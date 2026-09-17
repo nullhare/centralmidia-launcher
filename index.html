@@ -428,8 +428,8 @@
 <script>
   const REPO_API = 'https://api.github.com/repos/nullhare/centralmidia/codespaces';
   const GH_KEY = 'centralmidia_codespaces_token_v1';
-  const BROWSER_DEVCONTAINER = '.devcontainer/browser-v3/devcontainer.json';
-  const LEGACY_BROWSER_DEVCONTAINERS = ['.devcontainer/browser-v2/devcontainer.json', '.devcontainer/browser/devcontainer.json', '.devcontainer/devcontainer.json'];
+  const BROWSER_DEVCONTAINER = '.devcontainer/browser-v4/devcontainer.json';
+  const LEGACY_BROWSER_DEVCONTAINERS = ['.devcontainer/browser-v3/devcontainer.json', '.devcontainer/browser-v2/devcontainer.json', '.devcontainer/browser/devcontainer.json', '.devcontainer/devcontainer.json'];
   const COMPUTER_DEVCONTAINER = '.devcontainer/computer/devcontainer.json';
 
   const statusEl = document.getElementById('status');
@@ -507,7 +507,7 @@
       const pc = findByDevcontainer(list, COMPUTER_DEVCONTAINER);
 
       setStatus(
-        browser ? 'Chrome configurado no Codespace' : (legacyBrowser ? 'Chrome será preparado ao abrir' : 'Chrome será criado ao abrir'),
+        browser ? 'Google Chrome configurado no Codespace' : (legacyBrowser ? 'Google Chrome será preparado ao abrir' : 'Google Chrome será criado ao abrir'),
         browser ? 'good' : ''
       );
       setPcStatus(
@@ -570,7 +570,7 @@
         body:JSON.stringify({
           ref:'main',
           devcontainer_path:BROWSER_DEVCONTAINER,
-          display_name:'Navegador remoto'
+          display_name:'Navegador Google Chrome'
         })
       });
     } catch (err) {
