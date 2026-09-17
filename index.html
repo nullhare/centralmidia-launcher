@@ -276,7 +276,7 @@
               <p>Acesso remoto ao seu Zorin pelo RustDesk.</p>
             </div>
             <div class="card-controls">
-              <button id="open-pc" class="primary-blue">ABRIR COMPUTADOR</button>
+              <button id="open-pc" class="primary-green">ABRIR COMPUTADOR</button>
               <button id="stop-pc" class="danger">DESLIGAR COMPUTADOR</button>
             </div>
           </div>
@@ -421,9 +421,9 @@
     }
   }
 
-  async function stopCodespace() {
+  async function stopCodespace(openConfig = true) {
     if (!getToken()) {
-      ghConfigCard.open = true;
+      if (openConfig) ghConfigCard.open = true;
       setStatus('● Token do GitHub não configurado', 'bad');
       return false;
     }
@@ -466,9 +466,9 @@
     }
   }
 
-  async function stopComputerAccess() {
+  async function stopComputerAccess(openConfig = true) {
     if (!getPcId()) {
-      pcConfigCard.open = true;
+      if (openConfig) pcConfigCard.open = true;
       setPcStatus('● ID do RustDesk não configurado', 'bad');
       return false;
     }
@@ -481,8 +481,8 @@
     setStatus('Desligando navegador…');
     setPcStatus('Desligando computador…');
     const [browserOk, pcOk] = await Promise.all([
-      stopCodespace(),
-      stopComputerAccess()
+      stopCodespace(false),
+      stopComputerAccess(false)
     ]);
     if (browserOk && !pcOk) {
       setPcStatus('Codespace desligando. Falta conectar o controle local do Zorin.');
