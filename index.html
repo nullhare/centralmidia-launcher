@@ -19,7 +19,7 @@
     #stop { background:#da3633; color:white; }
     #stop:hover { background:#f85149; }
     .secondary { background:#21262d; color:#f0f6fc; border:1px solid #30363d; }
-    #status { min-height:24px; margin-top:14px; color:#8b949e; font-size:14px; }
+    #status { min-height:24px; margin-top:14px; color:#8b949e; font-size:14px; overflow-wrap:anywhere; }
     #setup { margin-top:24px; padding-top:22px; border-top:1px solid #30363d; text-align:left; }
     #setup h2 { margin:0 0 8px; font-size:18px; }
     #setup p,#setup li { color:#8b949e; font-size:14px; line-height:1.45; }
@@ -60,9 +60,7 @@
 </main>
 
 <script>
-  const CODESPACE = 'cuddly-space-robot-7pg55vp946g2wjgj';
-  const API = `https://api.github.com/user/codespaces/${CODESPACE}`;
-  const APP = `https://${CODESPACE}-3000.app.github.dev`;
+  const REPO_API = 'https://api.github.com/repos/nullhare/centralmidia/codespaces';
   const KEY = 'centralmidia_codespaces_token_v1';
   const statusEl = document.getElementById('status');
   const setupEl = document.getElementById('setup');
@@ -71,16 +69,17 @@
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const setStatus = text => statusEl.textContent = text;
   const getToken = () => localStorage.getItem(KEY) || '';
+
   const refreshSetup = () => {
     const configured = !!getToken();
     setupEl.style.display = configured ? 'none' : 'block';
     setStatus(configured ? 'Automação configurada. Pronto para usar.' : 'Faça a configuração única abaixo.');
   };
 
-  async function gh(path = '', options = {}) {
+  async function api(url, options = {}) {
     const token = getToken();
     if (!token) throw new Error('TOKEN_MISSING');
-    const response = await fetch(API + path, {
+    const response = await fetch(url, {
       ...options,
       headers: {
         'Accept': 'application/vnd.github+json',
@@ -94,6 +93,14 @@
       throw new Error(`GitHub ${response.status}: ${detail.slice(0,180)}`);
     }
     return response.status === 204 || response.status === 304 ? null : response.json().catch(() => null);
+  }
+
+  async function findCodespace() {
+    const data = await api(REPO_API);
+    const list = Array.isArray(data?.codespaces) ? data.codespaces : [];
+    if (!list.length) throw new Error('Nenhum Codespace encontrado para o repositório centralmidia.');
+    list.sort((a, b) => new Date(b.last_used_at || b.updated_at || 0) - new Date(a.last_used_at || a.updated_at || 0));
+    return list[0];
   }
 
   function popupMessage(tab, title, text) {
@@ -120,27 +127,28 @@
     popupMessage(tab, 'Iniciando navegador…', 'Ligando o Codespace. Esta aba abrirá o Firefox automaticamente.');
 
     try {
-      setStatus('Verificando Codespace…');
-      let info = await gh();
+      setStatus('Localizando Codespace…');
+      let info = await findCodespace();
 
-      if (!info || info.state !== 'Available') {
+      if (info.state !== 'Available') {
         setStatus('Ligando Codespace…');
-        await gh('/start', { method: 'POST' });
+        await api(info.start_url, { method: 'POST' });
       }
 
       const deadline = Date.now() + 180000;
       while (Date.now() < deadline) {
-        info = await gh();
-        if (info && info.state === 'Available') break;
-        setStatus(`Iniciando… ${info?.state || ''}`.trim());
+        info = await findCodespace();
+        if (info.state === 'Available') break;
+        setStatus(`Iniciando… ${info.state || ''}`.trim());
         await sleep(2500);
       }
 
-      if (!info || info.state !== 'Available') throw new Error('O Codespace demorou demais para iniciar.');
+      if (info.state !== 'Available') throw new Error('O Codespace demorou demais para iniciar.');
 
+      const appUrl = `https://${info.name}-3000.app.github.dev`;
       setStatus('Firefox iniciando…');
-      await sleep(4500);
-      tab.location.replace(APP);
+      await sleep(7000);
+      tab.location.replace(appUrl);
       setStatus('Navegador aberto.');
     } catch (err) {
       const message = err.message === 'TOKEN_MISSING' ? 'Token não configurado.' : err.message;
@@ -157,9 +165,15 @@
       return;
     }
     try {
+      setStatus('Localizando Codespace…');
+      const info = await findCodespace();
+      if (info.state !== 'Available') {
+        setStatus('Codespace já está desligado ou parando.');
+        return;
+      }
       setStatus('Desligando Codespace…');
-      await gh('/stop', { method: 'POST' });
-      setStatus('Codespace desligado.');
+      await api(info.stop_url, { method: 'POST' });
+      setStatus('Codespace desligando.');
     } catch (err) {
       setStatus(err.message);
     }
@@ -174,10 +188,10 @@
     localStorage.setItem(KEY, token);
     setStatus('Testando token…');
     try {
-      await gh();
+      const info = await findCodespace();
       tokenEl.value = '';
       refreshSetup();
-      setStatus('Configurado. Daqui em diante é só clicar em ABRIR NAVEGADOR.');
+      setStatus(`Configurado. Codespace encontrado: ${info.name}.`);
     } catch (err) {
       localStorage.removeItem(KEY);
       setupEl.style.display = 'block';
