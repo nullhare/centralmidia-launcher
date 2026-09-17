@@ -8,48 +8,190 @@
   <style>
     :root { color-scheme: dark; }
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #0d1117;
-      color: #f0f6fc;
-    }
-    main {
-      width: min(520px, 92vw);
-      padding: 36px;
-      border: 1px solid #30363d;
-      border-radius: 18px;
-      background: #161b22;
-      text-align: center;
-      box-shadow: 0 18px 60px rgba(0,0,0,.35);
-    }
-    h1 { margin: 0 0 10px; font-size: 32px; }
-    p { margin: 0; color: #8b949e; line-height: 1.5; }
-    .button {
-      display: block;
-      width: 100%;
-      margin-top: 24px;
-      padding: 18px 22px;
-      border-radius: 12px;
-      background: #238636;
-      color: #fff;
-      font-size: 18px;
-      font-weight: 800;
-      text-decoration: none;
-    }
-    .button:hover { background: #2ea043; }
-    .note { margin-top: 16px; font-size: 13px; color: #6e7681; line-height: 1.45; }
+    body { margin:0; min-height:100vh; display:grid; place-items:center; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:#0d1117; color:#f0f6fc; }
+    main { width:min(560px,92vw); padding:34px; border:1px solid #30363d; border-radius:18px; background:#161b22; text-align:center; box-shadow:0 18px 60px rgba(0,0,0,.35); }
+    h1 { margin:0 0 10px; font-size:32px; }
+    p { color:#8b949e; line-height:1.5; }
+    .actions { display:grid; grid-template-columns:1fr auto; gap:10px; margin-top:22px; }
+    button,.linkbtn { border:0; border-radius:12px; padding:17px 20px; font:inherit; font-weight:800; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
+    #open { background:#238636; color:white; font-size:18px; }
+    #open:hover { background:#2ea043; }
+    #stop { background:#da3633; color:white; }
+    #stop:hover { background:#f85149; }
+    .secondary { background:#21262d; color:#f0f6fc; border:1px solid #30363d; }
+    #status { min-height:24px; margin-top:14px; color:#8b949e; font-size:14px; }
+    #setup { margin-top:24px; padding-top:22px; border-top:1px solid #30363d; text-align:left; }
+    #setup h2 { margin:0 0 8px; font-size:18px; }
+    #setup p,#setup li { color:#8b949e; font-size:14px; line-height:1.45; }
+    #setup ol { padding-left:20px; }
+    input { width:100%; margin-top:10px; padding:13px; border-radius:9px; border:1px solid #30363d; background:#0d1117; color:#f0f6fc; }
+    .setup-actions { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+    .tiny { margin-top:15px; color:#6e7681; font-size:12px; line-height:1.45; }
+    @media (max-width:520px) { .actions{grid-template-columns:1fr;} }
   </style>
 </head>
 <body>
-  <main>
-    <h1>Navegador remoto</h1>
-    <p>Abre o GitHub Codespaces em outra aba e mantém este launcher aberto.</p>
-    <a class="button" href="https://codespaces.new/nullhare/centralmidia?quickstart=1" target="_blank" rel="noopener noreferrer">ABRIR NAVEGADOR</a>
-    <div class="note">Se o Codespace estiver parado, o GitHub pode pedir um clique em <strong>Resume this codespace</strong>.</div>
-  </main>
+<main>
+  <h1>Navegador remoto</h1>
+  <p>Um clique inicia o Codespace e abre direto o Firefox remoto, sem passar pelo VS Code.</p>
+
+  <div class="actions">
+    <button id="open">ABRIR NAVEGADOR</button>
+    <button id="stop">DESLIGAR</button>
+  </div>
+  <div id="status"></div>
+
+  <section id="setup">
+    <h2>Configuração única</h2>
+    <p>Para o launcher poder ligar/desligar seu Codespace sem a tela <em>Resume</em>, ele precisa de um token do GitHub limitado ao Codespaces.</p>
+    <ol>
+      <li>Abra o botão abaixo para criar o token com as permissões já preenchidas.</li>
+      <li>Em <strong>Repository access</strong>, escolha <strong>Only select repositories</strong> e selecione apenas <strong>centralmidia</strong>.</li>
+      <li>Gere o token, copie e cole aqui. Não envie o token em chat.</li>
+    </ol>
+    <a class="linkbtn secondary" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20o%20Codespace%20do%20navegador&target_name=nullhare&expires_in=90&codespaces=read&codespaces_lifecycle_admin=write&codespaces_metadata=read">CRIAR TOKEN NO GITHUB</a>
+    <input id="token" type="password" autocomplete="off" placeholder="github_pat_...">
+    <div class="setup-actions">
+      <button id="save" class="secondary">SALVAR E TESTAR</button>
+      <button id="forget" class="secondary">REMOVER TOKEN</button>
+    </div>
+    <div class="tiny">O token é salvo somente no armazenamento local deste navegador e é enviado diretamente para <code>api.github.com</code>. Ele não é salvo no repositório nem enviado ao GitHub Pages.</div>
+  </section>
+</main>
+
+<script>
+  const CODESPACE = 'cuddly-space-robot-7pg55vp946g2wjgj';
+  const API = `https://api.github.com/user/codespaces/${CODESPACE}`;
+  const APP = `https://${CODESPACE}-3000.app.github.dev`;
+  const KEY = 'centralmidia_codespaces_token_v1';
+  const statusEl = document.getElementById('status');
+  const setupEl = document.getElementById('setup');
+  const tokenEl = document.getElementById('token');
+
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const setStatus = text => statusEl.textContent = text;
+  const getToken = () => localStorage.getItem(KEY) || '';
+  const refreshSetup = () => {
+    const configured = !!getToken();
+    setupEl.style.display = configured ? 'none' : 'block';
+    setStatus(configured ? 'Automação configurada. Pronto para usar.' : 'Faça a configuração única abaixo.');
+  };
+
+  async function gh(path = '', options = {}) {
+    const token = getToken();
+    if (!token) throw new Error('TOKEN_MISSING');
+    const response = await fetch(API + path, {
+      ...options,
+      headers: {
+        'Accept': 'application/vnd.github+json',
+        'Authorization': `Bearer ${token}`,
+        'X-GitHub-Api-Version': '2026-03-10',
+        ...(options.headers || {})
+      }
+    });
+    if (!response.ok && response.status !== 304 && response.status !== 409) {
+      const detail = await response.text().catch(() => '');
+      throw new Error(`GitHub ${response.status}: ${detail.slice(0,180)}`);
+    }
+    return response.status === 204 || response.status === 304 ? null : response.json().catch(() => null);
+  }
+
+  function popupMessage(tab, title, text) {
+    try {
+      tab.document.open();
+      tab.document.write(`<!doctype html><meta name="color-scheme" content="dark"><title>${title}</title><body style="font-family:system-ui;background:#0d1117;color:#f0f6fc;display:grid;place-items:center;height:100vh;margin:0"><div style="text-align:center;max-width:520px;padding:30px"><h2>${title}</h2><p style="color:#8b949e">${text}</p></div></body>`);
+      tab.document.close();
+    } catch (_) {}
+  }
+
+  async function startAndOpen() {
+    if (!getToken()) {
+      setupEl.style.display = 'block';
+      setStatus('Configure uma vez o token abaixo.');
+      return;
+    }
+
+    const tab = window.open('about:blank', '_blank');
+    if (!tab) {
+      setStatus('O navegador bloqueou a nova aba. Libere pop-ups para este site.');
+      return;
+    }
+    try { tab.opener = null; } catch (_) {}
+    popupMessage(tab, 'Iniciando navegador…', 'Ligando o Codespace. Esta aba abrirá o Firefox automaticamente.');
+
+    try {
+      setStatus('Verificando Codespace…');
+      let info = await gh();
+
+      if (!info || info.state !== 'Available') {
+        setStatus('Ligando Codespace…');
+        await gh('/start', { method: 'POST' });
+      }
+
+      const deadline = Date.now() + 180000;
+      while (Date.now() < deadline) {
+        info = await gh();
+        if (info && info.state === 'Available') break;
+        setStatus(`Iniciando… ${info?.state || ''}`.trim());
+        await sleep(2500);
+      }
+
+      if (!info || info.state !== 'Available') throw new Error('O Codespace demorou demais para iniciar.');
+
+      setStatus('Firefox iniciando…');
+      await sleep(4500);
+      tab.location.replace(APP);
+      setStatus('Navegador aberto.');
+    } catch (err) {
+      const message = err.message === 'TOKEN_MISSING' ? 'Token não configurado.' : err.message;
+      setStatus(message);
+      popupMessage(tab, 'Não foi possível abrir', message + ' Volte ao launcher para corrigir a configuração.');
+      setupEl.style.display = 'block';
+    }
+  }
+
+  async function stopCodespace() {
+    if (!getToken()) {
+      setupEl.style.display = 'block';
+      setStatus('Configure uma vez o token abaixo.');
+      return;
+    }
+    try {
+      setStatus('Desligando Codespace…');
+      await gh('/stop', { method: 'POST' });
+      setStatus('Codespace desligado.');
+    } catch (err) {
+      setStatus(err.message);
+    }
+  }
+
+  document.getElementById('open').addEventListener('click', startAndOpen);
+  document.getElementById('stop').addEventListener('click', stopCodespace);
+
+  document.getElementById('save').addEventListener('click', async () => {
+    const token = tokenEl.value.trim();
+    if (!token) return setStatus('Cole o token primeiro.');
+    localStorage.setItem(KEY, token);
+    setStatus('Testando token…');
+    try {
+      await gh();
+      tokenEl.value = '';
+      refreshSetup();
+      setStatus('Configurado. Daqui em diante é só clicar em ABRIR NAVEGADOR.');
+    } catch (err) {
+      localStorage.removeItem(KEY);
+      setupEl.style.display = 'block';
+      setStatus('Token recusado ou sem permissão: ' + err.message);
+    }
+  });
+
+  document.getElementById('forget').addEventListener('click', () => {
+    localStorage.removeItem(KEY);
+    tokenEl.value = '';
+    refreshSetup();
+  });
+
+  refreshSetup();
+</script>
 </body>
 </html>
