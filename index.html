@@ -15,8 +15,6 @@
       --border-soft:#57606a;
       --text:#f0f6fc;
       --muted:#b1bac4;
-      --blue:#1f6feb;
-      --blue-hover:#388bfd;
       --green:#238636;
       --green-hover:#2ea043;
       --red-fill:#b62324;
@@ -119,8 +117,6 @@
     button:hover,.btn:hover { background:#30363d; }
     .primary-green { background:var(--green); border-color:#55ae68; color:white; }
     .primary-green:hover { background:var(--green-hover); }
-    .primary-blue { background:var(--blue); border-color:#6ea8fe; color:white; }
-    .primary-blue:hover { background:var(--blue-hover); }
     .danger { color:#ff7b72; background:transparent; border-color:#ff7b72; }
     .danger:hover { background:var(--red-fill); color:white; }
     .danger-fill { background:var(--red-fill); border-color:#ff7b72; color:white; }
@@ -261,7 +257,7 @@
               <button id="save">SALVAR E TESTAR</button>
             </div>
             <div class="config-actions">
-              <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20o%20Codespace%20do%20navegador&target_name=nullhare&expires_in=90&codespaces=read&codespaces_lifecycle_admin=write&codespaces_metadata=read">CRIAR TOKEN</a>
+              <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20os%20Codespaces%20remotos&target_name=nullhare&expires_in=90&codespaces=read&codespaces_lifecycle_admin=write&codespaces_metadata=read">CRIAR TOKEN</a>
               <button id="forget">REMOVER TOKEN</button>
             </div>
           </div>
@@ -273,7 +269,7 @@
           <div class="card-main">
             <div class="card-copy">
               <h2>Computador</h2>
-              <p>Acesso remoto ao seu Zorin pelo RustDesk.</p>
+              <p>RustDesk roda dentro de um Codespace e controla seu Zorin.</p>
             </div>
             <div class="card-controls">
               <button id="open-pc" class="primary-green">ABRIR COMPUTADOR</button>
@@ -286,13 +282,9 @@
         <details id="pc-config-card" class="card-config">
           <summary>Configuração</summary>
           <div class="config-content">
-            <p>Salve apenas o ID do computador. A senha não fica no launcher.</p>
-            <div class="field-row">
-              <input id="pc-id" type="text" autocomplete="off" placeholder="ID do RustDesk">
-              <button id="save-pc">SALVAR ID</button>
-            </div>
+            <p>O RustDesk fica dentro de um segundo Codespace do mesmo repositório. Ele só precisa ser criado uma vez.</p>
             <div class="config-actions">
-              <button id="forget-pc">REMOVER ID</button>
+              <a class="btn" target="_blank" rel="noopener noreferrer" href="https://codespaces.new/nullhare/centralmidia">CRIAR CODESPACE DO COMPUTADOR</a>
             </div>
           </div>
         </details>
@@ -303,19 +295,17 @@
 <script>
   const REPO_API = 'https://api.github.com/repos/nullhare/centralmidia/codespaces';
   const GH_KEY = 'centralmidia_codespaces_token_v1';
-  const PC_KEY = 'centralmidia_rustdesk_id_v1';
-  const RUSTDESK_WEB = 'https://rustdesk.com/web/';
+  const BROWSER_DEVCONTAINER = '.devcontainer/devcontainer.json';
+  const COMPUTER_DEVCONTAINER = '.devcontainer/computer/devcontainer.json';
 
   const statusEl = document.getElementById('status');
   const pcStatusEl = document.getElementById('pc-status');
   const ghConfigCard = document.getElementById('gh-config-card');
   const pcConfigCard = document.getElementById('pc-config-card');
   const tokenEl = document.getElementById('token');
-  const pcIdEl = document.getElementById('pc-id');
 
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const getToken = () => localStorage.getItem(GH_KEY) || '';
-  const getPcId = () => localStorage.getItem(PC_KEY) || '';
 
   function paintStatus(el, text, type = '') {
     el.className = `status${type ? ` ${type}` : ''}`;
@@ -324,26 +314,6 @@
 
   const setStatus = (text, type = '') => paintStatus(statusEl, text, type);
   const setPcStatus = (text, type = '') => paintStatus(pcStatusEl, text, type);
-
-  function refreshConfig() {
-    const gh = !!getToken();
-    const pc = getPcId();
-
-    setStatus(
-      gh ? '● Configurado neste navegador' : '● Token do GitHub não configurado',
-      gh ? 'good' : 'bad'
-    );
-    setPcStatus(
-      pc ? '● Computador configurado neste navegador' : '● ID do RustDesk não configurado',
-      pc ? 'good' : 'bad'
-    );
-
-    if (pc) pcIdEl.value = pc;
-  }
-
-  function restoreConfigStatus(delay = 1800) {
-    setTimeout(refreshConfig, delay);
-  }
 
   async function api(url, options = {}) {
     const token = getToken();
@@ -364,145 +334,185 @@
     return response.status === 204 || response.status === 304 ? null : response.json().catch(() => null);
   }
 
-  async function findCodespace() {
+  async function listCodespaces() {
     const data = await api(REPO_API);
     const list = Array.isArray(data?.codespaces) ? data.codespaces : [];
-    if (!list.length) throw new Error('Nenhum Codespace encontrado para centralmidia.');
     list.sort((a,b) => new Date(b.last_used_at || b.updated_at || 0) - new Date(a.last_used_at || a.updated_at || 0));
-    return list[0];
+    return list;
+  }
+
+  function findByDevcontainer(list, path) {
+    return list.find(space => space.devcontainer_path === path) || null;
+  }
+
+  async function getSpace(path) {
+    const list = await listCodespaces();
+    return findByDevcontainer(list, path);
+  }
+
+  async function refreshConfig() {
+    if (!getToken()) {
+      setStatus('● Token do GitHub não configurado', 'bad');
+      setPcStatus('● Token do GitHub não configurado', 'bad');
+      return;
+    }
+
+    setStatus('● Configurado neste navegador', 'good');
+    setPcStatus('Verificando Codespace do computador…');
+    try {
+      const list = await listCodespaces();
+      const pc = findByDevcontainer(list, COMPUTER_DEVCONTAINER);
+      setPcStatus(
+        pc ? '● Computador configurado no Codespace' : '● Falta criar o Codespace do computador',
+        pc ? 'good' : 'bad'
+      );
+    } catch (_) {
+      setPcStatus('● Não foi possível verificar o computador', 'bad');
+    }
+  }
+
+  function restoreConfigStatus(delay = 1800) {
+    setTimeout(refreshConfig, delay);
   }
 
   function popupMessage(tab, title, text) {
     try {
       tab.document.open();
-      tab.document.write(`<!doctype html><meta name="color-scheme" content="dark"><title>${title}</title><body style="font-family:system-ui;background:#010409;color:#f0f6fc;display:grid;place-items:center;height:100vh;margin:0"><div style="text-align:center;max-width:520px;padding:30px"><h2>${title}</h2><p style="color:#b1bac4">${text}</p></div></body>`);
+      tab.document.write(`<!doctype html><meta name="color-scheme" content="dark"><title>${title}</title><body style="font-family:system-ui;background:#010409;color:#f0f6fc;display:grid;place-items:center;height:100vh;margin:0"><div style="text-align:center;max-width:560px;padding:30px"><h2>${title}</h2><p style="color:#b1bac4">${text}</p></div></body>`);
       tab.document.close();
     } catch (_) {}
   }
 
-  async function startAndOpen() {
+  async function waitAvailable(space, setState) {
+    let current = space;
+    if (current.state !== 'Available') {
+      setState('Ligando Codespace…');
+      await api(current.start_url, { method:'POST' });
+    }
+
+    const deadline = Date.now() + 180000;
+    while (Date.now() < deadline) {
+      const list = await listCodespaces();
+      current = list.find(item => item.name === space.name) || current;
+      if (current.state === 'Available') return current;
+      setState(`Iniciando… ${current.state || ''}`.trim());
+      await sleep(2500);
+    }
+    throw new Error('O Codespace demorou demais para iniciar.');
+  }
+
+  async function openSpace(path, title, description, setState, openConfigOnMissing = false) {
     if (!getToken()) {
       ghConfigCard.open = true;
-      setStatus('● Token do GitHub não configurado', 'bad');
+      setState('● Token do GitHub não configurado', 'bad');
       setTimeout(() => tokenEl.focus(), 0);
       return;
     }
 
     const tab = window.open('about:blank', '_blank');
-    if (!tab) return setStatus('Libere pop-ups para este site.', 'bad');
+    if (!tab) return setState('Libere pop-ups para este site.', 'bad');
     try { tab.opener = null; } catch (_) {}
-    popupMessage(tab, 'Iniciando navegador…', 'Ligando o Codespace. Esta aba abrirá automaticamente.');
+    popupMessage(tab, title, description);
 
     try {
-      setStatus('Localizando Codespace…');
-      let info = await findCodespace();
-      if (info.state !== 'Available') {
-        setStatus('Ligando Codespace…');
-        await api(info.start_url, { method:'POST' });
+      setState('Localizando Codespace…');
+      const space = await getSpace(path);
+      if (!space) {
+        if (openConfigOnMissing) pcConfigCard.open = true;
+        throw new Error('Codespace do computador ainda não foi criado.');
       }
-
-      const deadline = Date.now() + 180000;
-      while (Date.now() < deadline) {
-        info = await findCodespace();
-        if (info.state === 'Available') break;
-        setStatus(`Iniciando… ${info.state || ''}`.trim());
-        await sleep(2500);
-      }
-      if (info.state !== 'Available') throw new Error('O Codespace demorou demais para iniciar.');
-
-      setStatus('Navegador iniciando…');
+      const ready = await waitAvailable(space, setState);
+      setState('Abrindo…');
       await sleep(7000);
-      tab.location.replace(`https://${info.name}-3000.app.github.dev`);
+      tab.location.replace(`https://${ready.name}-3000.app.github.dev`);
       refreshConfig();
     } catch (err) {
-      const message = err.message === 'TOKEN_MISSING' ? 'Token não configurado.' : err.message;
-      setStatus(message, 'bad');
-      popupMessage(tab, 'Não foi possível abrir', message);
+      setState(`● ${err.message}`, 'bad');
+      popupMessage(tab, 'Não foi possível abrir', err.message);
     }
   }
 
-  async function stopCodespace(openConfig = true) {
-    if (!getToken()) {
-      if (openConfig) ghConfigCard.open = true;
-      setStatus('● Token do GitHub não configurado', 'bad');
-      return false;
-    }
-    try {
-      setStatus('Localizando Codespace…');
-      const info = await findCodespace();
-      if (info.state !== 'Available') {
-        setStatus('Codespace já está desligado ou parando.');
-        restoreConfigStatus();
-        return true;
-      }
-      setStatus('Desligando Codespace…');
-      await api(info.stop_url, { method:'POST' });
-      setStatus('Codespace desligando.');
-      restoreConfigStatus();
-      return true;
-    } catch (err) {
-      setStatus(err.message, 'bad');
-      return false;
-    }
+  async function startAndOpen() {
+    return openSpace(
+      BROWSER_DEVCONTAINER,
+      'Iniciando navegador…',
+      'Ligando o Codespace do navegador. Esta aba abrirá automaticamente.',
+      setStatus
+    );
   }
 
   async function openComputer() {
-    const id = getPcId();
-    if (!id) {
-      pcConfigCard.open = true;
-      setPcStatus('● ID do RustDesk não configurado', 'bad');
-      setTimeout(() => pcIdEl.focus(), 0);
-      return;
+    return openSpace(
+      COMPUTER_DEVCONTAINER,
+      'Iniciando computador…',
+      'Ligando o Codespace do RustDesk. O controle do Zorin abrirá por dentro do Codespace.',
+      setPcStatus,
+      true
+    );
+  }
+
+  async function stopSpace(path, setState, openConfigOnMissing = false) {
+    if (!getToken()) {
+      if (openConfigOnMissing) ghConfigCard.open = true;
+      setState('● Token do GitHub não configurado', 'bad');
+      return false;
     }
-    const tab = window.open(RUSTDESK_WEB, '_blank', 'noopener,noreferrer');
-    if (!tab) return setPcStatus('Libere pop-ups para este site.', 'bad');
     try {
-      await navigator.clipboard.writeText(id);
-      setPcStatus('RustDesk Web aberto. ID copiado.');
+      setState('Localizando Codespace…');
+      const space = await getSpace(path);
+      if (!space) {
+        if (openConfigOnMissing) pcConfigCard.open = true;
+        setState('● Codespace ainda não foi criado', 'bad');
+        return false;
+      }
+      if (space.state !== 'Available') {
+        setState('Codespace já está desligado ou parando.');
+        restoreConfigStatus();
+        return true;
+      }
+      setState('Desligando Codespace…');
+      await api(space.stop_url, { method:'POST' });
+      setState('Codespace desligando.');
       restoreConfigStatus();
-    } catch (_) {
-      setPcStatus(`RustDesk Web aberto. ID: ${id}`);
-      restoreConfigStatus();
+      return true;
+    } catch (err) {
+      setState(`● ${err.message}`, 'bad');
+      return false;
     }
   }
 
-  async function stopComputerAccess(openConfig = true) {
-    if (!getPcId()) {
-      if (openConfig) pcConfigCard.open = true;
-      setPcStatus('● ID do RustDesk não configurado', 'bad');
-      return false;
-    }
-    setPcStatus('Controle remoto do Zorin será conectado na próxima etapa.');
-    restoreConfigStatus();
-    return false;
+  async function stopBrowser(openConfig = true) {
+    return stopSpace(BROWSER_DEVCONTAINER, setStatus, openConfig);
+  }
+
+  async function stopComputer(openConfig = true) {
+    return stopSpace(COMPUTER_DEVCONTAINER, setPcStatus, openConfig);
   }
 
   async function stopEverything() {
     setStatus('Desligando navegador…');
     setPcStatus('Desligando computador…');
-    const [browserOk, pcOk] = await Promise.all([
-      stopCodespace(false),
-      stopComputerAccess(false)
+    await Promise.all([
+      stopBrowser(false),
+      stopComputer(false)
     ]);
-    if (browserOk && !pcOk) {
-      setPcStatus('Codespace desligando. Falta conectar o controle local do Zorin.');
-      restoreConfigStatus(2500);
-    }
+    restoreConfigStatus(2500);
   }
 
   document.getElementById('open').addEventListener('click', startAndOpen);
   document.getElementById('open-pc').addEventListener('click', openComputer);
-  document.getElementById('stop-browser').addEventListener('click', stopCodespace);
-  document.getElementById('stop-pc').addEventListener('click', stopComputerAccess);
+  document.getElementById('stop-browser').addEventListener('click', () => stopBrowser(true));
+  document.getElementById('stop-pc').addEventListener('click', () => stopComputer(true));
   document.getElementById('stop-all').addEventListener('click', stopEverything);
 
   document.getElementById('save').addEventListener('click', async () => {
     const token = tokenEl.value.trim();
-    if (!token) return setStatus('Cole um token para substituir/testar o atual.', 'bad');
+    if (!token) return setStatus('● Cole um token para substituir/testar o atual.', 'bad');
     localStorage.setItem(GH_KEY, token);
     setStatus('Testando token…');
     try {
-      await findCodespace();
+      const browser = await getSpace(BROWSER_DEVCONTAINER);
+      if (!browser) throw new Error('Codespace do navegador não encontrado.');
       tokenEl.value = '';
       refreshConfig();
     } catch (err) {
@@ -515,19 +525,6 @@
   document.getElementById('forget').addEventListener('click', () => {
     localStorage.removeItem(GH_KEY);
     tokenEl.value = '';
-    refreshConfig();
-  });
-
-  document.getElementById('save-pc').addEventListener('click', () => {
-    const id = pcIdEl.value.trim();
-    if (!id) return setPcStatus('● Digite o ID do RustDesk primeiro', 'bad');
-    localStorage.setItem(PC_KEY, id);
-    refreshConfig();
-  });
-
-  document.getElementById('forget-pc').addEventListener('click', () => {
-    localStorage.removeItem(PC_KEY);
-    pcIdEl.value = '';
     refreshConfig();
   });
 
