@@ -4,316 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; connect-src https://api.github.com; img-src 'self' https://github.com https://avatars.githubusercontent.com data:; style-src 'self'; script-src 'self'; object-src 'none'; frame-src 'none'; form-action 'none'">
   <title>Central remota</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg:#010409;
-      --header:#010409;
-      --panel:#010409;
-      --surface:#21262d;
-      --surface-hover:#30363d;
-      --border:#b8bdc8;
-      --border-muted:#b8bdc8;
-      --text:#f0f6fc;
-      --muted:#b1bac4;
-      --green:#0b631b;
-      --green-hover:#0e7a24;
-      --green-border:#53e35d;
-      --focus:#58a6ff;
-    }
-
-    * { box-sizing:border-box; }
-    html,body { margin:0; min-height:100%; background:var(--bg); }
-    body {
-      color:var(--text);
-      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
-      font-size:14px;
-      line-height:1.5;
-    }
-
-    .topbar {
-      height:64px;
-      border-bottom:1px solid var(--border);
-      display:flex;
-      align-items:center;
-      padding:0 20px;
-      gap:12px;
-      background:var(--header);
-    }
-    .github-mark {
-      width:32px;
-      height:32px;
-      flex:0 0 32px;
-      display:grid;
-      place-items:center;
-      color:var(--text);
-      text-decoration:none;
-    }
-    .github-mark svg {
-      width:32px;
-      height:32px;
-      display:block;
-      fill:currentColor;
-    }
-    .brand {
-      color:var(--text);
-      font-weight:600;
-      font-size:14px;
-      line-height:20px;
-      letter-spacing:-.01em;
-    }
-    .header-spacer { margin-left:auto; }
-    .profile-link {
-      width:32px;
-      height:32px;
-      flex:0 0 32px;
-      border:1px solid var(--border);
-      border-radius:50%;
-      overflow:hidden;
-      display:block;
-      background:#fff;
-    }
-    .profile-link img {
-      width:100%;
-      height:100%;
-      display:block;
-      object-fit:cover;
-    }
-
-    main {
-      width:min(1080px, calc(100% - 40px));
-      margin:34px auto 28px;
-    }
-
-    .page-head {
-      display:flex;
-      align-items:end;
-      justify-content:space-between;
-      gap:20px;
-      padding-bottom:14px;
-      border-bottom:1px solid var(--border-muted);
-      margin-bottom:16px;
-    }
-    h1 {
-      margin:0;
-      color:var(--text);
-      font-size:24px;
-      font-weight:600;
-      line-height:1.25;
-      letter-spacing:-.01em;
-    }
-    .subtitle { margin:4px 0 0; color:var(--muted); }
-
-    .grid-2 {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-      align-items:start;
-    }
-
-    .card {
-      border:1px solid var(--border);
-      border-radius:6px;
-      background:var(--panel);
-      overflow:hidden;
-    }
-    .card-core { padding:16px; }
-    .card-main {
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:16px;
-    }
-    .card-copy { min-width:0; }
-    .card h2 {
-      margin:0;
-      color:var(--text);
-      font-size:16px;
-      font-weight:600;
-      line-height:1.5;
-      letter-spacing:-.01em;
-    }
-    .card p { margin:4px 0 0; color:var(--muted); font-size:13px; }
-    .card-controls {
-      width:152px;
-      flex:0 0 152px;
-      display:grid;
-      grid-template-columns:1fr;
-      gap:6px;
-    }
-
-    button,.btn,input { font:inherit; }
-    button,.btn {
-      min-height:32px;
-      padding:5px 12px;
-      border:1px solid var(--border);
-      border-radius:6px;
-      background:var(--surface);
-      color:var(--text);
-      font-weight:500;
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:7px;
-      cursor:pointer;
-      box-shadow:none;
-    }
-    button:hover,.btn:hover {
-      background:var(--surface-hover);
-      border-color:#b1bac4;
-    }
-    .primary-green {
-      background:var(--green);
-      border-color:var(--green-border);
-      color:#fff;
-      font-weight:500;
-    }
-    .primary-green:hover {
-      background:var(--green-hover);
-      border-color:#6bea73;
-    }
-    .danger {
-      color:var(--text);
-      background:var(--bg);
-      border-color:var(--border);
-      font-weight:500;
-    }
-    .danger-fill {
-      color:var(--text);
-      background:var(--surface);
-      border-color:var(--border);
-      font-weight:500;
-    }
-    .danger:hover,
-    .danger-fill:hover {
-      color:var(--text);
-      background:var(--surface-hover);
-      border-color:#b1bac4;
-    }
-    .card-controls button {
-      width:152px;
-      min-height:32px;
-      padding:5px 12px;
-      font-size:14px;
-      line-height:20px;
-      white-space:nowrap;
-    }
-    #stop-all {
-      min-height:32px;
-      padding:5px 12px;
-      font-size:14px;
-      line-height:20px;
-      white-space:nowrap;
-    }
-    .button-icon {
-      width:16px;
-      height:16px;
-      flex:0 0 16px;
-      display:block;
-    }
-
-    .status {
-      min-height:20px;
-      margin-top:9px;
-      color:var(--muted);
-      font-size:12px;
-      line-height:18px;
-      overflow-wrap:anywhere;
-    }
-    .status.good {
-      display:inline-flex;
-      align-items:center;
-      width:max-content;
-      min-height:20px;
-      padding:0 7px;
-      border:1px solid #238636;
-      border-radius:2em;
-      background:rgba(46,160,67,.15);
-      color:#3fb950;
-      font-size:12px;
-      line-height:18px;
-      font-weight:500;
-      animation:none;
-    }
-    .status.bad {
-      color:var(--text);
-      font-weight:600;
-    }
-
-    .card-config {
-      border-top:1px solid var(--border);
-      background:var(--panel);
-    }
-    .card-config summary {
-      min-height:42px;
-      padding:0 16px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      cursor:pointer;
-      list-style:none;
-      user-select:none;
-      font-size:13px;
-      font-weight:600;
-      color:var(--text);
-    }
-    .card-config summary::-webkit-details-marker { display:none; }
-    .card-config summary:hover { background:#0d1117; }
-    .card-config summary::after {
-      content:'▾';
-      color:var(--muted);
-      font-size:16px;
-      line-height:1;
-      transition:transform .15s ease;
-    }
-    .card-config[open] summary::after { transform:rotate(180deg); }
-    .config-content {
-      padding:14px 16px 16px;
-      border-top:1px solid var(--border);
-      background:var(--panel);
-    }
-    .config-content p { margin:0 0 10px; color:var(--muted); font-size:12px; }
-    .config-block + .config-block { margin-top:14px; }
-    .field-row { display:grid; grid-template-columns:1fr auto; gap:8px; }
-    input {
-      width:100%;
-      height:32px;
-      border:1px solid var(--border);
-      border-radius:6px;
-      background:var(--bg);
-      color:var(--text);
-      padding:5px 10px;
-      outline:none;
-      box-shadow:none;
-    }
-    input::placeholder { color:var(--muted); }
-    input:focus {
-      border-color:var(--focus);
-      box-shadow:0 0 0 3px rgba(88,166,255,.20);
-    }
-    .config-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
-
-    @media (max-width:760px) {
-      .grid-2 { grid-template-columns:1fr; }
-      .page-head { align-items:flex-start; }
-      .card-main { gap:10px; }
-      .card-controls { width:152px; flex-basis:152px; }
-      .topbar { padding:0 14px; }
-      main { width:min(100% - 40px,1080px); margin-top:26px; }
-    }
-
-    @media (max-width:520px) {
-      .page-head { flex-direction:column; }
-      #stop-all { width:auto; }
-      .card-main { flex-direction:column; }
-      .card-controls,
-      .card-controls button { width:100%; }
-      .field-row { grid-template-columns:1fr; }
-    }
-  </style>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.js" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -335,7 +30,7 @@
         <h1>Central remota</h1>
         <p class="subtitle">Navegador Codespace e computador Zorin em um só lugar.</p>
       </div>
-      <button id="stop-all" class="danger-fill">Encerrar tudo</button>
+      <button id="stop-all" class="danger-fill" type="button">Encerrar tudo</button>
     </div>
 
     <div class="grid-2">
@@ -347,14 +42,14 @@
               <p>Inicia o Codespace e abre direto o navegador.</p>
             </div>
             <div class="card-controls">
-              <button id="open" class="primary-green">
+              <button id="open" class="primary-green" type="button">
                 <svg class="button-icon" aria-hidden="true" viewBox="0 0 16 16">
                   <circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/>
                   <path d="M6.4 5.1 10.7 8l-4.3 2.9Z" fill="currentColor"/>
                 </svg>
                 <span>Navegador</span>
               </button>
-              <button id="stop-browser" class="danger">Encerrar</button>
+              <button id="stop-browser" class="danger" type="button">Encerrar</button>
             </div>
           </div>
           <div id="status" class="status"></div>
@@ -364,14 +59,14 @@
           <summary>Configuração</summary>
           <div class="config-content">
             <div class="config-block">
-              <p>Token limitado ao Codespaces. Ele fica somente neste navegador.</p>
+              <p>Token do navegador limitado ao Codespaces. Ele fica somente neste navegador.</p>
               <div class="field-row">
-                <input id="token" type="password" autocomplete="off" placeholder="github_pat_...">
-                <button id="save">Salvar e testar</button>
+                <input id="token" type="password" autocomplete="new-password" spellcheck="false" placeholder="github_pat_..." aria-label="Token do navegador">
+                <button id="save" type="button">Salvar e testar</button>
               </div>
               <div class="config-actions">
                 <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20os%20Codespaces%20remotos&target_name=nullhare&expires_in=90&codespaces=write&codespaces_lifecycle_admin=write&codespaces_metadata=read">Criar token</a>
-                <button id="forget">Remover token</button>
+                <button id="forget" type="button">Remover token</button>
               </div>
             </div>
           </div>
@@ -386,14 +81,14 @@
               <p>RustDesk roda dentro de um Codespace e controla seu Zorin.</p>
             </div>
             <div class="card-controls">
-              <button id="open-pc" class="primary-green">
+              <button id="open-pc" class="primary-green" type="button">
                 <svg class="button-icon" aria-hidden="true" viewBox="0 0 16 16">
                   <circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/>
                   <path d="M6.4 5.1 10.7 8l-4.3 2.9Z" fill="currentColor"/>
                 </svg>
                 <span>Computador</span>
               </button>
-              <button id="stop-pc" class="danger">Encerrar</button>
+              <button id="stop-pc" class="danger" type="button">Encerrar</button>
             </div>
           </div>
           <div id="pc-status" class="status"></div>
@@ -403,14 +98,14 @@
           <summary>Configuração</summary>
           <div class="config-content">
             <div class="config-block">
-              <p>Token limitado ao Codespaces. Ele fica somente neste navegador.</p>
+              <p>Token do computador limitado ao Codespaces. Ele é independente do navegador remoto.</p>
               <div class="field-row">
-                <input id="pc-token" type="password" autocomplete="off" placeholder="github_pat_...">
-                <button id="pc-save">Salvar e testar</button>
+                <input id="pc-token" type="password" autocomplete="new-password" spellcheck="false" placeholder="github_pat_..." aria-label="Token do computador">
+                <button id="pc-save" type="button">Salvar e testar</button>
               </div>
               <div class="config-actions">
                 <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20os%20Codespaces%20remotos&target_name=nullhare&expires_in=90&codespaces=write&codespaces_lifecycle_admin=write&codespaces_metadata=read">Criar token</a>
-                <button id="pc-forget">Remover token</button>
+                <button id="pc-forget" type="button">Remover token</button>
               </div>
             </div>
             <div class="config-block">
@@ -424,346 +119,5 @@
       </section>
     </div>
   </main>
-
-<script>
-  const REPO_API = 'https://api.github.com/repos/nullhare/centralmidia/codespaces';
-  const GH_KEY = 'centralmidia_codespaces_token_v1';
-  const BROWSER_DEVCONTAINER = '.devcontainer/browser-v4/devcontainer.json';
-  const LEGACY_BROWSER_DEVCONTAINERS = ['.devcontainer/browser-v3/devcontainer.json', '.devcontainer/browser-v2/devcontainer.json', '.devcontainer/browser/devcontainer.json', '.devcontainer/devcontainer.json'];
-  const COMPUTER_DEVCONTAINER = '.devcontainer/computer/devcontainer.json';
-
-  const statusEl = document.getElementById('status');
-  const pcStatusEl = document.getElementById('pc-status');
-  const ghConfigCard = document.getElementById('gh-config-card');
-  const pcConfigCard = document.getElementById('pc-config-card');
-  const tokenEl = document.getElementById('token');
-  const pcTokenEl = document.getElementById('pc-token');
-
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
-  const getToken = () => localStorage.getItem(GH_KEY) || '';
-
-  function paintStatus(el, text, type = '') {
-    el.className = `status${type ? ` ${type}` : ''}`;
-    el.textContent = text;
-  }
-
-  const setStatus = (text, type = '') => paintStatus(statusEl, text, type);
-  const setPcStatus = (text, type = '') => paintStatus(pcStatusEl, text, type);
-
-  function tokenUi(path) {
-    return path === COMPUTER_DEVCONTAINER
-      ? { card: pcConfigCard, input: pcTokenEl }
-      : { card: ghConfigCard, input: tokenEl };
-  }
-
-  async function api(url, options = {}) {
-    const token = getToken();
-    if (!token) throw new Error('TOKEN_MISSING');
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        'Accept': 'application/vnd.github+json',
-        'Authorization': `Bearer ${token}`,
-        'X-GitHub-Api-Version': '2026-03-10',
-        ...(options.headers || {})
-      }
-    });
-    if (!response.ok && response.status !== 304 && response.status !== 409) {
-      const detail = await response.text().catch(() => '');
-      throw new Error(`GitHub ${response.status}: ${detail.slice(0,180)}`);
-    }
-    return response.status === 204 || response.status === 304 ? null : response.json().catch(() => null);
-  }
-
-  async function listCodespaces() {
-    const data = await api(REPO_API);
-    const list = Array.isArray(data?.codespaces) ? data.codespaces : [];
-    list.sort((a,b) => new Date(b.last_used_at || b.updated_at || 0) - new Date(a.last_used_at || a.updated_at || 0));
-    return list;
-  }
-
-  function findByDevcontainer(list, path) {
-    return list.find(space => space.devcontainer_path === path) || null;
-  }
-
-  async function getSpace(path) {
-    const list = await listCodespaces();
-    return findByDevcontainer(list, path);
-  }
-
-  async function refreshConfig() {
-    if (!getToken()) {
-      setStatus('● Token do GitHub não configurado', 'bad');
-      setPcStatus('● Token do GitHub não configurado', 'bad');
-      return;
-    }
-
-    setStatus('Verificando navegador…');
-    setPcStatus('Verificando Codespace do computador…');
-    try {
-      const list = await listCodespaces();
-      const browser = findByDevcontainer(list, BROWSER_DEVCONTAINER);
-      const legacyBrowser = LEGACY_BROWSER_DEVCONTAINERS.map(path => findByDevcontainer(list, path)).find(Boolean);
-      const pc = findByDevcontainer(list, COMPUTER_DEVCONTAINER);
-
-      setStatus(
-        browser ? 'Google Chrome configurado no Codespace' : (legacyBrowser ? 'Google Chrome será preparado ao abrir' : 'Google Chrome será criado ao abrir'),
-        browser ? 'good' : ''
-      );
-      setPcStatus(
-        pc ? 'Computador configurado no Codespace' : '● Falta criar o Codespace do computador',
-        pc ? 'good' : 'bad'
-      );
-    } catch (_) {
-      setStatus('● Não foi possível verificar o navegador', 'bad');
-      setPcStatus('● Não foi possível verificar o computador', 'bad');
-    }
-  }
-
-  function restoreConfigStatus(delay = 1800) {
-    setTimeout(refreshConfig, delay);
-  }
-
-  function popupMessage(tab, title, text) {
-    try {
-      tab.document.open();
-      tab.document.write(`<!doctype html><meta name="color-scheme" content="dark"><title>${title}</title><body style="font-family:system-ui;background:#010409;color:#f0f6fc;display:grid;place-items:center;height:100vh;margin:0"><div style="text-align:center;max-width:560px;padding:30px"><h2>${title}</h2><p style="color:#b1bac4">${text}</p></div></body>`);
-      tab.document.close();
-    } catch (_) {}
-  }
-
-  async function waitAvailable(space, setState) {
-    let current = space;
-    if (current.state !== 'Available') {
-      setState('Ligando Codespace…');
-      await api(current.start_url, { method:'POST' });
-    }
-
-    const deadline = Date.now() + 180000;
-    while (Date.now() < deadline) {
-      const list = await listCodespaces();
-      current = list.find(item => item.name === space.name) || current;
-      if (current.state === 'Available') return current;
-      setState(`Iniciando… ${current.state || ''}`.trim());
-      await sleep(2500);
-    }
-    throw new Error('O Codespace demorou demais para iniciar.');
-  }
-
-  async function createBrowserSpace(setState) {
-    const list = await listCodespaces();
-    const existing = findByDevcontainer(list, BROWSER_DEVCONTAINER);
-    if (existing) return existing;
-
-    const legacy = LEGACY_BROWSER_DEVCONTAINERS.map(path => findByDevcontainer(list, path)).find(Boolean);
-    if (legacy?.state === 'Available') {
-      setState('Desligando navegador antigo…');
-      await api(legacy.stop_url, { method:'POST' });
-    }
-
-    setState('Criando Chrome…');
-    let created;
-    try {
-      created = await api(REPO_API, {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body:JSON.stringify({
-          ref:'main',
-          devcontainer_path:BROWSER_DEVCONTAINER,
-          display_name:'Navegador Google Chrome'
-        })
-      });
-    } catch (err) {
-      if (/GitHub 403/.test(err.message)) {
-        throw new Error('O token salvo não tem permissão para criar o novo Codespace Chrome.');
-      }
-      throw err;
-    }
-
-    if (created?.name) return created;
-
-    const deadline = Date.now() + 60000;
-    while (Date.now() < deadline) {
-      await sleep(2500);
-      const space = await getSpace(BROWSER_DEVCONTAINER);
-      if (space) return space;
-    }
-    throw new Error('O GitHub não concluiu a criação do Codespace Chrome.');
-  }
-
-  async function openSpace(path, title, description, setState, openConfigOnMissing = false) {
-    if (!getToken()) {
-      const { card, input } = tokenUi(path);
-      card.open = true;
-      setState('● Token do GitHub não configurado', 'bad');
-      setTimeout(() => input.focus(), 0);
-      return;
-    }
-
-    const tab = window.open('about:blank', '_blank');
-    if (!tab) return setState('Libere pop-ups para este site.', 'bad');
-    try { tab.opener = null; } catch (_) {}
-    popupMessage(tab, title, description);
-
-    try {
-      setState('Localizando Codespace…');
-      let space = await getSpace(path);
-      if (!space && path === BROWSER_DEVCONTAINER) {
-        space = await createBrowserSpace(setState);
-      }
-      if (!space) {
-        if (openConfigOnMissing) pcConfigCard.open = true;
-        throw new Error('Codespace do computador ainda não foi criado.');
-      }
-      const ready = await waitAvailable(space, setState);
-      setState('Abrindo…');
-      await sleep(7000);
-      tab.location.replace(`https://${ready.name}-3000.app.github.dev`);
-      refreshConfig();
-    } catch (err) {
-      setState(`● ${err.message}`, 'bad');
-      popupMessage(tab, 'Não foi possível abrir', err.message);
-    }
-  }
-
-  async function startAndOpen() {
-    return openSpace(
-      BROWSER_DEVCONTAINER,
-      'Iniciando navegador…',
-      'Ligando o Codespace do navegador. Esta aba abrirá automaticamente.',
-      setStatus
-    );
-  }
-
-  async function openComputer() {
-    return openSpace(
-      COMPUTER_DEVCONTAINER,
-      'Iniciando computador…',
-      'Ligando o Codespace do RustDesk. O controle do Zorin abrirá por dentro do Codespace.',
-      setPcStatus,
-      true
-    );
-  }
-
-  async function stopSpace(path, setState, openConfigOnMissing = false) {
-    if (!getToken()) {
-      const { card } = tokenUi(path);
-      card.open = true;
-      setState('● Token do GitHub não configurado', 'bad');
-      return false;
-    }
-    try {
-      setState('Localizando Codespace…');
-      const space = await getSpace(path);
-      if (!space) {
-        if (openConfigOnMissing) pcConfigCard.open = true;
-        setState('● Codespace ainda não foi criado', 'bad');
-        return false;
-      }
-      if (space.state !== 'Available') {
-        setState('Codespace já está desligado ou parando.');
-        restoreConfigStatus();
-        return true;
-      }
-      setState('Desligando Codespace…');
-      await api(space.stop_url, { method:'POST' });
-      setState('Codespace desligando.');
-      restoreConfigStatus();
-      return true;
-    } catch (err) {
-      setState(`● ${err.message}`, 'bad');
-      return false;
-    }
-  }
-
-  async function stopBrowser(openConfig = true) {
-    if (!getToken()) {
-      ghConfigCard.open = true;
-      setStatus('● Token do GitHub não configurado', 'bad');
-      return false;
-    }
-    try {
-      setStatus('Localizando Codespace…');
-      const list = await listCodespaces();
-      const spaces = [
-        findByDevcontainer(list, BROWSER_DEVCONTAINER),
-        ...LEGACY_BROWSER_DEVCONTAINERS.map(path => findByDevcontainer(list, path))
-      ].filter(Boolean);
-
-      if (!spaces.length) {
-        setStatus('Codespace do navegador ainda não foi criado.');
-        restoreConfigStatus();
-        return false;
-      }
-
-      const running = spaces.filter(space => space.state === 'Available');
-      if (!running.length) {
-        setStatus('Codespace já está desligado ou parando.');
-        restoreConfigStatus();
-        return true;
-      }
-
-      setStatus('Desligando Codespace…');
-      await Promise.all(running.map(space => api(space.stop_url, { method:'POST' })));
-      setStatus('Codespace desligando.');
-      restoreConfigStatus();
-      return true;
-    } catch (err) {
-      setStatus(`● ${err.message}`, 'bad');
-      return false;
-    }
-  }
-
-  async function stopComputer(openConfig = true) {
-    return stopSpace(COMPUTER_DEVCONTAINER, setPcStatus, openConfig);
-  }
-
-  async function stopEverything() {
-    setStatus('Desligando navegador…');
-    setPcStatus('Desligando computador…');
-    await Promise.all([
-      stopBrowser(false),
-      stopComputer(false)
-    ]);
-    restoreConfigStatus(2500);
-  }
-
-  async function saveToken(inputEl, setState) {
-    const token = inputEl.value.trim();
-    if (!token) return setState('● Cole um token para substituir/testar o atual.', 'bad');
-
-    localStorage.setItem(GH_KEY, token);
-    setState('Testando token…');
-    try {
-      await listCodespaces();
-      tokenEl.value = '';
-      pcTokenEl.value = '';
-      refreshConfig();
-    } catch (_) {
-      localStorage.removeItem(GH_KEY);
-      refreshConfig();
-      setState('● Token recusado ou sem permissão', 'bad');
-    }
-  }
-
-  function forgetToken() {
-    localStorage.removeItem(GH_KEY);
-    tokenEl.value = '';
-    pcTokenEl.value = '';
-    refreshConfig();
-  }
-
-  document.getElementById('open').addEventListener('click', startAndOpen);
-  document.getElementById('open-pc').addEventListener('click', openComputer);
-  document.getElementById('stop-browser').addEventListener('click', () => stopBrowser(true));
-  document.getElementById('stop-pc').addEventListener('click', () => stopComputer(true));
-  document.getElementById('stop-all').addEventListener('click', stopEverything);
-  document.getElementById('save').addEventListener('click', () => saveToken(tokenEl, setStatus));
-  document.getElementById('pc-save').addEventListener('click', () => saveToken(pcTokenEl, setPcStatus));
-  document.getElementById('forget').addEventListener('click', forgetToken);
-  document.getElementById('pc-forget').addEventListener('click', forgetToken);
-
-  refreshConfig();
-</script>
 </body>
 </html>
