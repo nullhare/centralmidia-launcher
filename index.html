@@ -8,386 +8,260 @@
   <style>
     :root {
       color-scheme: dark;
-      --bg:#0d1117;
-      --bg-subtle:#010409;
+      --bg:#010409;
       --panel:#0d1117;
-      --panel-muted:#161b22;
-      --border:#30363d;
-      --border-muted:#21262d;
-      --fg:#f0f6fc;
-      --muted:#8b949e;
-      --accent:#4493f8;
-      --accent-muted:#1f6feb;
-      --success:#238636;
-      --success-hover:#2ea043;
-      --danger:#f85149;
-      --danger-bg:rgba(248,81,73,.1);
+      --panel-2:#161b22;
+      --border:#8c959f;
+      --border-soft:#57606a;
+      --text:#f0f6fc;
+      --muted:#b1bac4;
+      --blue:#1f6feb;
+      --blue-hover:#388bfd;
+      --green:#238636;
+      --green-hover:#2ea043;
+      --red:#f85149;
+      --red-fill:#b62324;
     }
 
     * { box-sizing:border-box; }
-    html { min-height:100%; background:var(--bg); }
+    html,body { margin:0; min-height:100%; background:var(--bg); }
     body {
-      margin:0;
-      min-height:100vh;
-      background:var(--bg);
-      color:var(--fg);
+      color:var(--text);
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
       font-size:14px;
-      line-height:1.5;
+      line-height:1.45;
     }
-
-    button,input,.linkbtn { font:inherit; }
-    button { cursor:pointer; }
 
     .topbar {
-      height:64px;
+      height:50px;
+      border-bottom:1px solid var(--border-soft);
       display:flex;
       align-items:center;
-      gap:16px;
-      padding:0 24px;
-      background:var(--bg-subtle);
-      border-bottom:1px solid var(--border-muted);
+      padding:0 22px;
+      gap:10px;
+      background:var(--bg);
     }
-
-    .brandmark {
-      width:32px;
-      height:32px;
+    .mark {
+      width:28px;
+      height:28px;
+      border:1px solid var(--border);
       border-radius:50%;
       display:grid;
       place-items:center;
-      background:var(--fg);
-      color:var(--bg-subtle);
-      font-weight:800;
-      letter-spacing:-.5px;
-    }
-
-    .brandtext { font-weight:600; font-size:16px; }
-    .top-meta { margin-left:auto; color:var(--muted); font-size:13px; }
-
-    .shell {
-      width:min(1280px, calc(100% - 48px));
-      margin:32px auto 60px;
-      display:grid;
-      grid-template-columns:260px minmax(0, 1fr);
-      gap:32px;
-      align-items:start;
-    }
-
-    .sidebar { position:sticky; top:24px; }
-    .side-group { margin-bottom:22px; }
-    .side-title {
-      margin:0 0 8px;
-      padding:0 12px;
-      color:var(--muted);
+      font-weight:700;
       font-size:12px;
-      font-weight:600;
+    }
+    .brand { font-weight:600; font-size:15px; }
+    .topnote { margin-left:auto; color:var(--muted); font-size:12px; }
+
+    main {
+      width:min(1080px, calc(100% - 32px));
+      margin:18px auto 28px;
     }
 
-    .side-item {
-      width:100%;
+    .page-head {
       display:flex;
-      align-items:center;
-      gap:9px;
-      min-height:36px;
-      padding:7px 12px;
-      border:0;
-      border-radius:6px;
-      background:transparent;
-      color:var(--fg);
-      text-align:left;
-      text-decoration:none;
-      font-weight:500;
+      align-items:end;
+      justify-content:space-between;
+      gap:20px;
+      padding-bottom:14px;
+      border-bottom:1px solid var(--border-soft);
+      margin-bottom:16px;
     }
-    .side-item:hover { background:var(--panel-muted); }
-    .side-item.active { background:var(--panel-muted); font-weight:600; }
-    .side-icon { width:18px; color:var(--muted); text-align:center; }
-    .side-sep { height:1px; background:var(--border-muted); margin:16px 0; }
-
-    .content { min-width:0; }
-    .page-header {
-      padding-bottom:18px;
-      margin-bottom:24px;
-      border-bottom:1px solid var(--border-muted);
-    }
-    .page-header h1 {
-      margin:0;
-      font-size:24px;
-      line-height:1.25;
-      font-weight:400;
-      letter-spacing:-.2px;
-    }
-    .page-header p { margin:6px 0 0; color:var(--muted); }
-
-    .section-title {
-      margin:0 0 10px;
-      font-size:16px;
-      font-weight:600;
+    h1 { margin:0; font-size:24px; font-weight:400; }
+    .subtitle { margin:4px 0 0; color:var(--muted); }
+    .contrast-pill {
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:5px 10px;
+      color:var(--text);
+      font-size:12px;
+      white-space:nowrap;
     }
 
-    .cards {
+    .grid-2 {
       display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:16px;
-      margin-bottom:24px;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
     }
 
     .card {
       border:1px solid var(--border);
       border-radius:6px;
       background:var(--panel);
-      overflow:hidden;
-    }
-    .card-body { padding:18px; }
-    .card-title-row { display:flex; align-items:flex-start; gap:12px; }
-    .card-icon {
-      width:34px;
-      height:34px;
-      flex:0 0 34px;
-      display:grid;
-      place-items:center;
-      border:1px solid var(--border);
-      border-radius:6px;
-      background:var(--panel-muted);
-      color:var(--muted);
-      font-size:18px;
+      padding:16px;
     }
     .card h2 { margin:0; font-size:16px; font-weight:600; }
     .card p { margin:4px 0 0; color:var(--muted); font-size:13px; }
-    .card-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+    .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .between { justify-content:space-between; }
+    .actions { margin-top:14px; }
 
-    .btn,.linkbtn {
-      min-height:32px;
-      padding:5px 12px;
-      border:1px solid rgba(240,246,252,.1);
+    button,.btn,input { font:inherit; }
+    button,.btn {
+      min-height:34px;
+      padding:6px 12px;
+      border:1px solid var(--border);
       border-radius:6px;
-      background:#21262d;
-      color:var(--fg);
+      background:var(--panel-2);
+      color:var(--text);
       font-weight:600;
-      font-size:13px;
-      line-height:20px;
       text-decoration:none;
       display:inline-flex;
       align-items:center;
       justify-content:center;
-      gap:6px;
-      box-shadow:0 0 transparent;
+      cursor:pointer;
     }
-    .btn:hover,.linkbtn:hover { background:#30363d; border-color:#8b949e; }
-    .btn-primary { background:var(--success); border-color:rgba(240,246,252,.1); color:white; }
-    .btn-primary:hover { background:var(--success-hover); border-color:rgba(240,246,252,.1); }
-    .btn-accent { background:var(--accent-muted); color:white; }
-    .btn-accent:hover { background:#388bfd; border-color:rgba(240,246,252,.1); }
-    .btn-danger { color:var(--danger); background:transparent; border-color:var(--border); }
-    .btn-danger:hover { color:white; background:#b62324; border-color:#b62324; }
+    button:hover,.btn:hover { background:#30363d; }
+    .primary-green { background:var(--green); border-color:#55ae68; color:white; }
+    .primary-green:hover { background:var(--green-hover); }
+    .primary-blue { background:var(--blue); border-color:#6ea8fe; color:white; }
+    .primary-blue:hover { background:var(--blue-hover); }
+    .danger { color:#ff7b72; background:transparent; border-color:#ff7b72; }
+    .danger:hover { background:var(--red-fill); color:white; }
+    .danger-fill { background:var(--red-fill); border-color:#ff7b72; color:white; }
+    .danger-fill:hover { background:#da3633; }
 
     .status {
-      min-height:20px;
-      margin-top:12px;
+      min-height:18px;
+      margin-top:9px;
       color:var(--muted);
       font-size:12px;
       overflow-wrap:anywhere;
     }
 
-    .panel {
-      margin-top:24px;
-      border:1px solid var(--border);
-      border-radius:6px;
-      overflow:hidden;
-      background:var(--panel);
+    .section-title {
+      margin:16px 0 8px;
+      font-size:14px;
+      font-weight:600;
     }
-    .panel-head {
-      padding:14px 16px;
-      background:var(--panel-muted);
-      border-bottom:1px solid var(--border);
-    }
-    .panel-head h2 { margin:0; font-size:14px; font-weight:600; }
-    .panel-head p { margin:3px 0 0; color:var(--muted); font-size:12px; }
-    .panel-body { padding:16px; }
 
-    .danger-grid {
+    .shutdown {
       display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:12px;
-    }
-    .danger-box {
-      padding:14px;
+      grid-template-columns:1fr 1fr 1fr;
+      gap:10px;
       border:1px solid var(--border);
       border-radius:6px;
       background:var(--panel);
+      padding:12px;
     }
-    .danger-box strong { display:block; margin-bottom:4px; font-size:13px; }
-    .danger-box span { display:block; min-height:36px; color:var(--muted); font-size:12px; }
-    .danger-box .btn { width:100%; margin-top:12px; }
+    .shutdown button { width:100%; }
 
-    section.setup { display:none; }
-    section.setup h2 { margin:0; font-size:16px; }
-    section.setup p, section.setup li { color:var(--muted); font-size:13px; }
-    section.setup ol { margin:12px 0; padding-left:22px; }
-    section.setup .panel-body { text-align:left; }
-
+    .config-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-top:14px;
+    }
+    .config-card {
+      border:1px solid var(--border);
+      border-radius:6px;
+      background:var(--panel);
+      padding:14px;
+    }
+    .config-card h3 { margin:0; font-size:14px; }
+    .config-card p { margin:4px 0 10px; color:var(--muted); font-size:12px; }
+    .field-row { display:grid; grid-template-columns:1fr auto; gap:8px; }
     input {
       width:100%;
-      min-height:34px;
-      margin-top:10px;
-      padding:5px 12px;
+      height:34px;
       border:1px solid var(--border);
       border-radius:6px;
+      background:var(--bg);
+      color:var(--text);
+      padding:6px 10px;
       outline:none;
-      background:var(--bg-subtle);
-      color:var(--fg);
     }
-    input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(68,147,248,.15); }
-    .setup-actions { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
-    .tiny { margin-top:12px; color:var(--muted); font-size:12px; }
-    code { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px; }
+    input:focus { border-color:#58a6ff; box-shadow:0 0 0 2px rgba(88,166,255,.25); }
+    .config-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+    .mini-status { margin-top:8px; color:var(--muted); font-size:12px; }
+    .ok { color:#7ee787; }
 
-    @media (max-width:900px) {
-      .shell { width:min(100% - 32px, 900px); grid-template-columns:1fr; margin-top:20px; gap:18px; }
-      .sidebar { position:static; display:flex; gap:8px; overflow:auto; padding-bottom:4px; }
-      .side-group { display:flex; gap:6px; margin:0; }
-      .side-title,.side-sep { display:none; }
-      .side-item { white-space:nowrap; border:1px solid var(--border); background:var(--panel); }
-    }
-
-    @media (max-width:700px) {
-      .topbar { padding:0 16px; }
-      .top-meta { display:none; }
-      .shell { width:calc(100% - 24px); }
-      .cards,.danger-grid { grid-template-columns:1fr; }
-      .card-actions { flex-direction:column; }
-      .card-actions .btn { width:100%; }
+    @media (max-width:760px) {
+      .grid-2,.config-grid,.shutdown { grid-template-columns:1fr; }
+      .page-head { align-items:flex-start; flex-direction:column; }
+      .topnote { display:none; }
+      main { width:min(100% - 20px,1080px); margin-top:10px; }
     }
   </style>
 </head>
 <body>
   <header class="topbar">
-    <div class="brandmark">CR</div>
-    <div class="brandtext">Central remota</div>
-    <div class="top-meta">nullhare / centralmidia</div>
+    <div class="mark">CR</div>
+    <div class="brand">Central remota</div>
+    <div class="topnote">Acesso pessoal</div>
   </header>
 
-  <div class="shell">
-    <aside class="sidebar" aria-label="Navegação">
-      <div class="side-group">
-        <div class="side-title">Acesso</div>
-        <a class="side-item active" href="#acesso"><span class="side-icon">⌂</span>Visão geral</a>
-        <a class="side-item" href="#navegador"><span class="side-icon">◫</span>Navegador</a>
-        <a class="side-item" href="#computador"><span class="side-icon">▣</span>Computador</a>
-      </div>
-      <div class="side-sep"></div>
-      <div class="side-group">
-        <div class="side-title">Configuração</div>
-        <button id="show-github-setup" class="side-item" type="button"><span class="side-icon">◆</span>GitHub</button>
-        <button id="show-pc-setup" class="side-item" type="button"><span class="side-icon">⚙</span>Computador</button>
-      </div>
-    </aside>
-
-    <main class="content" id="acesso">
-      <div class="page-header">
+  <main>
+    <div class="page-head">
+      <div>
         <h1>Central remota</h1>
-        <p>Acesse o navegador do Codespace e o computador Zorin no mesmo painel.</p>
+        <p class="subtitle">Navegador Codespace e computador Zorin em um só lugar.</p>
       </div>
+      <div class="contrast-pill">Contraste alto</div>
+    </div>
 
-      <h2 class="section-title">Acessos</h2>
-      <div class="cards">
-        <section class="card" id="navegador">
-          <div class="card-body">
-            <div class="card-title-row">
-              <div class="card-icon">◫</div>
-              <div>
-                <h2>Navegador remoto</h2>
-                <p>Firefox no GitHub Codespaces com áudio e vídeo.</p>
-              </div>
-            </div>
-            <div class="card-actions">
-              <button id="open" class="btn btn-primary" type="button">Abrir navegador</button>
-            </div>
-            <div id="status" class="status"></div>
+    <div class="grid-2">
+      <section class="card">
+        <div class="row between">
+          <div>
+            <h2>Navegador remoto</h2>
+            <p>Inicia o Codespace e abre direto o navegador.</p>
           </div>
-        </section>
-
-        <section class="card" id="computador">
-          <div class="card-body">
-            <div class="card-title-row">
-              <div class="card-icon">▣</div>
-              <div>
-                <h2>Computador Zorin</h2>
-                <p>Acesso remoto ao seu computador através do RustDesk.</p>
-              </div>
-            </div>
-            <div class="card-actions">
-              <button id="open-pc" class="btn btn-accent" type="button">Abrir computador</button>
-            </div>
-            <div id="pc-status" class="status"></div>
-          </div>
-        </section>
-      </div>
-
-      <section class="panel">
-        <div class="panel-head">
-          <h2>Desligamento</h2>
-          <p>Controles separados para cada acesso e um controle geral.</p>
+          <button id="open" class="primary-green">ABRIR NAVEGADOR</button>
         </div>
-        <div class="panel-body">
-          <div class="danger-grid">
-            <div class="danger-box">
-              <strong>Navegador</strong>
-              <span>Para o Codespace do navegador remoto.</span>
-              <button id="stop-browser" class="btn btn-danger" type="button">Desligar navegador</button>
-            </div>
-            <div class="danger-box">
-              <strong>Computador</strong>
-              <span>Desativa o acesso remoto do Zorin quando o agente estiver configurado.</span>
-              <button id="stop-pc" class="btn btn-danger" type="button">Desligar computador</button>
-            </div>
-            <div class="danger-box">
-              <strong>Todos os acessos</strong>
-              <span>Executa os dois controles de desligamento.</span>
-              <button id="stop-all" class="btn btn-danger" type="button">Desligar tudo</button>
-            </div>
-          </div>
-        </div>
+        <div id="status" class="status"></div>
       </section>
 
-      <section id="setup" class="setup panel">
-        <div class="panel-head">
-          <h2>Configuração do GitHub</h2>
-          <p>Configuração única deste navegador.</p>
+      <section class="card">
+        <div class="row between">
+          <div>
+            <h2>Computador</h2>
+            <p>Acesso remoto ao seu Zorin pelo RustDesk.</p>
+          </div>
+          <button id="open-pc" class="primary-blue">ABRIR COMPUTADOR</button>
         </div>
-        <div class="panel-body">
-          <p>Para o launcher ligar e desligar seu Codespace sem a tela <em>Resume</em>, ele usa um token limitado ao Codespaces.</p>
-          <ol>
-            <li>Abra o botão abaixo para criar o token com as permissões preenchidas.</li>
-            <li>Em <strong>Repository access</strong>, escolha <strong>Only select repositories</strong> e selecione apenas <strong>centralmidia</strong>.</li>
-            <li>Gere o token, copie e cole aqui. Não envie o token em chat.</li>
-          </ol>
-          <a class="linkbtn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20o%20Codespace%20do%20navegador&target_name=nullhare&expires_in=90&codespaces=read&codespaces_lifecycle_admin=write&codespaces_metadata=read">Criar token no GitHub</a>
+        <div id="pc-status" class="status"></div>
+      </section>
+    </div>
+
+    <div class="section-title">Desligar</div>
+    <section class="shutdown">
+      <button id="stop-browser" class="danger">DESLIGAR NAVEGADOR</button>
+      <button id="stop-pc" class="danger">DESLIGAR COMPUTADOR</button>
+      <button id="stop-all" class="danger-fill">DESLIGAR TUDO</button>
+    </section>
+
+    <div class="section-title">Configuração</div>
+    <div class="config-grid">
+      <section class="config-card">
+        <h3>GitHub / Codespaces</h3>
+        <p>Token limitado ao Codespaces. Ele fica somente neste navegador.</p>
+        <div class="field-row">
           <input id="token" type="password" autocomplete="off" placeholder="github_pat_...">
-          <div class="setup-actions">
-            <button id="save" class="btn btn-primary" type="button">Salvar e testar</button>
-            <button id="forget" class="btn" type="button">Remover token</button>
-          </div>
-          <div class="tiny">O token fica apenas no armazenamento local deste navegador e é usado diretamente com <code>api.github.com</code>. Ele não é salvo no repositório.</div>
+          <button id="save">SALVAR E TESTAR</button>
         </div>
+        <div class="config-actions">
+          <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20o%20Codespace%20do%20navegador&target_name=nullhare&expires_in=90&codespaces=read&codespaces_lifecycle_admin=write&codespaces_metadata=read">CRIAR TOKEN</a>
+          <button id="forget">REMOVER TOKEN</button>
+        </div>
+        <div id="gh-config-status" class="mini-status"></div>
       </section>
 
-      <section id="pc-setup" class="setup panel">
-        <div class="panel-head">
-          <h2>Configuração do computador</h2>
-          <p>Configuração única do RustDesk neste navegador.</p>
+      <section class="config-card">
+        <h3>Computador / RustDesk</h3>
+        <p>Salve apenas o ID do computador. A senha não fica no launcher.</p>
+        <div class="field-row">
+          <input id="pc-id" type="text" autocomplete="off" placeholder="ID do RustDesk">
+          <button id="save-pc">SALVAR ID</button>
         </div>
-        <div class="panel-body">
-          <p>Quando o RustDesk estiver instalado no Zorin, coloque aqui apenas o <strong>ID do RustDesk</strong>. A senha nunca é salva neste launcher.</p>
-          <input id="pc-id" type="text" inputmode="text" autocomplete="off" placeholder="ID do RustDesk">
-          <div class="setup-actions">
-            <button id="save-pc" class="btn btn-primary" type="button">Salvar ID</button>
-            <button id="forget-pc" class="btn" type="button">Remover ID</button>
-          </div>
-          <div class="tiny">Ao clicar em <strong>Abrir computador</strong>, o launcher abre o cliente web oficial do RustDesk em outra aba e copia seu ID para a área de transferência. <strong>Desligar computador</strong> será conectado ao agente local do Zorin na próxima etapa; ele significará desativar o acesso remoto, não desligar fisicamente o PC.</div>
+        <div class="config-actions">
+          <button id="forget-pc">REMOVER ID</button>
         </div>
+        <div id="pc-config-status" class="mini-status"></div>
       </section>
-    </main>
-  </div>
+    </div>
+  </main>
 
 <script>
   const REPO_API = 'https://api.github.com/repos/nullhare/centralmidia/codespaces';
@@ -397,8 +271,8 @@
 
   const statusEl = document.getElementById('status');
   const pcStatusEl = document.getElementById('pc-status');
-  const setupEl = document.getElementById('setup');
-  const pcSetupEl = document.getElementById('pc-setup');
+  const ghConfigStatusEl = document.getElementById('gh-config-status');
+  const pcConfigStatusEl = document.getElementById('pc-config-status');
   const tokenEl = document.getElementById('token');
   const pcIdEl = document.getElementById('pc-id');
 
@@ -408,15 +282,18 @@
   const getToken = () => localStorage.getItem(GH_KEY) || '';
   const getPcId = () => localStorage.getItem(PC_KEY) || '';
 
-  function refreshSetup() {
-    const ghConfigured = !!getToken();
-    const pcConfigured = !!getPcId();
-    setupEl.style.display = ghConfigured ? 'none' : 'block';
-    pcSetupEl.style.display = pcConfigured ? 'none' : 'block';
-    if (ghConfigured) setStatus('Navegador remoto configurado.');
-    else setStatus('Configure o GitHub uma vez abaixo.');
-    if (pcConfigured) setPcStatus('Computador remoto configurado.');
-    else setPcStatus('O computador será configurado depois que instalarmos o RustDesk no Zorin.');
+  function refreshConfig() {
+    const gh = !!getToken();
+    const pc = getPcId();
+    ghConfigStatusEl.innerHTML = gh
+      ? '<span class="ok">● Configurado neste navegador</span>'
+      : '○ Token ainda não configurado';
+    pcConfigStatusEl.innerHTML = pc
+      ? '<span class="ok">● ID configurado neste navegador</span>'
+      : '○ ID ainda não configurado';
+    if (pc) pcIdEl.value = pc;
+    setStatus(gh ? 'Pronto para usar.' : 'Configure o token do GitHub abaixo.');
+    setPcStatus(pc ? 'Pronto para abrir.' : 'Falta configurar o ID do RustDesk.');
   }
 
   async function api(url, options = {}) {
@@ -441,42 +318,37 @@
   async function findCodespace() {
     const data = await api(REPO_API);
     const list = Array.isArray(data?.codespaces) ? data.codespaces : [];
-    if (!list.length) throw new Error('Nenhum Codespace encontrado para o repositório centralmidia.');
-    list.sort((a, b) => new Date(b.last_used_at || b.updated_at || 0) - new Date(a.last_used_at || a.updated_at || 0));
+    if (!list.length) throw new Error('Nenhum Codespace encontrado para centralmidia.');
+    list.sort((a,b) => new Date(b.last_used_at || b.updated_at || 0) - new Date(a.last_used_at || a.updated_at || 0));
     return list[0];
   }
 
   function popupMessage(tab, title, text) {
     try {
       tab.document.open();
-      tab.document.write(`<!doctype html><meta name="color-scheme" content="dark"><title>${title}</title><body style="font-family:system-ui;background:#0d1117;color:#f0f6fc;display:grid;place-items:center;height:100vh;margin:0"><div style="text-align:center;max-width:520px;padding:30px"><h2>${title}</h2><p style="color:#8b949e">${text}</p></div></body>`);
+      tab.document.write(`<!doctype html><meta name="color-scheme" content="dark"><title>${title}</title><body style="font-family:system-ui;background:#010409;color:#f0f6fc;display:grid;place-items:center;height:100vh;margin:0"><div style="text-align:center;max-width:520px;padding:30px"><h2>${title}</h2><p style="color:#b1bac4">${text}</p></div></body>`);
       tab.document.close();
     } catch (_) {}
   }
 
   async function startAndOpen() {
     if (!getToken()) {
-      setupEl.style.display = 'block';
-      setStatus('Configure uma vez o token do GitHub abaixo.');
-      setupEl.scrollIntoView({ behavior:'smooth', block:'start' });
+      setStatus('Configure o token do GitHub na parte inferior.');
+      tokenEl.focus();
       return;
     }
 
     const tab = window.open('about:blank', '_blank');
-    if (!tab) {
-      setStatus('O navegador bloqueou a nova aba. Libere pop-ups para este site.');
-      return;
-    }
+    if (!tab) return setStatus('Libere pop-ups para este site.');
     try { tab.opener = null; } catch (_) {}
-    popupMessage(tab, 'Iniciando navegador…', 'Ligando o Codespace. Esta aba abrirá o navegador automaticamente.');
+    popupMessage(tab, 'Iniciando navegador…', 'Ligando o Codespace. Esta aba abrirá automaticamente.');
 
     try {
       setStatus('Localizando Codespace…');
       let info = await findCodespace();
-
       if (info.state !== 'Available') {
         setStatus('Ligando Codespace…');
-        await api(info.start_url, { method: 'POST' });
+        await api(info.start_url, { method:'POST' });
       }
 
       const deadline = Date.now() + 180000;
@@ -486,26 +358,22 @@
         setStatus(`Iniciando… ${info.state || ''}`.trim());
         await sleep(2500);
       }
-
       if (info.state !== 'Available') throw new Error('O Codespace demorou demais para iniciar.');
 
-      const appUrl = `https://${info.name}-3000.app.github.dev`;
       setStatus('Navegador iniciando…');
       await sleep(7000);
-      tab.location.replace(appUrl);
+      tab.location.replace(`https://${info.name}-3000.app.github.dev`);
       setStatus('Navegador aberto.');
     } catch (err) {
       const message = err.message === 'TOKEN_MISSING' ? 'Token não configurado.' : err.message;
       setStatus(message);
-      popupMessage(tab, 'Não foi possível abrir', message + ' Volte ao launcher para corrigir a configuração.');
-      setupEl.style.display = 'block';
+      popupMessage(tab, 'Não foi possível abrir', message);
     }
   }
 
   async function stopCodespace() {
     if (!getToken()) {
-      setupEl.style.display = 'block';
-      setStatus('Configure uma vez o token do GitHub abaixo.');
+      setStatus('Configure o token do GitHub primeiro.');
       return false;
     }
     try {
@@ -516,7 +384,7 @@
         return true;
       }
       setStatus('Desligando Codespace…');
-      await api(info.stop_url, { method: 'POST' });
+      await api(info.stop_url, { method:'POST' });
       setStatus('Codespace desligando.');
       return true;
     } catch (err) {
@@ -528,47 +396,34 @@
   async function openComputer() {
     const id = getPcId();
     if (!id) {
-      pcSetupEl.style.display = 'block';
+      setPcStatus('Salve o ID do RustDesk primeiro.');
       pcIdEl.focus();
-      setPcStatus('Primeiro salve o ID do RustDesk do seu Zorin.');
-      pcSetupEl.scrollIntoView({ behavior:'smooth', block:'start' });
       return;
     }
-
     const tab = window.open(RUSTDESK_WEB, '_blank', 'noopener,noreferrer');
-    if (!tab) {
-      setPcStatus('O navegador bloqueou a nova aba. Libere pop-ups para este site.');
-      return;
-    }
-
+    if (!tab) return setPcStatus('Libere pop-ups para este site.');
     try {
       await navigator.clipboard.writeText(id);
-      setPcStatus('RustDesk Web aberto. ID copiado — cole no campo Remote ID.');
+      setPcStatus('RustDesk Web aberto. ID copiado.');
     } catch (_) {
-      setPcStatus(`RustDesk Web aberto. Use o ID salvo: ${id}`);
+      setPcStatus(`RustDesk Web aberto. ID: ${id}`);
     }
   }
 
   async function stopComputerAccess() {
     if (!getPcId()) {
-      pcSetupEl.style.display = 'block';
-      setPcStatus('Computador ainda não configurado. Primeiro vamos instalar o RustDesk no Zorin.');
+      setPcStatus('Computador ainda não configurado.');
       return false;
     }
-    setPcStatus('O botão já está preparado. Falta conectar o agente local do Zorin para desativar o acesso remoto à distância.');
+    setPcStatus('Controle remoto do Zorin será conectado na próxima etapa.');
     return false;
   }
 
   async function stopEverything() {
     setStatus('Desligando navegador…');
-    setPcStatus('Desligando acesso remoto do computador…');
-    const [browserOk, pcOk] = await Promise.all([
-      stopCodespace(),
-      stopComputerAccess()
-    ]);
-    if (browserOk && !pcOk) {
-      setPcStatus('Navegador desligando. O desligamento remoto do computador será ativado após configurar o agente no Zorin.');
-    }
+    setPcStatus('Desligando acesso do computador…');
+    const [browserOk, pcOk] = await Promise.all([stopCodespace(), stopComputerAccess()]);
+    if (browserOk && !pcOk) setPcStatus('Navegador desligando. Falta conectar o controle local do Zorin.');
   }
 
   document.getElementById('open').addEventListener('click', startAndOpen);
@@ -579,17 +434,17 @@
 
   document.getElementById('save').addEventListener('click', async () => {
     const token = tokenEl.value.trim();
-    if (!token) return setStatus('Cole o token primeiro.');
+    if (!token) return setStatus('Cole um token para substituir/testar o atual.');
     localStorage.setItem(GH_KEY, token);
     setStatus('Testando token…');
     try {
       const info = await findCodespace();
       tokenEl.value = '';
-      setupEl.style.display = 'none';
-      setStatus(`Configurado. Codespace encontrado: ${info.name}.`);
+      refreshConfig();
+      setStatus(`Configurado. Codespace: ${info.name}.`);
     } catch (err) {
       localStorage.removeItem(GH_KEY);
-      setupEl.style.display = 'block';
+      refreshConfig();
       setStatus('Token recusado ou sem permissão: ' + err.message);
     }
   });
@@ -597,39 +452,24 @@
   document.getElementById('forget').addEventListener('click', () => {
     localStorage.removeItem(GH_KEY);
     tokenEl.value = '';
-    setupEl.style.display = 'block';
-    setStatus('Configuração do GitHub removida deste navegador.');
+    refreshConfig();
   });
 
   document.getElementById('save-pc').addEventListener('click', () => {
     const id = pcIdEl.value.trim();
     if (!id) return setPcStatus('Digite o ID do RustDesk primeiro.');
     localStorage.setItem(PC_KEY, id);
-    pcIdEl.value = '';
-    pcSetupEl.style.display = 'none';
-    setPcStatus('Computador remoto configurado.');
+    refreshConfig();
+    setPcStatus('ID salvo.');
   });
 
   document.getElementById('forget-pc').addEventListener('click', () => {
     localStorage.removeItem(PC_KEY);
     pcIdEl.value = '';
-    pcSetupEl.style.display = 'block';
-    setPcStatus('ID do computador removido deste navegador.');
+    refreshConfig();
   });
 
-  document.getElementById('show-github-setup').addEventListener('click', () => {
-    const opening = setupEl.style.display === 'none';
-    setupEl.style.display = opening ? 'block' : 'none';
-    if (opening) setupEl.scrollIntoView({ behavior:'smooth', block:'start' });
-  });
-
-  document.getElementById('show-pc-setup').addEventListener('click', () => {
-    const opening = pcSetupEl.style.display === 'none';
-    pcSetupEl.style.display = opening ? 'block' : 'none';
-    if (opening) pcSetupEl.scrollIntoView({ behavior:'smooth', block:'start' });
-  });
-
-  refreshSetup();
+  refreshConfig();
 </script>
 </body>
 </html>
