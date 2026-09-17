@@ -428,8 +428,8 @@
 <script>
   const REPO_API = 'https://api.github.com/repos/nullhare/centralmidia/codespaces';
   const GH_KEY = 'centralmidia_codespaces_token_v1';
-  const BROWSER_DEVCONTAINER = '.devcontainer/browser-v2/devcontainer.json';
-  const LEGACY_BROWSER_DEVCONTAINERS = ['.devcontainer/browser/devcontainer.json', '.devcontainer/devcontainer.json'];
+  const BROWSER_DEVCONTAINER = '.devcontainer/browser-v3/devcontainer.json';
+  const LEGACY_BROWSER_DEVCONTAINERS = ['.devcontainer/browser-v2/devcontainer.json', '.devcontainer/browser/devcontainer.json', '.devcontainer/devcontainer.json'];
   const COMPUTER_DEVCONTAINER = '.devcontainer/computer/devcontainer.json';
 
   const statusEl = document.getElementById('status');
@@ -507,7 +507,7 @@
       const pc = findByDevcontainer(list, COMPUTER_DEVCONTAINER);
 
       setStatus(
-        browser ? 'Chromium configurado no Codespace' : (legacyBrowser ? 'Chromium será preparado ao abrir' : 'Chromium será criado ao abrir'),
+        browser ? 'Chrome configurado no Codespace' : (legacyBrowser ? 'Chrome será preparado ao abrir' : 'Chrome será criado ao abrir'),
         browser ? 'good' : ''
       );
       setPcStatus(
@@ -561,7 +561,7 @@
       await api(legacy.stop_url, { method:'POST' });
     }
 
-    setState('Criando Chromium…');
+    setState('Criando Chrome…');
     let created;
     try {
       created = await api(REPO_API, {
@@ -575,7 +575,7 @@
       });
     } catch (err) {
       if (/GitHub 403/.test(err.message)) {
-        throw new Error('O token salvo não tem permissão para criar o novo Codespace Chromium.');
+        throw new Error('O token salvo não tem permissão para criar o novo Codespace Chrome.');
       }
       throw err;
     }
@@ -588,7 +588,7 @@
       const space = await getSpace(BROWSER_DEVCONTAINER);
       if (space) return space;
     }
-    throw new Error('O GitHub não concluiu a criação do Codespace Chromium.');
+    throw new Error('O GitHub não concluiu a criação do Codespace Chrome.');
   }
 
   async function openSpace(path, title, description, setState, openConfigOnMissing = false) {
