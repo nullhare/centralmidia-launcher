@@ -11,15 +11,15 @@
       --bg:#010409;
       --header:#010409;
       --panel:#010409;
-      --surface:#272c36;
-      --surface-hover:#343b46;
-      --border:#b8bdc8;
-      --border-muted:#8c959f;
-      --text:#ffffff;
-      --muted:#b8bdc8;
-      --green:#0b631b;
-      --green-hover:#0e7a24;
-      --green-border:#53e35d;
+      --surface:#21262d;
+      --surface-hover:#30363d;
+      --border:#8c959f;
+      --border-muted:#6e7681;
+      --text:#f0f6fc;
+      --muted:#b1bac4;
+      --green:#238636;
+      --green-hover:#2ea043;
+      --green-border:#3fb950;
       --focus:#58a6ff;
     }
 
@@ -67,7 +67,7 @@
       justify-content:space-between;
       gap:20px;
       padding-bottom:14px;
-      border-bottom:1px solid var(--border);
+      border-bottom:1px solid var(--border-muted);
       margin-bottom:16px;
     }
     h1 { margin:0; font-size:24px; font-weight:400; color:var(--text); }
@@ -97,8 +97,8 @@
     .card h2 { margin:0; font-size:16px; font-weight:600; color:var(--text); }
     .card p { margin:4px 0 0; color:var(--muted); font-size:13px; }
     .card-controls {
-      width:188px;
-      flex:0 0 188px;
+      width:152px;
+      flex:0 0 152px;
       display:grid;
       grid-template-columns:1fr;
       gap:6px;
@@ -117,22 +117,23 @@
       display:inline-flex;
       align-items:center;
       justify-content:center;
+      gap:7px;
       cursor:pointer;
       box-shadow:none;
     }
     button:hover,.btn:hover {
       background:var(--surface-hover);
-      border-color:#ffffff;
+      border-color:#b1bac4;
     }
     .primary-green {
       background:var(--green);
       border-color:var(--green-border);
       color:#fff;
-      font-weight:600;
+      font-weight:500;
     }
     .primary-green:hover {
       background:var(--green-hover);
-      border-color:#6bea73;
+      border-color:#56d364;
     }
     .danger,
     .danger-fill {
@@ -145,17 +146,29 @@
     .danger-fill:hover {
       color:var(--text);
       background:var(--surface-hover);
-      border-color:#ffffff;
+      border-color:#b1bac4;
     }
-    .card-controls button,
-    #stop-all {
-      min-height:30px;
-      padding:4px 10px;
-      font-size:12px;
-      line-height:18px;
+    .card-controls button {
+      width:152px;
+      min-height:32px;
+      padding:5px 12px;
+      font-size:14px;
+      line-height:20px;
       white-space:nowrap;
     }
-    #stop-all { min-width:120px; }
+    #stop-all {
+      min-height:32px;
+      padding:5px 12px;
+      font-size:14px;
+      line-height:20px;
+      white-space:nowrap;
+    }
+    .button-icon {
+      width:16px;
+      height:16px;
+      flex:0 0 16px;
+      display:block;
+    }
 
     .status {
       min-height:18px;
@@ -165,7 +178,7 @@
       overflow-wrap:anywhere;
     }
     .status.good {
-      color:#53e35d;
+      color:#3fb950;
       font-weight:600;
       animation:status-pulse 1.35s ease-in-out infinite;
     }
@@ -197,7 +210,7 @@
       color:var(--text);
     }
     .card-config summary::-webkit-details-marker { display:none; }
-    .card-config summary:hover { background:#161b23; }
+    .card-config summary:hover { background:#0d1117; }
     .card-config summary::after {
       content:'▾';
       color:var(--muted);
@@ -235,7 +248,7 @@
       .grid-2 { grid-template-columns:1fr; }
       .page-head { align-items:flex-start; }
       .card-main { gap:10px; }
-      .card-controls { width:188px; flex-basis:188px; }
+      .card-controls { width:152px; flex-basis:152px; }
       .topnote { display:none; }
       main { width:min(100% - 20px,1080px); margin-top:10px; }
     }
@@ -244,7 +257,8 @@
       .page-head { flex-direction:column; }
       #stop-all { width:auto; }
       .card-main { flex-direction:column; }
-      .card-controls { width:100%; }
+      .card-controls,
+      .card-controls button { width:100%; }
       .field-row { grid-template-columns:1fr; }
     }
   </style>
@@ -262,7 +276,7 @@
         <h1>Central remota</h1>
         <p class="subtitle">Navegador Codespace e computador Zorin em um só lugar.</p>
       </div>
-      <button id="stop-all" class="danger-fill">ENCERRAR TUDO</button>
+      <button id="stop-all" class="danger-fill">Encerrar tudo</button>
     </div>
 
     <div class="grid-2">
@@ -274,8 +288,14 @@
               <p>Inicia o Codespace e abre direto o navegador.</p>
             </div>
             <div class="card-controls">
-              <button id="open" class="primary-green">ABRIR NAVEGADOR</button>
-              <button id="stop-browser" class="danger">DESLIGAR NAVEGADOR</button>
+              <button id="open" class="primary-green">
+                <svg class="button-icon" aria-hidden="true" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M6.4 5.1 10.7 8l-4.3 2.9Z" fill="currentColor"/>
+                </svg>
+                <span>Navegador</span>
+              </button>
+              <button id="stop-browser" class="danger">Encerrar</button>
             </div>
           </div>
           <div id="status" class="status"></div>
@@ -287,11 +307,11 @@
             <p>Token limitado ao Codespaces. Ele fica somente neste navegador.</p>
             <div class="field-row">
               <input id="token" type="password" autocomplete="off" placeholder="github_pat_...">
-              <button id="save">SALVAR E TESTAR</button>
+              <button id="save">Salvar e testar</button>
             </div>
             <div class="config-actions">
-              <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20os%20Codespaces%20remotos&target_name=nullhare&expires_in=90&codespaces=read&codespaces_lifecycle_admin=write&codespaces_metadata=read">CRIAR TOKEN</a>
-              <button id="forget">REMOVER TOKEN</button>
+              <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20os%20Codespaces%20remotos&target_name=nullhare&expires_in=90&codespaces=read&codespaces_lifecycle_admin=write&codespaces_metadata=read">Criar token</a>
+              <button id="forget">Remover token</button>
             </div>
           </div>
         </details>
@@ -305,8 +325,14 @@
               <p>RustDesk roda dentro de um Codespace e controla seu Zorin.</p>
             </div>
             <div class="card-controls">
-              <button id="open-pc" class="primary-green">ABRIR COMPUTADOR</button>
-              <button id="stop-pc" class="danger">DESLIGAR COMPUTADOR</button>
+              <button id="open-pc" class="primary-green">
+                <svg class="button-icon" aria-hidden="true" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M6.4 5.1 10.7 8l-4.3 2.9Z" fill="currentColor"/>
+                </svg>
+                <span>Computador</span>
+              </button>
+              <button id="stop-pc" class="danger">Encerrar</button>
             </div>
           </div>
           <div id="pc-status" class="status"></div>
@@ -317,7 +343,7 @@
           <div class="config-content">
             <p>O RustDesk fica dentro de um segundo Codespace do mesmo repositório. Ele só precisa ser criado uma vez.</p>
             <div class="config-actions">
-              <a class="btn" target="_blank" rel="noopener noreferrer" href="https://codespaces.new/nullhare/centralmidia">CRIAR CODESPACE DO COMPUTADOR</a>
+              <a class="btn" target="_blank" rel="noopener noreferrer" href="https://codespaces.new/nullhare/centralmidia">Criar Codespace do computador</a>
             </div>
           </div>
         </details>
@@ -411,7 +437,7 @@
   function popupMessage(tab, title, text) {
     try {
       tab.document.open();
-      tab.document.write(`<!doctype html><meta name="color-scheme" content="dark"><title>${title}</title><body style="font-family:system-ui;background:#010409;color:#ffffff;display:grid;place-items:center;height:100vh;margin:0"><div style="text-align:center;max-width:560px;padding:30px"><h2>${title}</h2><p style="color:#b8bdc8">${text}</p></div></body>`);
+      tab.document.write(`<!doctype html><meta name="color-scheme" content="dark"><title>${title}</title><body style="font-family:system-ui;background:#010409;color:#f0f6fc;display:grid;place-items:center;height:100vh;margin:0"><div style="text-align:center;max-width:560px;padding:30px"><h2>${title}</h2><p style="color:#b1bac4">${text}</p></div></body>`);
       tab.document.close();
     } catch (_) {}
   }
