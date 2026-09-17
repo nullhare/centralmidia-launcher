@@ -428,8 +428,8 @@
 <script>
   const REPO_API = 'https://api.github.com/repos/nullhare/centralmidia/codespaces';
   const GH_KEY = 'centralmidia_codespaces_token_v1';
-  const BROWSER_DEVCONTAINER = '.devcontainer/browser/devcontainer.json';
-  const LEGACY_BROWSER_DEVCONTAINER = '.devcontainer/devcontainer.json';
+  const BROWSER_DEVCONTAINER = '.devcontainer/browser-v2/devcontainer.json';
+  const LEGACY_BROWSER_DEVCONTAINERS = ['.devcontainer/browser/devcontainer.json', '.devcontainer/devcontainer.json'];
   const COMPUTER_DEVCONTAINER = '.devcontainer/computer/devcontainer.json';
 
   const statusEl = document.getElementById('status');
@@ -503,7 +503,7 @@
     try {
       const list = await listCodespaces();
       const browser = findByDevcontainer(list, BROWSER_DEVCONTAINER);
-      const legacyBrowser = findByDevcontainer(list, LEGACY_BROWSER_DEVCONTAINER);
+      const legacyBrowser = LEGACY_BROWSER_DEVCONTAINERS.map(path => findByDevcontainer(list, path)).find(Boolean);
       const pc = findByDevcontainer(list, COMPUTER_DEVCONTAINER);
 
       setStatus(
@@ -555,7 +555,7 @@
     const existing = findByDevcontainer(list, BROWSER_DEVCONTAINER);
     if (existing) return existing;
 
-    const legacy = findByDevcontainer(list, LEGACY_BROWSER_DEVCONTAINER);
+    const legacy = LEGACY_BROWSER_DEVCONTAINERS.map(path => findByDevcontainer(list, path)).find(Boolean);
     if (legacy?.state === 'Available') {
       setState('Desligando navegador antigo…');
       await api(legacy.stop_url, { method:'POST' });
@@ -687,7 +687,7 @@
       const list = await listCodespaces();
       const spaces = [
         findByDevcontainer(list, BROWSER_DEVCONTAINER),
-        findByDevcontainer(list, LEGACY_BROWSER_DEVCONTAINER)
+        ...LEGACY_BROWSER_DEVCONTAINERS.map(path => findByDevcontainer(list, path))
       ].filter(Boolean);
 
       if (!spaces.length) {
