@@ -41,22 +41,6 @@
       gap:12px;
       background:var(--header);
     }
-    .menu-button {
-      width:32px;
-      height:32px;
-      flex:0 0 32px;
-      border:1px solid var(--border);
-      border-radius:6px;
-      display:grid;
-      place-items:center;
-      color:var(--text);
-      background:var(--header);
-    }
-    .menu-button svg {
-      width:16px;
-      height:16px;
-      display:block;
-    }
     .github-mark {
       width:32px;
       height:32px;
@@ -226,24 +210,31 @@
     }
 
     .status {
-      min-height:18px;
+      min-height:20px;
       margin-top:9px;
       color:var(--muted);
       font-size:12px;
+      line-height:18px;
       overflow-wrap:anywhere;
     }
     .status.good {
+      display:inline-flex;
+      align-items:center;
+      width:max-content;
+      min-height:20px;
+      padding:0 7px;
+      border:1px solid #238636;
+      border-radius:2em;
+      background:rgba(46,160,67,.15);
       color:#3fb950;
-      font-weight:600;
-      animation:status-pulse 1.35s ease-in-out infinite;
+      font-size:12px;
+      line-height:18px;
+      font-weight:500;
+      animation:none;
     }
     .status.bad {
       color:var(--text);
       font-weight:600;
-    }
-    @keyframes status-pulse {
-      0%,100% { opacity:1; }
-      50% { opacity:.5; }
     }
 
     .card-config {
@@ -320,11 +311,6 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="menu-button" aria-hidden="true">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-        <path d="M3 4h10M3 8h10M3 12h10"/>
-      </svg>
-    </div>
     <a class="github-mark" href="https://github.com/" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
       <svg viewBox="0 0 16 16" aria-hidden="true">
         <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.6-.18-3.28-.8-3.28-3.56 0-.88.31-1.6.82-2.16-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 018 4.58a7.6 7.6 0 012 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.16 0 2.77-1.69 3.38-3.3 3.56.29.25.54.74.54 1.5 0 1.08-.01 1.95-.01 2.21 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
@@ -483,13 +469,13 @@
       return;
     }
 
-    setStatus('● Configurado neste navegador', 'good');
+    setStatus('Configurado neste navegador', 'good');
     setPcStatus('Verificando Codespace do computador…');
     try {
       const list = await listCodespaces();
       const pc = findByDevcontainer(list, COMPUTER_DEVCONTAINER);
       setPcStatus(
-        pc ? '● Computador configurado no Codespace' : '● Falta criar o Codespace do computador',
+        pc ? 'Computador configurado no Codespace' : '● Falta criar o Codespace do computador',
         pc ? 'good' : 'bad'
       );
     } catch (_) {
