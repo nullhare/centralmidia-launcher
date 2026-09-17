@@ -47,16 +47,16 @@
 <body>
   <main>
     <h1>Navegador remoto</h1>
-    <p>Abre o GitHub Codespaces em outra aba e mantém este launcher aberto.</p>
+    <p>Abre seu Codespace existente diretamente em outra aba.</p>
     <button id="open">ABRIR NAVEGADOR</button>
     <div class="note">Se a nova aba for bloqueada, permita pop-ups para este site.</div>
   </main>
 
   <script>
-    const codespacesUrl = 'https://codespaces.new/nullhare/centralmidia?quickstart=1';
+    const codespaceUrl = 'https://cuddly-space-robot-7pg55vp946g2wjgj.github.dev';
 
     document.getElementById('open').addEventListener('click', () => {
-      const tab = window.open(codespacesUrl, '_blank', 'noopener,noreferrer');
+      const tab = window.open(codespaceUrl, '_blank', 'noopener,noreferrer');
       if (!tab) {
         alert('A nova aba foi bloqueada. Permita pop-ups para este site e tente novamente.');
       }
