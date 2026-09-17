@@ -1,0 +1,38 @@
+name: Apply official Chrome migration
+
+on:
+  push:
+    paths:
+      - .github/workflows/apply-official-chrome.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-launcher:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch launcher
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text()
+
+          old = "const BROWSER_DEVCONTAINER = '.devcontainer/browser-v2/devcontainer.json';\n  const LEGACY_BROWSER_DEVCONTAINERS = ['.devcontainer/browser/devcontainer.json', '.devcontainer/devcontainer.json'];"
+          new = "const BROWSER_DEVCONTAINER = '.devcontainer/browser-v3/devcontainer.json';\n  const LEGACY_BROWSER_DEVCONTAINERS = ['.devcontainer/browser-v2/devcontainer.json', '.devcontainer/browser/devcontainer.json', '.devcontainer/devcontainer.json'];"
+          if old not in s:
+              raise SystemExit('browser devcontainer constants not found')
+          s = s.replace(old, new, 1)
+          s = s.replace('Chromium', 'Chrome')
+          p.write_text(s)
+
+      - name: Commit launcher patch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Use official Chrome for Google sign-in" || exit 0
+          git push
