@@ -142,6 +142,19 @@
       font-size:12px;
       overflow-wrap:anywhere;
     }
+    .status.good {
+      color:#3fb950;
+      font-weight:600;
+      animation:status-pulse 1.35s ease-in-out infinite;
+    }
+    .status.bad {
+      color:#ff7b72;
+      font-weight:600;
+    }
+    @keyframes status-pulse {
+      0%,100% { opacity:1; }
+      50% { opacity:.5; }
+    }
 
     .card-config {
       border-top:1px solid var(--border-soft);
@@ -188,8 +201,6 @@
     }
     input:focus { border-color:#58a6ff; box-shadow:0 0 0 2px rgba(88,166,255,.25); }
     .config-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
-    .mini-status { margin-top:8px; color:var(--muted); font-size:12px; }
-    .ok { color:#7ee787; }
 
     @media (max-width:760px) {
       .grid-2 { grid-template-columns:1fr; }
@@ -253,7 +264,6 @@
               <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20o%20Codespace%20do%20navegador&target_name=nullhare&expires_in=90&codespaces=read&codespaces_lifecycle_admin=write&codespaces_metadata=read">CRIAR TOKEN</a>
               <button id="forget">REMOVER TOKEN</button>
             </div>
-            <div id="gh-config-status" class="mini-status"></div>
           </div>
         </details>
       </section>
@@ -284,7 +294,6 @@
             <div class="config-actions">
               <button id="forget-pc">REMOVER ID</button>
             </div>
-            <div id="pc-config-status" class="mini-status"></div>
           </div>
         </details>
       </section>
@@ -299,31 +308,41 @@
 
   const statusEl = document.getElementById('status');
   const pcStatusEl = document.getElementById('pc-status');
-  const ghConfigStatusEl = document.getElementById('gh-config-status');
-  const pcConfigStatusEl = document.getElementById('pc-config-status');
   const ghConfigCard = document.getElementById('gh-config-card');
   const pcConfigCard = document.getElementById('pc-config-card');
   const tokenEl = document.getElementById('token');
   const pcIdEl = document.getElementById('pc-id');
 
   const sleep = ms => new Promise(r => setTimeout(r, ms));
-  const setStatus = text => statusEl.textContent = text;
-  const setPcStatus = text => pcStatusEl.textContent = text;
   const getToken = () => localStorage.getItem(GH_KEY) || '';
   const getPcId = () => localStorage.getItem(PC_KEY) || '';
+
+  function paintStatus(el, text, type = '') {
+    el.className = `status${type ? ` ${type}` : ''}`;
+    el.textContent = text;
+  }
+
+  const setStatus = (text, type = '') => paintStatus(statusEl, text, type);
+  const setPcStatus = (text, type = '') => paintStatus(pcStatusEl, text, type);
 
   function refreshConfig() {
     const gh = !!getToken();
     const pc = getPcId();
-    ghConfigStatusEl.innerHTML = gh
-      ? '<span class="ok">● Configurado neste navegador</span>'
-      : '○ Token ainda não configurado';
-    pcConfigStatusEl.innerHTML = pc
-      ? '<span class="ok">● ID configurado neste navegador</span>'
-      : '○ ID ainda não configurado';
+
+    setStatus(
+      gh ? '● Configurado neste navegador' : '● Token do GitHub não configurado',
+      gh ? 'good' : 'bad'
+    );
+    setPcStatus(
+      pc ? '● Computador configurado neste navegador' : '● ID do RustDesk não configurado',
+      pc ? 'good' : 'bad'
+    );
+
     if (pc) pcIdEl.value = pc;
-    setStatus(gh ? 'Pronto para usar.' : 'Configure o token do GitHub abaixo.');
-    setPcStatus(pc ? 'Pronto para abrir.' : 'Falta configurar o ID do RustDesk.');
+  }
+
+  function restoreConfigStatus(delay = 1800) {
+    setTimeout(refreshConfig, delay);
   }
 
   async function api(url, options = {}) {
@@ -364,13 +383,13 @@
   async function startAndOpen() {
     if (!getToken()) {
       ghConfigCard.open = true;
-      setStatus('Configure o token do GitHub abaixo.');
+      setStatus('● Token do GitHub não configurado', 'bad');
       setTimeout(() => tokenEl.focus(), 0);
       return;
     }
 
     const tab = window.open('about:blank', '_blank');
-    if (!tab) return setStatus('Libere pop-ups para este site.');
+    if (!tab) return setStatus('Libere pop-ups para este site.', 'bad');
     try { tab.opener = null; } catch (_) {}
     popupMessage(tab, 'Iniciando navegador…', 'Ligando o Codespace. Esta aba abrirá automaticamente.');
 
@@ -394,10 +413,10 @@
       setStatus('Navegador iniciando…');
       await sleep(7000);
       tab.location.replace(`https://${info.name}-3000.app.github.dev`);
-      setStatus('Navegador aberto.');
+      refreshConfig();
     } catch (err) {
       const message = err.message === 'TOKEN_MISSING' ? 'Token não configurado.' : err.message;
-      setStatus(message);
+      setStatus(message, 'bad');
       popupMessage(tab, 'Não foi possível abrir', message);
     }
   }
@@ -405,7 +424,7 @@
   async function stopCodespace() {
     if (!getToken()) {
       ghConfigCard.open = true;
-      setStatus('Configure o token do GitHub primeiro.');
+      setStatus('● Token do GitHub não configurado', 'bad');
       return false;
     }
     try {
@@ -413,14 +432,16 @@
       const info = await findCodespace();
       if (info.state !== 'Available') {
         setStatus('Codespace já está desligado ou parando.');
+        restoreConfigStatus();
         return true;
       }
       setStatus('Desligando Codespace…');
       await api(info.stop_url, { method:'POST' });
       setStatus('Codespace desligando.');
+      restoreConfigStatus();
       return true;
     } catch (err) {
-      setStatus(err.message);
+      setStatus(err.message, 'bad');
       return false;
     }
   }
@@ -429,27 +450,30 @@
     const id = getPcId();
     if (!id) {
       pcConfigCard.open = true;
-      setPcStatus('Salve o ID do RustDesk primeiro.');
+      setPcStatus('● ID do RustDesk não configurado', 'bad');
       setTimeout(() => pcIdEl.focus(), 0);
       return;
     }
     const tab = window.open(RUSTDESK_WEB, '_blank', 'noopener,noreferrer');
-    if (!tab) return setPcStatus('Libere pop-ups para este site.');
+    if (!tab) return setPcStatus('Libere pop-ups para este site.', 'bad');
     try {
       await navigator.clipboard.writeText(id);
       setPcStatus('RustDesk Web aberto. ID copiado.');
+      restoreConfigStatus();
     } catch (_) {
       setPcStatus(`RustDesk Web aberto. ID: ${id}`);
+      restoreConfigStatus();
     }
   }
 
   async function stopComputerAccess() {
     if (!getPcId()) {
       pcConfigCard.open = true;
-      setPcStatus('Computador ainda não configurado.');
+      setPcStatus('● ID do RustDesk não configurado', 'bad');
       return false;
     }
     setPcStatus('Controle remoto do Zorin será conectado na próxima etapa.');
+    restoreConfigStatus();
     return false;
   }
 
@@ -462,6 +486,7 @@
     ]);
     if (browserOk && !pcOk) {
       setPcStatus('Codespace desligando. Falta conectar o controle local do Zorin.');
+      restoreConfigStatus(2500);
     }
   }
 
@@ -473,18 +498,17 @@
 
   document.getElementById('save').addEventListener('click', async () => {
     const token = tokenEl.value.trim();
-    if (!token) return setStatus('Cole um token para substituir/testar o atual.');
+    if (!token) return setStatus('Cole um token para substituir/testar o atual.', 'bad');
     localStorage.setItem(GH_KEY, token);
     setStatus('Testando token…');
     try {
-      const info = await findCodespace();
+      await findCodespace();
       tokenEl.value = '';
       refreshConfig();
-      setStatus(`Configurado. Codespace: ${info.name}.`);
     } catch (err) {
       localStorage.removeItem(GH_KEY);
       refreshConfig();
-      setStatus('Token recusado ou sem permissão: ' + err.message);
+      setStatus('● Token recusado ou sem permissão', 'bad');
     }
   });
 
@@ -496,10 +520,9 @@
 
   document.getElementById('save-pc').addEventListener('click', () => {
     const id = pcIdEl.value.trim();
-    if (!id) return setPcStatus('Digite o ID do RustDesk primeiro.');
+    if (!id) return setPcStatus('● Digite o ID do RustDesk primeiro', 'bad');
     localStorage.setItem(PC_KEY, id);
     refreshConfig();
-    setPcStatus('ID salvo.');
   });
 
   document.getElementById('forget-pc').addEventListener('click', () => {
