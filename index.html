@@ -82,8 +82,8 @@
       border:1px solid var(--border);
       border-radius:6px;
       background:var(--panel);
-      padding:16px;
     }
+    .card { padding:16px; }
     .card-main {
       display:flex;
       align-items:flex-start;
@@ -149,10 +149,36 @@
       font-weight:600;
     }
 
-    .config-grid { margin-top:8px; }
-    .config-card { padding:14px; }
-    .config-card h3 { margin:0; font-size:14px; }
-    .config-card p { margin:4px 0 10px; color:var(--muted); font-size:12px; }
+    .config-grid { margin-top:8px; align-items:start; }
+    .config-card { overflow:hidden; }
+    .config-card summary {
+      min-height:48px;
+      padding:0 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      cursor:pointer;
+      list-style:none;
+      user-select:none;
+      font-size:14px;
+      font-weight:600;
+    }
+    .config-card summary::-webkit-details-marker { display:none; }
+    .config-card summary:hover { background:var(--panel-2); }
+    .config-card summary::after {
+      content:'▾';
+      color:var(--muted);
+      font-size:16px;
+      line-height:1;
+      transition:transform .15s ease;
+    }
+    .config-card[open] summary::after { transform:rotate(180deg); }
+    .config-content {
+      padding:14px;
+      border-top:1px solid var(--border-soft);
+    }
+    .config-content p { margin:0 0 10px; color:var(--muted); font-size:12px; }
     .field-row { display:grid; grid-template-columns:1fr auto; gap:8px; }
     input {
       width:100%;
@@ -183,6 +209,7 @@
       #stop-all { width:auto; }
       .card-main { flex-direction:column; }
       .card-controls { width:100%; }
+      .field-row { grid-template-columns:1fr; }
     }
   </style>
 </head>
@@ -234,32 +261,36 @@
 
     <div class="section-title">Configuração</div>
     <div class="config-grid">
-      <section class="config-card">
-        <h3>GitHub / Codespaces</h3>
-        <p>Token limitado ao Codespaces. Ele fica somente neste navegador.</p>
-        <div class="field-row">
-          <input id="token" type="password" autocomplete="off" placeholder="github_pat_...">
-          <button id="save">SALVAR E TESTAR</button>
+      <details id="gh-config-card" class="config-card">
+        <summary>GitHub / Codespaces</summary>
+        <div class="config-content">
+          <p>Token limitado ao Codespaces. Ele fica somente neste navegador.</p>
+          <div class="field-row">
+            <input id="token" type="password" autocomplete="off" placeholder="github_pat_...">
+            <button id="save">SALVAR E TESTAR</button>
+          </div>
+          <div class="config-actions">
+            <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20o%20Codespace%20do%20navegador&target_name=nullhare&expires_in=90&codespaces=read&codespaces_lifecycle_admin=write&codespaces_metadata=read">CRIAR TOKEN</a>
+            <button id="forget">REMOVER TOKEN</button>
+          </div>
+          <div id="gh-config-status" class="mini-status"></div>
         </div>
-        <div class="config-actions">
-          <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20o%20Codespace%20do%20navegador&target_name=nullhare&expires_in=90&codespaces=read&codespaces_lifecycle_admin=write&codespaces_metadata=read">CRIAR TOKEN</a>
-          <button id="forget">REMOVER TOKEN</button>
-        </div>
-        <div id="gh-config-status" class="mini-status"></div>
-      </section>
+      </details>
 
-      <section class="config-card">
-        <h3>Computador / RustDesk</h3>
-        <p>Salve apenas o ID do computador. A senha não fica no launcher.</p>
-        <div class="field-row">
-          <input id="pc-id" type="text" autocomplete="off" placeholder="ID do RustDesk">
-          <button id="save-pc">SALVAR ID</button>
+      <details id="pc-config-card" class="config-card">
+        <summary>Computador / RustDesk</summary>
+        <div class="config-content">
+          <p>Salve apenas o ID do computador. A senha não fica no launcher.</p>
+          <div class="field-row">
+            <input id="pc-id" type="text" autocomplete="off" placeholder="ID do RustDesk">
+            <button id="save-pc">SALVAR ID</button>
+          </div>
+          <div class="config-actions">
+            <button id="forget-pc">REMOVER ID</button>
+          </div>
+          <div id="pc-config-status" class="mini-status"></div>
         </div>
-        <div class="config-actions">
-          <button id="forget-pc">REMOVER ID</button>
-        </div>
-        <div id="pc-config-status" class="mini-status"></div>
-      </section>
+      </details>
     </div>
   </main>
 
@@ -273,6 +304,8 @@
   const pcStatusEl = document.getElementById('pc-status');
   const ghConfigStatusEl = document.getElementById('gh-config-status');
   const pcConfigStatusEl = document.getElementById('pc-config-status');
+  const ghConfigCard = document.getElementById('gh-config-card');
+  const pcConfigCard = document.getElementById('pc-config-card');
   const tokenEl = document.getElementById('token');
   const pcIdEl = document.getElementById('pc-id');
 
@@ -333,8 +366,9 @@
 
   async function startAndOpen() {
     if (!getToken()) {
+      ghConfigCard.open = true;
       setStatus('Configure o token do GitHub na parte inferior.');
-      tokenEl.focus();
+      setTimeout(() => tokenEl.focus(), 0);
       return;
     }
 
@@ -373,6 +407,7 @@
 
   async function stopCodespace() {
     if (!getToken()) {
+      ghConfigCard.open = true;
       setStatus('Configure o token do GitHub primeiro.');
       return false;
     }
@@ -396,8 +431,9 @@
   async function openComputer() {
     const id = getPcId();
     if (!id) {
+      pcConfigCard.open = true;
       setPcStatus('Salve o ID do RustDesk primeiro.');
-      pcIdEl.focus();
+      setTimeout(() => pcIdEl.focus(), 0);
       return;
     }
     const tab = window.open(RUSTDESK_WEB, '_blank', 'noopener,noreferrer');
@@ -412,6 +448,7 @@
 
   async function stopComputerAccess() {
     if (!getPcId()) {
+      pcConfigCard.open = true;
       setPcStatus('Computador ainda não configurado.');
       return false;
     }
