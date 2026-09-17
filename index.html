@@ -370,7 +370,7 @@
                 <button id="save">Salvar e testar</button>
               </div>
               <div class="config-actions">
-                <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20os%20Codespaces%20remotos&target_name=nullhare&expires_in=90&codespaces=read&codespaces_lifecycle_admin=write&codespaces_metadata=read">Criar token</a>
+                <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20os%20Codespaces%20remotos&target_name=nullhare&expires_in=90&codespaces=write&codespaces_lifecycle_admin=write&codespaces_metadata=read">Criar token</a>
                 <button id="forget">Remover token</button>
               </div>
             </div>
@@ -409,7 +409,7 @@
                 <button id="pc-save">Salvar e testar</button>
               </div>
               <div class="config-actions">
-                <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20os%20Codespaces%20remotos&target_name=nullhare&expires_in=90&codespaces=read&codespaces_lifecycle_admin=write&codespaces_metadata=read">Criar token</a>
+                <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20os%20Codespaces%20remotos&target_name=nullhare&expires_in=90&codespaces=write&codespaces_lifecycle_admin=write&codespaces_metadata=read">Criar token</a>
                 <button id="pc-forget">Remover token</button>
               </div>
             </div>
@@ -428,7 +428,8 @@
 <script>
   const REPO_API = 'https://api.github.com/repos/nullhare/centralmidia/codespaces';
   const GH_KEY = 'centralmidia_codespaces_token_v1';
-  const BROWSER_DEVCONTAINER = '.devcontainer/devcontainer.json';
+  const BROWSER_DEVCONTAINER = '.devcontainer/browser/devcontainer.json';
+  const LEGACY_BROWSER_DEVCONTAINER = '.devcontainer/devcontainer.json';
   const COMPUTER_DEVCONTAINER = '.devcontainer/computer/devcontainer.json';
 
   const statusEl = document.getElementById('status');
@@ -497,16 +498,24 @@
       return;
     }
 
-    setStatus('Configurado neste navegador', 'good');
+    setStatus('Verificando navegador…');
     setPcStatus('Verificando Codespace do computador…');
     try {
       const list = await listCodespaces();
+      const browser = findByDevcontainer(list, BROWSER_DEVCONTAINER);
+      const legacyBrowser = findByDevcontainer(list, LEGACY_BROWSER_DEVCONTAINER);
       const pc = findByDevcontainer(list, COMPUTER_DEVCONTAINER);
+
+      setStatus(
+        browser ? 'Chromium configurado no Codespace' : (legacyBrowser ? 'Chromium será preparado ao abrir' : 'Chromium será criado ao abrir'),
+        browser ? 'good' : ''
+      );
       setPcStatus(
         pc ? 'Computador configurado no Codespace' : '● Falta criar o Codespace do computador',
         pc ? 'good' : 'bad'
       );
     } catch (_) {
+      setStatus('● Não foi possível verificar o navegador', 'bad');
       setPcStatus('● Não foi possível verificar o computador', 'bad');
     }
   }
@@ -541,6 +550,47 @@
     throw new Error('O Codespace demorou demais para iniciar.');
   }
 
+  async function createBrowserSpace(setState) {
+    const list = await listCodespaces();
+    const existing = findByDevcontainer(list, BROWSER_DEVCONTAINER);
+    if (existing) return existing;
+
+    const legacy = findByDevcontainer(list, LEGACY_BROWSER_DEVCONTAINER);
+    if (legacy?.state === 'Available') {
+      setState('Desligando navegador antigo…');
+      await api(legacy.stop_url, { method:'POST' });
+    }
+
+    setState('Criando Chromium…');
+    let created;
+    try {
+      created = await api(REPO_API, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body:JSON.stringify({
+          ref:'main',
+          devcontainer_path:BROWSER_DEVCONTAINER,
+          display_name:'Navegador remoto'
+        })
+      });
+    } catch (err) {
+      if (/GitHub 403/.test(err.message)) {
+        throw new Error('O token salvo não tem permissão para criar o novo Codespace Chromium.');
+      }
+      throw err;
+    }
+
+    if (created?.name) return created;
+
+    const deadline = Date.now() + 60000;
+    while (Date.now() < deadline) {
+      await sleep(2500);
+      const space = await getSpace(BROWSER_DEVCONTAINER);
+      if (space) return space;
+    }
+    throw new Error('O GitHub não concluiu a criação do Codespace Chromium.');
+  }
+
   async function openSpace(path, title, description, setState, openConfigOnMissing = false) {
     if (!getToken()) {
       const { card, input } = tokenUi(path);
@@ -557,7 +607,10 @@
 
     try {
       setState('Localizando Codespace…');
-      const space = await getSpace(path);
+      let space = await getSpace(path);
+      if (!space && path === BROWSER_DEVCONTAINER) {
+        space = await createBrowserSpace(setState);
+      }
       if (!space) {
         if (openConfigOnMissing) pcConfigCard.open = true;
         throw new Error('Codespace do computador ainda não foi criado.');
@@ -624,7 +677,41 @@
   }
 
   async function stopBrowser(openConfig = true) {
-    return stopSpace(BROWSER_DEVCONTAINER, setStatus, openConfig);
+    if (!getToken()) {
+      ghConfigCard.open = true;
+      setStatus('● Token do GitHub não configurado', 'bad');
+      return false;
+    }
+    try {
+      setStatus('Localizando Codespace…');
+      const list = await listCodespaces();
+      const spaces = [
+        findByDevcontainer(list, BROWSER_DEVCONTAINER),
+        findByDevcontainer(list, LEGACY_BROWSER_DEVCONTAINER)
+      ].filter(Boolean);
+
+      if (!spaces.length) {
+        setStatus('Codespace do navegador ainda não foi criado.');
+        restoreConfigStatus();
+        return false;
+      }
+
+      const running = spaces.filter(space => space.state === 'Available');
+      if (!running.length) {
+        setStatus('Codespace já está desligado ou parando.');
+        restoreConfigStatus();
+        return true;
+      }
+
+      setStatus('Desligando Codespace…');
+      await Promise.all(running.map(space => api(space.stop_url, { method:'POST' })));
+      setStatus('Codespace desligando.');
+      restoreConfigStatus();
+      return true;
+    } catch (err) {
+      setStatus(`● ${err.message}`, 'bad');
+      return false;
+    }
   }
 
   async function stopComputer(openConfig = true) {
