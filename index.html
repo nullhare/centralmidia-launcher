@@ -19,7 +19,6 @@
       --blue-hover:#388bfd;
       --green:#238636;
       --green-hover:#2ea043;
-      --red:#f85149;
       --red-fill:#b62324;
     }
 
@@ -60,32 +59,22 @@
     }
 
     .page-head {
-      display:flex;
-      align-items:end;
-      justify-content:space-between;
-      gap:20px;
       padding-bottom:14px;
       border-bottom:1px solid var(--border-soft);
       margin-bottom:16px;
     }
     h1 { margin:0; font-size:24px; font-weight:400; }
     .subtitle { margin:4px 0 0; color:var(--muted); }
-    .contrast-pill {
-      border:1px solid var(--border);
-      border-radius:20px;
-      padding:5px 10px;
-      color:var(--text);
-      font-size:12px;
-      white-space:nowrap;
-    }
 
-    .grid-2 {
+    .grid-2,
+    .config-grid {
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:14px;
     }
 
-    .card {
+    .card,
+    .config-card {
       border:1px solid var(--border);
       border-radius:6px;
       background:var(--panel);
@@ -95,7 +84,7 @@
     .card p { margin:4px 0 0; color:var(--muted); font-size:13px; }
     .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
     .between { justify-content:space-between; }
-    .actions { margin-top:14px; }
+    .card-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; }
 
     button,.btn,input { font:inherit; }
     button,.btn {
@@ -119,8 +108,6 @@
     .primary-blue:hover { background:var(--blue-hover); }
     .danger { color:#ff7b72; background:transparent; border-color:#ff7b72; }
     .danger:hover { background:var(--red-fill); color:white; }
-    .danger-fill { background:var(--red-fill); border-color:#ff7b72; color:white; }
-    .danger-fill:hover { background:#da3633; }
 
     .status {
       min-height:18px;
@@ -136,29 +123,8 @@
       font-weight:600;
     }
 
-    .shutdown {
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr;
-      gap:10px;
-      border:1px solid var(--border);
-      border-radius:6px;
-      background:var(--panel);
-      padding:12px;
-    }
-    .shutdown button { width:100%; }
-
-    .config-grid {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:14px;
-      margin-top:14px;
-    }
-    .config-card {
-      border:1px solid var(--border);
-      border-radius:6px;
-      background:var(--panel);
-      padding:14px;
-    }
+    .config-grid { margin-top:8px; }
+    .config-card { padding:14px; }
     .config-card h3 { margin:0; font-size:14px; }
     .config-card p { margin:4px 0 10px; color:var(--muted); font-size:12px; }
     .field-row { display:grid; grid-template-columns:1fr auto; gap:8px; }
@@ -178,8 +144,8 @@
     .ok { color:#7ee787; }
 
     @media (max-width:760px) {
-      .grid-2,.config-grid,.shutdown { grid-template-columns:1fr; }
-      .page-head { align-items:flex-start; flex-direction:column; }
+      .grid-2,.config-grid { grid-template-columns:1fr; }
+      .card-actions { grid-template-columns:1fr; }
       .topnote { display:none; }
       main { width:min(100% - 20px,1080px); margin-top:10px; }
     }
@@ -194,43 +160,35 @@
 
   <main>
     <div class="page-head">
-      <div>
-        <h1>Central remota</h1>
-        <p class="subtitle">Navegador Codespace e computador Zorin em um só lugar.</p>
-      </div>
-      <div class="contrast-pill">Contraste alto</div>
+      <h1>Central remota</h1>
+      <p class="subtitle">Navegador Codespace e computador Zorin em um só lugar.</p>
     </div>
 
     <div class="grid-2">
       <section class="card">
-        <div class="row between">
-          <div>
-            <h2>Navegador remoto</h2>
-            <p>Inicia o Codespace e abre direto o navegador.</p>
-          </div>
+        <div>
+          <h2>Navegador remoto</h2>
+          <p>Inicia o Codespace e abre direto o navegador.</p>
+        </div>
+        <div class="card-actions">
           <button id="open" class="primary-green">ABRIR NAVEGADOR</button>
+          <button id="stop-browser" class="danger">ENCERRAR CODESPACE</button>
         </div>
         <div id="status" class="status"></div>
       </section>
 
       <section class="card">
-        <div class="row between">
-          <div>
-            <h2>Computador</h2>
-            <p>Acesso remoto ao seu Zorin pelo RustDesk.</p>
-          </div>
+        <div>
+          <h2>Computador</h2>
+          <p>Acesso remoto ao seu Zorin pelo RustDesk.</p>
+        </div>
+        <div class="card-actions">
           <button id="open-pc" class="primary-blue">ABRIR COMPUTADOR</button>
+          <button id="stop-pc" class="danger">DESATIVAR ACESSO REMOTO</button>
         </div>
         <div id="pc-status" class="status"></div>
       </section>
     </div>
-
-    <div class="section-title">Desligar</div>
-    <section class="shutdown">
-      <button id="stop-browser" class="danger">DESLIGAR NAVEGADOR</button>
-      <button id="stop-pc" class="danger">DESLIGAR COMPUTADOR</button>
-      <button id="stop-all" class="danger-fill">DESLIGAR TUDO</button>
-    </section>
 
     <div class="section-title">Configuração</div>
     <div class="config-grid">
@@ -380,12 +338,12 @@
       setStatus('Localizando Codespace…');
       const info = await findCodespace();
       if (info.state !== 'Available') {
-        setStatus('Codespace já está desligado ou parando.');
+        setStatus('Codespace já está encerrado ou parando.');
         return true;
       }
-      setStatus('Desligando Codespace…');
+      setStatus('Encerrando Codespace…');
       await api(info.stop_url, { method:'POST' });
-      setStatus('Codespace desligando.');
+      setStatus('Codespace encerrando.');
       return true;
     } catch (err) {
       setStatus(err.message);
@@ -419,18 +377,10 @@
     return false;
   }
 
-  async function stopEverything() {
-    setStatus('Desligando navegador…');
-    setPcStatus('Desligando acesso do computador…');
-    const [browserOk, pcOk] = await Promise.all([stopCodespace(), stopComputerAccess()]);
-    if (browserOk && !pcOk) setPcStatus('Navegador desligando. Falta conectar o controle local do Zorin.');
-  }
-
   document.getElementById('open').addEventListener('click', startAndOpen);
   document.getElementById('open-pc').addEventListener('click', openComputer);
   document.getElementById('stop-browser').addEventListener('click', stopCodespace);
   document.getElementById('stop-pc').addEventListener('click', stopComputerAccess);
-  document.getElementById('stop-all').addEventListener('click', stopEverything);
 
   document.getElementById('save').addEventListener('click', async () => {
     const token = tokenEl.value.trim();
