@@ -11,17 +11,15 @@
       --bg:#010409;
       --header:#010409;
       --panel:#010409;
-      --surface:#161b22;
-      --surface-hover:#21262d;
-      --border:#8c959f;
-      --border-muted:#6e7681;
-      --text:#f0f6fc;
-      --muted:#b1bac4;
-      --green:#238636;
-      --green-hover:#2ea043;
-      --red:#f85149;
-      --red-fill:#da3633;
-      --red-hover:#b62324;
+      --surface:#272c36;
+      --surface-hover:#343b46;
+      --border:#b8bdc8;
+      --border-muted:#8c959f;
+      --text:#ffffff;
+      --muted:#b8bdc8;
+      --green:#0b631b;
+      --green-hover:#0e7a24;
+      --green-border:#53e35d;
       --focus:#58a6ff;
     }
 
@@ -36,7 +34,7 @@
 
     .topbar {
       height:50px;
-      border-bottom:1px solid var(--border-muted);
+      border-bottom:1px solid #30363d;
       display:flex;
       align-items:center;
       padding:0 22px;
@@ -69,10 +67,10 @@
       justify-content:space-between;
       gap:20px;
       padding-bottom:14px;
-      border-bottom:1px solid var(--border-muted);
+      border-bottom:1px solid var(--border);
       margin-bottom:16px;
     }
-    h1 { margin:0; font-size:24px; font-weight:400; }
+    h1 { margin:0; font-size:24px; font-weight:400; color:var(--text); }
     .subtitle { margin:4px 0 0; color:var(--muted); }
 
     .grid-2 {
@@ -96,7 +94,7 @@
       gap:16px;
     }
     .card-copy { min-width:0; }
-    .card h2 { margin:0; font-size:16px; font-weight:600; }
+    .card h2 { margin:0; font-size:16px; font-weight:600; color:var(--text); }
     .card p { margin:4px 0 0; color:var(--muted); font-size:13px; }
     .card-controls {
       width:188px;
@@ -124,37 +122,30 @@
     }
     button:hover,.btn:hover {
       background:var(--surface-hover);
-      border-color:#f0f6fc;
+      border-color:#ffffff;
     }
     .primary-green {
       background:var(--green);
-      border-color:#2ea043;
+      border-color:var(--green-border);
       color:#fff;
       font-weight:600;
     }
     .primary-green:hover {
       background:var(--green-hover);
-      border-color:#3fb950;
+      border-color:#6bea73;
     }
-    .danger {
-      color:var(--red);
+    .danger,
+    .danger-fill {
+      color:var(--text);
       background:var(--surface);
       border-color:var(--border);
+      font-weight:500;
     }
-    .danger:hover {
-      background:rgba(248,81,73,.10);
-      border-color:var(--red);
-      color:#ff7b72;
-    }
-    .danger-fill {
-      background:var(--red-fill);
-      border-color:#f85149;
-      color:#fff;
-      font-weight:600;
-    }
+    .danger:hover,
     .danger-fill:hover {
-      background:var(--red-hover);
-      border-color:#ff7b72;
+      color:var(--text);
+      background:var(--surface-hover);
+      border-color:#ffffff;
     }
     .card-controls button,
     #stop-all {
@@ -174,12 +165,12 @@
       overflow-wrap:anywhere;
     }
     .status.good {
-      color:#3fb950;
+      color:#53e35d;
       font-weight:600;
       animation:status-pulse 1.35s ease-in-out infinite;
     }
     .status.bad {
-      color:var(--red);
+      color:var(--text);
       font-weight:600;
     }
     @keyframes status-pulse {
@@ -203,9 +194,10 @@
       user-select:none;
       font-size:13px;
       font-weight:600;
+      color:var(--text);
     }
     .card-config summary::-webkit-details-marker { display:none; }
-    .card-config summary:hover { background:#0d1117; }
+    .card-config summary:hover { background:#161b23; }
     .card-config summary::after {
       content:'▾';
       color:var(--muted);
@@ -232,6 +224,7 @@
       outline:none;
       box-shadow:none;
     }
+    input::placeholder { color:var(--muted); }
     input:focus {
       border-color:var(--focus);
       box-shadow:0 0 0 3px rgba(88,166,255,.20);
@@ -418,7 +411,7 @@
   function popupMessage(tab, title, text) {
     try {
       tab.document.open();
-      tab.document.write(`<!doctype html><meta name="color-scheme" content="dark"><title>${title}</title><body style="font-family:system-ui;background:#010409;color:#f0f6fc;display:grid;place-items:center;height:100vh;margin:0"><div style="text-align:center;max-width:560px;padding:30px"><h2>${title}</h2><p style="color:#b1bac4">${text}</p></div></body>`);
+      tab.document.write(`<!doctype html><meta name="color-scheme" content="dark"><title>${title}</title><body style="font-family:system-ui;background:#010409;color:#ffffff;display:grid;place-items:center;height:100vh;margin:0"><div style="text-align:center;max-width:560px;padding:30px"><h2>${title}</h2><p style="color:#b8bdc8">${text}</p></div></body>`);
       tab.document.close();
     } catch (_) {}
   }
