@@ -33,32 +33,73 @@
     }
 
     .topbar {
-      height:50px;
-      border-bottom:1px solid #30363d;
+      height:64px;
+      border-bottom:1px solid var(--border);
       display:flex;
       align-items:center;
-      padding:0 22px;
-      gap:10px;
+      padding:0 20px;
+      gap:12px;
       background:var(--header);
     }
-    .mark {
-      width:28px;
-      height:28px;
+    .menu-button {
+      width:32px;
+      height:32px;
+      flex:0 0 32px;
       border:1px solid var(--border);
-      border-radius:50%;
+      border-radius:6px;
       display:grid;
       place-items:center;
+      color:var(--text);
       background:var(--header);
+    }
+    .menu-button svg {
+      width:16px;
+      height:16px;
+      display:block;
+    }
+    .github-mark {
+      width:32px;
+      height:32px;
+      flex:0 0 32px;
+      display:grid;
+      place-items:center;
+      color:var(--text);
+      text-decoration:none;
+    }
+    .github-mark svg {
+      width:32px;
+      height:32px;
+      display:block;
+      fill:currentColor;
+    }
+    .brand {
       color:var(--text);
       font-weight:600;
-      font-size:12px;
+      font-size:14px;
+      line-height:20px;
+      letter-spacing:-.01em;
     }
-    .brand { font-weight:600; font-size:14px; }
-    .topnote { margin-left:auto; color:var(--muted); font-size:12px; }
+    .header-spacer { margin-left:auto; }
+    .profile-link {
+      width:32px;
+      height:32px;
+      flex:0 0 32px;
+      border:1px solid var(--border);
+      border-radius:50%;
+      overflow:hidden;
+      display:block;
+      background:#fff;
+    }
+    .profile-link img {
+      width:100%;
+      height:100%;
+      display:block;
+      object-fit:cover;
+    }
 
     main {
       width:min(1080px, calc(100% - 32px));
-      margin:18px auto 28px;
+      margin:24px auto 28px;
     }
 
     .page-head {
@@ -70,7 +111,14 @@
       border-bottom:1px solid var(--border-muted);
       margin-bottom:16px;
     }
-    h1 { margin:0; font-size:24px; font-weight:400; color:var(--text); }
+    h1 {
+      margin:0;
+      color:var(--text);
+      font-size:24px;
+      font-weight:600;
+      line-height:1.25;
+      letter-spacing:-.01em;
+    }
     .subtitle { margin:4px 0 0; color:var(--muted); }
 
     .grid-2 {
@@ -94,7 +142,14 @@
       gap:16px;
     }
     .card-copy { min-width:0; }
-    .card h2 { margin:0; font-size:16px; font-weight:600; color:var(--text); }
+    .card h2 {
+      margin:0;
+      color:var(--text);
+      font-size:16px;
+      font-weight:600;
+      line-height:1.5;
+      letter-spacing:-.01em;
+    }
     .card p { margin:4px 0 0; color:var(--muted); font-size:13px; }
     .card-controls {
       width:152px;
@@ -249,8 +304,8 @@
       .page-head { align-items:flex-start; }
       .card-main { gap:10px; }
       .card-controls { width:152px; flex-basis:152px; }
-      .topnote { display:none; }
-      main { width:min(100% - 20px,1080px); margin-top:10px; }
+      .topbar { padding:0 14px; }
+      main { width:min(100% - 20px,1080px); margin-top:16px; }
     }
 
     @media (max-width:520px) {
@@ -265,9 +320,21 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="mark">CR</div>
+    <div class="menu-button" aria-hidden="true">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <path d="M3 4h10M3 8h10M3 12h10"/>
+      </svg>
+    </div>
+    <a class="github-mark" href="https://github.com/" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+      <svg viewBox="0 0 16 16" aria-hidden="true">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.6-.18-3.28-.8-3.28-3.56 0-.88.31-1.6.82-2.16-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 018 4.58a7.6 7.6 0 012 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.16 0 2.77-1.69 3.38-3.3 3.56.29.25.54.74.54 1.5 0 1.08-.01 1.95-.01 2.21 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+      </svg>
+    </a>
     <div class="brand">Central remota</div>
-    <div class="topnote">Acesso pessoal</div>
+    <div class="header-spacer"></div>
+    <a class="profile-link" href="https://github.com/nullhare" target="_blank" rel="noopener noreferrer" aria-label="Perfil nullhare" title="nullhare">
+      <img src="https://github.com/nullhare.png?size=64" alt="nullhare">
+    </a>
   </header>
 
   <main>
