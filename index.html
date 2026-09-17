@@ -59,6 +59,10 @@
     }
 
     .page-head {
+      display:flex;
+      align-items:end;
+      justify-content:space-between;
+      gap:20px;
       padding-bottom:14px;
       border-bottom:1px solid var(--border-soft);
       margin-bottom:16px;
@@ -80,11 +84,22 @@
       background:var(--panel);
       padding:16px;
     }
+    .card-main {
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+    }
+    .card-copy { min-width:0; }
     .card h2 { margin:0; font-size:16px; font-weight:600; }
     .card p { margin:4px 0 0; color:var(--muted); font-size:13px; }
-    .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-    .between { justify-content:space-between; }
-    .card-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; }
+    .card-controls {
+      width:172px;
+      flex:0 0 172px;
+      display:grid;
+      grid-template-columns:1fr;
+      gap:8px;
+    }
 
     button,.btn,input { font:inherit; }
     button,.btn {
@@ -108,6 +123,9 @@
     .primary-blue:hover { background:var(--blue-hover); }
     .danger { color:#ff7b72; background:transparent; border-color:#ff7b72; }
     .danger:hover { background:var(--red-fill); color:white; }
+    .danger-fill { background:var(--red-fill); border-color:#ff7b72; color:white; }
+    .danger-fill:hover { background:#da3633; }
+    #stop-all { min-width:142px; }
 
     .status {
       min-height:18px;
@@ -145,9 +163,18 @@
 
     @media (max-width:760px) {
       .grid-2,.config-grid { grid-template-columns:1fr; }
-      .card-actions { grid-template-columns:1fr; }
+      .page-head { align-items:flex-start; }
+      .card-main { gap:10px; }
+      .card-controls { width:160px; flex-basis:160px; }
       .topnote { display:none; }
       main { width:min(100% - 20px,1080px); margin-top:10px; }
+    }
+
+    @media (max-width:520px) {
+      .page-head { flex-direction:column; }
+      #stop-all { width:100%; }
+      .card-main { flex-direction:column; }
+      .card-controls { width:100%; }
     }
   </style>
 </head>
@@ -160,31 +187,38 @@
 
   <main>
     <div class="page-head">
-      <h1>Central remota</h1>
-      <p class="subtitle">Navegador Codespace e computador Zorin em um só lugar.</p>
+      <div>
+        <h1>Central remota</h1>
+        <p class="subtitle">Navegador Codespace e computador Zorin em um só lugar.</p>
+      </div>
+      <button id="stop-all" class="danger-fill">ENCERRAR TUDO</button>
     </div>
 
     <div class="grid-2">
       <section class="card">
-        <div>
-          <h2>Navegador remoto</h2>
-          <p>Inicia o Codespace e abre direto o navegador.</p>
-        </div>
-        <div class="card-actions">
-          <button id="open" class="primary-green">ABRIR NAVEGADOR</button>
-          <button id="stop-browser" class="danger">ENCERRAR CODESPACE</button>
+        <div class="card-main">
+          <div class="card-copy">
+            <h2>Navegador remoto</h2>
+            <p>Inicia o Codespace e abre direto o navegador.</p>
+          </div>
+          <div class="card-controls">
+            <button id="open" class="primary-green">ABRIR NAVEGADOR</button>
+            <button id="stop-browser" class="danger">DESLIGAR NAVEGADOR</button>
+          </div>
         </div>
         <div id="status" class="status"></div>
       </section>
 
       <section class="card">
-        <div>
-          <h2>Computador</h2>
-          <p>Acesso remoto ao seu Zorin pelo RustDesk.</p>
-        </div>
-        <div class="card-actions">
-          <button id="open-pc" class="primary-blue">ABRIR COMPUTADOR</button>
-          <button id="stop-pc" class="danger">DESATIVAR ACESSO REMOTO</button>
+        <div class="card-main">
+          <div class="card-copy">
+            <h2>Computador</h2>
+            <p>Acesso remoto ao seu Zorin pelo RustDesk.</p>
+          </div>
+          <div class="card-controls">
+            <button id="open-pc" class="primary-blue">ABRIR COMPUTADOR</button>
+            <button id="stop-pc" class="danger">DESLIGAR COMPUTADOR</button>
+          </div>
         </div>
         <div id="pc-status" class="status"></div>
       </section>
@@ -338,12 +372,12 @@
       setStatus('Localizando Codespace…');
       const info = await findCodespace();
       if (info.state !== 'Available') {
-        setStatus('Codespace já está encerrado ou parando.');
+        setStatus('Codespace já está desligado ou parando.');
         return true;
       }
-      setStatus('Encerrando Codespace…');
+      setStatus('Desligando Codespace…');
       await api(info.stop_url, { method:'POST' });
-      setStatus('Codespace encerrando.');
+      setStatus('Codespace desligando.');
       return true;
     } catch (err) {
       setStatus(err.message);
@@ -377,10 +411,23 @@
     return false;
   }
 
+  async function stopEverything() {
+    setStatus('Desligando navegador…');
+    setPcStatus('Desligando computador…');
+    const [browserOk, pcOk] = await Promise.all([
+      stopCodespace(),
+      stopComputerAccess()
+    ]);
+    if (browserOk && !pcOk) {
+      setPcStatus('Codespace desligando. Falta conectar o controle local do Zorin.');
+    }
+  }
+
   document.getElementById('open').addEventListener('click', startAndOpen);
   document.getElementById('open-pc').addEventListener('click', openComputer);
   document.getElementById('stop-browser').addEventListener('click', stopCodespace);
   document.getElementById('stop-pc').addEventListener('click', stopComputerAccess);
+  document.getElementById('stop-all').addEventListener('click', stopEverything);
 
   document.getElementById('save').addEventListener('click', async () => {
     const token = tokenEl.value.trim();
