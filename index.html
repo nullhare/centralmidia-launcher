@@ -70,20 +70,20 @@
     h1 { margin:0; font-size:24px; font-weight:400; }
     .subtitle { margin:4px 0 0; color:var(--muted); }
 
-    .grid-2,
-    .config-grid {
+    .grid-2 {
       display:grid;
       grid-template-columns:1fr 1fr;
       gap:14px;
+      align-items:start;
     }
 
-    .card,
-    .config-card {
+    .card {
       border:1px solid var(--border);
       border-radius:6px;
       background:var(--panel);
+      overflow:hidden;
     }
-    .card { padding:16px; }
+    .card-core { padding:16px; }
     .card-main {
       display:flex;
       align-items:flex-start;
@@ -143,17 +143,13 @@
       overflow-wrap:anywhere;
     }
 
-    .section-title {
-      margin:16px 0 8px;
-      font-size:14px;
-      font-weight:600;
+    .card-config {
+      border-top:1px solid var(--border-soft);
+      background:var(--panel);
     }
-
-    .config-grid { margin-top:8px; align-items:start; }
-    .config-card { overflow:hidden; }
-    .config-card summary {
-      min-height:48px;
-      padding:0 14px;
+    .card-config summary {
+      min-height:42px;
+      padding:0 16px;
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -161,21 +157,21 @@
       cursor:pointer;
       list-style:none;
       user-select:none;
-      font-size:14px;
+      font-size:13px;
       font-weight:600;
     }
-    .config-card summary::-webkit-details-marker { display:none; }
-    .config-card summary:hover { background:var(--panel-2); }
-    .config-card summary::after {
+    .card-config summary::-webkit-details-marker { display:none; }
+    .card-config summary:hover { background:var(--panel-2); }
+    .card-config summary::after {
       content:'▾';
       color:var(--muted);
       font-size:16px;
       line-height:1;
       transition:transform .15s ease;
     }
-    .config-card[open] summary::after { transform:rotate(180deg); }
+    .card-config[open] summary::after { transform:rotate(180deg); }
     .config-content {
-      padding:14px;
+      padding:14px 16px 16px;
       border-top:1px solid var(--border-soft);
     }
     .config-content p { margin:0 0 10px; color:var(--muted); font-size:12px; }
@@ -196,7 +192,7 @@
     .ok { color:#7ee787; }
 
     @media (max-width:760px) {
-      .grid-2,.config-grid { grid-template-columns:1fr; }
+      .grid-2 { grid-template-columns:1fr; }
       .page-head { align-items:flex-start; }
       .card-main { gap:10px; }
       .card-controls { width:188px; flex-basis:188px; }
@@ -231,66 +227,67 @@
 
     <div class="grid-2">
       <section class="card">
-        <div class="card-main">
-          <div class="card-copy">
-            <h2>Navegador remoto</h2>
-            <p>Inicia o Codespace e abre direto o navegador.</p>
+        <div class="card-core">
+          <div class="card-main">
+            <div class="card-copy">
+              <h2>Navegador remoto</h2>
+              <p>Inicia o Codespace e abre direto o navegador.</p>
+            </div>
+            <div class="card-controls">
+              <button id="open" class="primary-green">ABRIR NAVEGADOR</button>
+              <button id="stop-browser" class="danger">DESLIGAR NAVEGADOR</button>
+            </div>
           </div>
-          <div class="card-controls">
-            <button id="open" class="primary-green">ABRIR NAVEGADOR</button>
-            <button id="stop-browser" class="danger">DESLIGAR NAVEGADOR</button>
-          </div>
+          <div id="status" class="status"></div>
         </div>
-        <div id="status" class="status"></div>
+
+        <details id="gh-config-card" class="card-config">
+          <summary>Configuração</summary>
+          <div class="config-content">
+            <p>Token limitado ao Codespaces. Ele fica somente neste navegador.</p>
+            <div class="field-row">
+              <input id="token" type="password" autocomplete="off" placeholder="github_pat_...">
+              <button id="save">SALVAR E TESTAR</button>
+            </div>
+            <div class="config-actions">
+              <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20o%20Codespace%20do%20navegador&target_name=nullhare&expires_in=90&codespaces=read&codespaces_lifecycle_admin=write&codespaces_metadata=read">CRIAR TOKEN</a>
+              <button id="forget">REMOVER TOKEN</button>
+            </div>
+            <div id="gh-config-status" class="mini-status"></div>
+          </div>
+        </details>
       </section>
 
       <section class="card">
-        <div class="card-main">
-          <div class="card-copy">
-            <h2>Computador</h2>
-            <p>Acesso remoto ao seu Zorin pelo RustDesk.</p>
+        <div class="card-core">
+          <div class="card-main">
+            <div class="card-copy">
+              <h2>Computador</h2>
+              <p>Acesso remoto ao seu Zorin pelo RustDesk.</p>
+            </div>
+            <div class="card-controls">
+              <button id="open-pc" class="primary-blue">ABRIR COMPUTADOR</button>
+              <button id="stop-pc" class="danger">DESLIGAR COMPUTADOR</button>
+            </div>
           </div>
-          <div class="card-controls">
-            <button id="open-pc" class="primary-blue">ABRIR COMPUTADOR</button>
-            <button id="stop-pc" class="danger">DESLIGAR COMPUTADOR</button>
-          </div>
+          <div id="pc-status" class="status"></div>
         </div>
-        <div id="pc-status" class="status"></div>
+
+        <details id="pc-config-card" class="card-config">
+          <summary>Configuração</summary>
+          <div class="config-content">
+            <p>Salve apenas o ID do computador. A senha não fica no launcher.</p>
+            <div class="field-row">
+              <input id="pc-id" type="text" autocomplete="off" placeholder="ID do RustDesk">
+              <button id="save-pc">SALVAR ID</button>
+            </div>
+            <div class="config-actions">
+              <button id="forget-pc">REMOVER ID</button>
+            </div>
+            <div id="pc-config-status" class="mini-status"></div>
+          </div>
+        </details>
       </section>
-    </div>
-
-    <div class="section-title">Configuração</div>
-    <div class="config-grid">
-      <details id="gh-config-card" class="config-card">
-        <summary>GitHub / Codespaces</summary>
-        <div class="config-content">
-          <p>Token limitado ao Codespaces. Ele fica somente neste navegador.</p>
-          <div class="field-row">
-            <input id="token" type="password" autocomplete="off" placeholder="github_pat_...">
-            <button id="save">SALVAR E TESTAR</button>
-          </div>
-          <div class="config-actions">
-            <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20o%20Codespace%20do%20navegador&target_name=nullhare&expires_in=90&codespaces=read&codespaces_lifecycle_admin=write&codespaces_metadata=read">CRIAR TOKEN</a>
-            <button id="forget">REMOVER TOKEN</button>
-          </div>
-          <div id="gh-config-status" class="mini-status"></div>
-        </div>
-      </details>
-
-      <details id="pc-config-card" class="config-card">
-        <summary>Computador / RustDesk</summary>
-        <div class="config-content">
-          <p>Salve apenas o ID do computador. A senha não fica no launcher.</p>
-          <div class="field-row">
-            <input id="pc-id" type="text" autocomplete="off" placeholder="ID do RustDesk">
-            <button id="save-pc">SALVAR ID</button>
-          </div>
-          <div class="config-actions">
-            <button id="forget-pc">REMOVER ID</button>
-          </div>
-          <div id="pc-config-status" class="mini-status"></div>
-        </div>
-      </details>
     </div>
   </main>
 
@@ -367,7 +364,7 @@
   async function startAndOpen() {
     if (!getToken()) {
       ghConfigCard.open = true;
-      setStatus('Configure o token do GitHub na parte inferior.');
+      setStatus('Configure o token do GitHub abaixo.');
       setTimeout(() => tokenEl.focus(), 0);
       return;
     }
