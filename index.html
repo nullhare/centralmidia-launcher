@@ -28,39 +28,28 @@
     }
     h1 { margin: 0 0 10px; font-size: 32px; }
     p { margin: 0; color: #8b949e; line-height: 1.5; }
-    button {
+    .button {
+      display: block;
       width: 100%;
       margin-top: 24px;
       padding: 18px 22px;
-      border: 0;
       border-radius: 12px;
       background: #238636;
       color: #fff;
       font-size: 18px;
       font-weight: 800;
-      cursor: pointer;
+      text-decoration: none;
     }
-    button:hover { background: #2ea043; }
-    .note { margin-top: 16px; font-size: 13px; color: #6e7681; }
+    .button:hover { background: #2ea043; }
+    .note { margin-top: 16px; font-size: 13px; color: #6e7681; line-height: 1.45; }
   </style>
 </head>
 <body>
   <main>
     <h1>Navegador remoto</h1>
-    <p>Abre seu Codespace existente diretamente em outra aba.</p>
-    <button id="open">ABRIR NAVEGADOR</button>
-    <div class="note">Se a nova aba for bloqueada, permita pop-ups para este site.</div>
+    <p>Abre o GitHub Codespaces em outra aba e mantém este launcher aberto.</p>
+    <a class="button" href="https://codespaces.new/nullhare/centralmidia?quickstart=1" target="_blank" rel="noopener noreferrer">ABRIR NAVEGADOR</a>
+    <div class="note">Se o Codespace estiver parado, o GitHub pode pedir um clique em <strong>Resume this codespace</strong>.</div>
   </main>
-
-  <script>
-    const codespaceUrl = 'https://cuddly-space-robot-7pg55vp946g2wjgj.github.dev';
-
-    document.getElementById('open').addEventListener('click', () => {
-      const tab = window.open(codespaceUrl, '_blank', 'noopener,noreferrer');
-      if (!tab) {
-        alert('A nova aba foi bloqueada. Permita pop-ups para este site e tente novamente.');
-      }
-    });
-  </script>
 </body>
 </html>
