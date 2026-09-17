@@ -94,11 +94,11 @@
     .card h2 { margin:0; font-size:16px; font-weight:600; }
     .card p { margin:4px 0 0; color:var(--muted); font-size:13px; }
     .card-controls {
-      width:172px;
-      flex:0 0 172px;
+      width:188px;
+      flex:0 0 188px;
       display:grid;
       grid-template-columns:1fr;
-      gap:8px;
+      gap:6px;
     }
 
     button,.btn,input { font:inherit; }
@@ -125,7 +125,15 @@
     .danger:hover { background:var(--red-fill); color:white; }
     .danger-fill { background:var(--red-fill); border-color:#ff7b72; color:white; }
     .danger-fill:hover { background:#da3633; }
-    #stop-all { min-width:142px; }
+    .card-controls button,
+    #stop-all {
+      min-height:30px;
+      padding:4px 10px;
+      font-size:12px;
+      line-height:18px;
+      white-space:nowrap;
+    }
+    #stop-all { min-width:120px; }
 
     .status {
       min-height:18px;
@@ -165,14 +173,14 @@
       .grid-2,.config-grid { grid-template-columns:1fr; }
       .page-head { align-items:flex-start; }
       .card-main { gap:10px; }
-      .card-controls { width:160px; flex-basis:160px; }
+      .card-controls { width:188px; flex-basis:188px; }
       .topnote { display:none; }
       main { width:min(100% - 20px,1080px); margin-top:10px; }
     }
 
     @media (max-width:520px) {
       .page-head { flex-direction:column; }
-      #stop-all { width:100%; }
+      #stop-all { width:auto; }
       .card-main { flex-direction:column; }
       .card-controls { width:100%; }
     }
