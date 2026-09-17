@@ -9,17 +9,22 @@
     :root { color-scheme: dark; }
     * { box-sizing: border-box; }
     body { margin:0; min-height:100vh; display:grid; place-items:center; font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:#0d1117; color:#f0f6fc; }
-    main { width:min(650px,94vw); padding:34px; border:1px solid #30363d; border-radius:18px; background:#161b22; text-align:center; box-shadow:0 18px 60px rgba(0,0,0,.35); }
+    main { width:min(760px,94vw); padding:34px; border:1px solid #30363d; border-radius:18px; background:#161b22; text-align:center; box-shadow:0 18px 60px rgba(0,0,0,.35); }
     h1 { margin:0 0 10px; font-size:32px; }
     p { color:#8b949e; line-height:1.5; }
     .actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:22px; }
+    .shutdown-actions { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:10px; }
     button,.linkbtn { border:0; border-radius:12px; padding:17px 20px; font:inherit; font-weight:800; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
     #open { background:#238636; color:white; font-size:17px; }
     #open:hover { background:#2ea043; }
     #open-pc { background:#1f6feb; color:white; font-size:17px; }
     #open-pc:hover { background:#388bfd; }
-    #stop { margin-top:10px; width:100%; background:#da3633; color:white; }
-    #stop:hover { background:#f85149; }
+    #stop-browser { background:#b62324; color:white; }
+    #stop-browser:hover { background:#da3633; }
+    #stop-pc { background:#b62324; color:white; }
+    #stop-pc:hover { background:#da3633; }
+    #stop-all { background:#da3633; color:white; }
+    #stop-all:hover { background:#f85149; }
     .secondary { background:#21262d; color:#f0f6fc; border:1px solid #30363d; }
     .status { min-height:22px; margin-top:12px; color:#8b949e; font-size:14px; overflow-wrap:anywhere; }
     section.setup { margin-top:24px; padding-top:22px; border-top:1px solid #30363d; text-align:left; }
@@ -31,7 +36,9 @@
     .tiny { margin-top:15px; color:#6e7681; font-size:12px; line-height:1.45; }
     .manage { margin-top:14px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap; }
     .manage button { padding:7px 10px; font-size:12px; font-weight:600; }
-    @media (max-width:560px) { .actions{grid-template-columns:1fr;} }
+    @media (max-width:680px) {
+      .actions,.shutdown-actions { grid-template-columns:1fr; }
+    }
   </style>
 </head>
 <body>
@@ -43,7 +50,12 @@
     <button id="open">ABRIR NAVEGADOR</button>
     <button id="open-pc">ABRIR COMPUTADOR</button>
   </div>
-  <button id="stop">DESLIGAR NAVEGADOR</button>
+
+  <div class="shutdown-actions">
+    <button id="stop-browser">DESLIGAR NAVEGADOR</button>
+    <button id="stop-pc">DESLIGAR COMPUTADOR</button>
+    <button id="stop-all">DESLIGAR TUDO</button>
+  </div>
 
   <div id="status" class="status"></div>
   <div id="pc-status" class="status"></div>
@@ -78,7 +90,7 @@
       <button id="save-pc" class="secondary">SALVAR ID</button>
       <button id="forget-pc" class="secondary">REMOVER ID</button>
     </div>
-    <div class="tiny">Ao clicar em <strong>ABRIR COMPUTADOR</strong>, o launcher abre o cliente web oficial do RustDesk em outra aba e copia seu ID para a área de transferência. Depois é só colar no campo Remote ID e autenticar com a senha permanente configurada no Zorin.</div>
+    <div class="tiny">Ao clicar em <strong>ABRIR COMPUTADOR</strong>, o launcher abre o cliente web oficial do RustDesk em outra aba e copia seu ID para a área de transferência. O botão <strong>DESLIGAR COMPUTADOR</strong> será conectado ao agente local do Zorin na próxima etapa; ele significará desativar o acesso remoto, não desligar fisicamente o PC.</div>
   </section>
 </main>
 
@@ -198,20 +210,22 @@
     if (!getToken()) {
       setupEl.style.display = 'block';
       setStatus('Configure uma vez o token do GitHub abaixo.');
-      return;
+      return false;
     }
     try {
       setStatus('Localizando Codespace…');
       const info = await findCodespace();
       if (info.state !== 'Available') {
         setStatus('Codespace já está desligado ou parando.');
-        return;
+        return true;
       }
       setStatus('Desligando Codespace…');
       await api(info.stop_url, { method: 'POST' });
       setStatus('Codespace desligando.');
+      return true;
     } catch (err) {
       setStatus(err.message);
+      return false;
     }
   }
 
@@ -238,9 +252,33 @@
     }
   }
 
+  async function stopComputerAccess() {
+    if (!getPcId()) {
+      pcSetupEl.style.display = 'block';
+      setPcStatus('Computador ainda não configurado. Primeiro vamos instalar o RustDesk no Zorin.');
+      return false;
+    }
+    setPcStatus('O botão já está preparado. Falta conectar o agente local do Zorin para desativar o acesso remoto à distância.');
+    return false;
+  }
+
+  async function stopEverything() {
+    setStatus('Desligando navegador…');
+    setPcStatus('Desligando acesso remoto do computador…');
+    const [browserOk, pcOk] = await Promise.all([
+      stopCodespace(),
+      stopComputerAccess()
+    ]);
+    if (browserOk && !pcOk) {
+      setPcStatus('Navegador desligando. O desligamento remoto do computador será ativado após configurar o agente no Zorin.');
+    }
+  }
+
   document.getElementById('open').addEventListener('click', startAndOpen);
   document.getElementById('open-pc').addEventListener('click', openComputer);
-  document.getElementById('stop').addEventListener('click', stopCodespace);
+  document.getElementById('stop-browser').addEventListener('click', stopCodespace);
+  document.getElementById('stop-pc').addEventListener('click', stopComputerAccess);
+  document.getElementById('stop-all').addEventListener('click', stopEverything);
 
   document.getElementById('save').addEventListener('click', async () => {
     const token = tokenEl.value.trim();
