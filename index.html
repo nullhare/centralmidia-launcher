@@ -276,6 +276,7 @@
       background:var(--panel);
     }
     .config-content p { margin:0 0 10px; color:var(--muted); font-size:12px; }
+    .config-block + .config-block { margin-top:14px; }
     .field-row { display:grid; grid-template-columns:1fr auto; gap:8px; }
     input {
       width:100%;
@@ -362,14 +363,16 @@
         <details id="gh-config-card" class="card-config">
           <summary>Configuração</summary>
           <div class="config-content">
-            <p>Token limitado ao Codespaces. Ele fica somente neste navegador.</p>
-            <div class="field-row">
-              <input id="token" type="password" autocomplete="off" placeholder="github_pat_...">
-              <button id="save">Salvar e testar</button>
-            </div>
-            <div class="config-actions">
-              <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20os%20Codespaces%20remotos&target_name=nullhare&expires_in=90&codespaces=read&codespaces_lifecycle_admin=write&codespaces_metadata=read">Criar token</a>
-              <button id="forget">Remover token</button>
+            <div class="config-block">
+              <p>Token limitado ao Codespaces. Ele fica somente neste navegador.</p>
+              <div class="field-row">
+                <input id="token" type="password" autocomplete="off" placeholder="github_pat_...">
+                <button id="save">Salvar e testar</button>
+              </div>
+              <div class="config-actions">
+                <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20os%20Codespaces%20remotos&target_name=nullhare&expires_in=90&codespaces=read&codespaces_lifecycle_admin=write&codespaces_metadata=read">Criar token</a>
+                <button id="forget">Remover token</button>
+              </div>
             </div>
           </div>
         </details>
@@ -399,9 +402,22 @@
         <details id="pc-config-card" class="card-config">
           <summary>Configuração</summary>
           <div class="config-content">
-            <p>O RustDesk fica dentro de um segundo Codespace do mesmo repositório. Ele só precisa ser criado uma vez.</p>
-            <div class="config-actions">
-              <a class="btn" target="_blank" rel="noopener noreferrer" href="https://codespaces.new/nullhare/centralmidia">Criar Codespace do computador</a>
+            <div class="config-block">
+              <p>Token limitado ao Codespaces. Ele fica somente neste navegador.</p>
+              <div class="field-row">
+                <input id="pc-token" type="password" autocomplete="off" placeholder="github_pat_...">
+                <button id="pc-save">Salvar e testar</button>
+              </div>
+              <div class="config-actions">
+                <a class="btn" target="_blank" rel="noopener noreferrer" href="https://github.com/settings/personal-access-tokens/new?name=Centralmidia%20Launcher&description=Iniciar%20e%20parar%20os%20Codespaces%20remotos&target_name=nullhare&expires_in=90&codespaces=read&codespaces_lifecycle_admin=write&codespaces_metadata=read">Criar token</a>
+                <button id="pc-forget">Remover token</button>
+              </div>
+            </div>
+            <div class="config-block">
+              <p>O RustDesk fica dentro de um segundo Codespace do mesmo repositório. Ele só precisa ser criado uma vez.</p>
+              <div class="config-actions">
+                <a class="btn" target="_blank" rel="noopener noreferrer" href="https://codespaces.new/nullhare/centralmidia">Criar Codespace do computador</a>
+              </div>
             </div>
           </div>
         </details>
@@ -420,6 +436,7 @@
   const ghConfigCard = document.getElementById('gh-config-card');
   const pcConfigCard = document.getElementById('pc-config-card');
   const tokenEl = document.getElementById('token');
+  const pcTokenEl = document.getElementById('pc-token');
 
   const sleep = ms => new Promise(r => setTimeout(r, ms));
   const getToken = () => localStorage.getItem(GH_KEY) || '';
@@ -431,6 +448,12 @@
 
   const setStatus = (text, type = '') => paintStatus(statusEl, text, type);
   const setPcStatus = (text, type = '') => paintStatus(pcStatusEl, text, type);
+
+  function tokenUi(path) {
+    return path === COMPUTER_DEVCONTAINER
+      ? { card: pcConfigCard, input: pcTokenEl }
+      : { card: ghConfigCard, input: tokenEl };
+  }
 
   async function api(url, options = {}) {
     const token = getToken();
@@ -520,9 +543,10 @@
 
   async function openSpace(path, title, description, setState, openConfigOnMissing = false) {
     if (!getToken()) {
-      ghConfigCard.open = true;
+      const { card, input } = tokenUi(path);
+      card.open = true;
       setState('● Token do GitHub não configurado', 'bad');
-      setTimeout(() => tokenEl.focus(), 0);
+      setTimeout(() => input.focus(), 0);
       return;
     }
 
@@ -570,7 +594,8 @@
 
   async function stopSpace(path, setState, openConfigOnMissing = false) {
     if (!getToken()) {
-      if (openConfigOnMissing) ghConfigCard.open = true;
+      const { card } = tokenUi(path);
+      card.open = true;
       setState('● Token do GitHub não configurado', 'bad');
       return false;
     }
@@ -616,34 +641,40 @@
     restoreConfigStatus(2500);
   }
 
+  async function saveToken(inputEl, setState) {
+    const token = inputEl.value.trim();
+    if (!token) return setState('● Cole um token para substituir/testar o atual.', 'bad');
+
+    localStorage.setItem(GH_KEY, token);
+    setState('Testando token…');
+    try {
+      await listCodespaces();
+      tokenEl.value = '';
+      pcTokenEl.value = '';
+      refreshConfig();
+    } catch (_) {
+      localStorage.removeItem(GH_KEY);
+      refreshConfig();
+      setState('● Token recusado ou sem permissão', 'bad');
+    }
+  }
+
+  function forgetToken() {
+    localStorage.removeItem(GH_KEY);
+    tokenEl.value = '';
+    pcTokenEl.value = '';
+    refreshConfig();
+  }
+
   document.getElementById('open').addEventListener('click', startAndOpen);
   document.getElementById('open-pc').addEventListener('click', openComputer);
   document.getElementById('stop-browser').addEventListener('click', () => stopBrowser(true));
   document.getElementById('stop-pc').addEventListener('click', () => stopComputer(true));
   document.getElementById('stop-all').addEventListener('click', stopEverything);
-
-  document.getElementById('save').addEventListener('click', async () => {
-    const token = tokenEl.value.trim();
-    if (!token) return setStatus('● Cole um token para substituir/testar o atual.', 'bad');
-    localStorage.setItem(GH_KEY, token);
-    setStatus('Testando token…');
-    try {
-      const browser = await getSpace(BROWSER_DEVCONTAINER);
-      if (!browser) throw new Error('Codespace do navegador não encontrado.');
-      tokenEl.value = '';
-      refreshConfig();
-    } catch (err) {
-      localStorage.removeItem(GH_KEY);
-      refreshConfig();
-      setStatus('● Token recusado ou sem permissão', 'bad');
-    }
-  });
-
-  document.getElementById('forget').addEventListener('click', () => {
-    localStorage.removeItem(GH_KEY);
-    tokenEl.value = '';
-    refreshConfig();
-  });
+  document.getElementById('save').addEventListener('click', () => saveToken(tokenEl, setStatus));
+  document.getElementById('pc-save').addEventListener('click', () => saveToken(pcTokenEl, setPcStatus));
+  document.getElementById('forget').addEventListener('click', forgetToken);
+  document.getElementById('pc-forget').addEventListener('click', forgetToken);
 
   refreshConfig();
 </script>
