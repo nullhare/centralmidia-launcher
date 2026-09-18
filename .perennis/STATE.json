@@ -19,12 +19,13 @@
     "executor_class": null
   },
   "work": {
-    "last_completed": "Telemetria real de MCP/Codespaces publicada no launcher em fcb5cb50974ff903091086ccb0352f6a6ad6c42d. telemetry.js descobre os Codespaces pelos devcontainer_path, consulta o bridge privado /__centralmidia/mcp/health e /usage, pinta estado MCP real por Browser/Computer e apresenta consumo do Desktop Commander e de Codespaces sem inventar disponibilidade. O GitHub Pages run 35368816913 publicou essa revisão com success; o arquivo telemetry.js servido pelo Pages foi comparado byte a byte com o arquivo da revisão canônica, os SHA-256 coincidiram e ambos passaram node --check. Depois do rebuild de /mg/ctm, o bridge de Browser e Computer respondeu health/usage/proxy/CORS ao vivo conforme esperado.",
-    "next_action": "Validar no navegador do usuário, com a sessão/PAT já mantida localmente pelo launcher, que os dois indicadores MCP e os painéis de uso refletem os bridges privados atuais. Não promover essa etapa a PASS sem observação da UI autenticada; o produto está publicado e a dependência runtime já está live.",
+    "last_completed": "Telemetria real de MCP/Codespaces publicada no launcher em fcb5cb50974ff903091086ccb0352f6a6ad6c42d. telemetry.js descobre os Codespaces pelos devcontainer_path, consulta o bridge privado /__centralmidia/mcp/health e /usage, pinta estado MCP real por Browser/Computer e apresenta consumo do Desktop Commander e de Codespaces sem inventar disponibilidade. O Pages foi validado contra o artefato publicado e a dependência /mg/ctm foi validada live após rebuild. No checkpoint de recuperação, a UI do usuário mostrou os dois Codespaces GitHub ligados, porém MCP ainda indisponível/0 de 2 na apresentação enquanto os dois Desktop Commander remote estavam online nos terminais. O DevTools indicou que chamadas health/usage entram em repetição e são interceptadas pela autenticação GitHub da porta privada, com 302 para login e/ou 401 no preflight, antes de alcançar o bridge.",
+    "next_action": "Fechar o consumo autenticado privado CTM -> CTML sem reabrir a arquitetura: manter private-first via Codespaces, corrigir a travessia autenticada da UI até os endpoints já existentes, remover polling infinito em erro, aplicar backoff/reconexão controlada e mostrar estado de reconexão/degradação. Quando GitHub Usage não tiver permissão suficiente, degradar de forma clara sem mascarar o estado MCP. Não usar PAT GitHub como chave de telemetria e não copiar sessão/localStorage para agente ou repositório.",
     "blockers": [
-      "A prova end-to-end autenticada da UI depende da credencial GitHub/localStorage do navegador do usuário para atravessar as portas privadas dos Codespaces; essa credencial não é disponibilizada ao agente remoto e não deve ser copiada para o repositório ou para logs."
+      "A autenticação da porta privada do Codespaces intercepta as chamadas do launcher antes do bridge; foram observados 302 para login GitHub e/ou 401 no preflight.",
+      "A sessão/PAT/localStorage necessária para a prova end-to-end pertence ao navegador do usuário e não deve ser exportada para agente, código, logs ou repositório."
     ],
-    "safe_resume_checkpoint": "Produto /mg/ctml em fcb5cb50974ff903091086ccb0352f6a6ad6c42d, árvore 870bb44135b6e4ed45b80493ce8f793ee2f0e3c5. GitHub Pages publicou a revisão com success e telemetry.js do Pages corresponde exatamente ao blob publicado e passa análise sintática. A dependência /mg/ctm foi rebuildada e validada live nos dois Codespaces; resta somente a observação end-to-end da UI autenticada no navegador que possui a sessão/PAT local."
+    "safe_resume_checkpoint": "CTML permanece owner exclusivo da UI, lifecycle dos Codespaces, apresentação e telemetria. A decisão arquitetural está fechada: primeira linha é o caminho privado do Codespaces; não abrir superfície pública agora; PAT GitHub não é chave de telemetria; nunca expor terminal, arquivos, RustDesk, Chrome ou execução remota. Fallback público é somente plano B: endpoint separado, chave própria, escopo mínimo health/usage e nenhum privilégio lateral. O runtime MCP do CTM está comprovadamente ativo; o trabalho restante é fazer a UI refletir isso com autenticação privada correta, backoff/reconexão e degradação honesta de permissões."
   },
   "validation": {
     "last_verified_revision": "fcb5cb50974ff903091086ccb0352f6a6ad6c42d",
@@ -50,14 +51,14 @@
       {
         "name": "Authenticated launcher UI end-to-end telemetry",
         "status": "pending",
-        "evidence": null,
+        "evidence": "No checkpoint de recuperação, a UI do usuário mostrou os dois Codespaces GitHub ativos, mas MCP ainda indisponível/0 de 2 enquanto os dois Desktop Commander remote estavam online nos terminais. DevTools apontou interceptação pela autenticação GitHub da porta privada, com 302 para login e/ou 401 no preflight antes do bridge, além de repetição das chamadas em erro.",
         "verified_revision": null,
-        "environment": null,
+        "environment": "user-browser",
         "verified_at": null,
-        "note": "Requer observar a UI no navegador que possui a sessão/PAT local do launcher; não copiar a credencial para o agente."
+        "note": "Pendência única material. Corrigir acesso privado, polling infinito, backoff/reconexão e degradação de GitHub Usage; não promover a PASS até observar a UI autenticada refletindo os dois bridges sem exportar credenciais."
       }
     ]
   },
   "releases": [],
-  "updated_at": "2026-09-18T21:30:35Z"
+  "updated_at": "2026-09-18T22:10:00Z"
 }
