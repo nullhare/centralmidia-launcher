@@ -19,24 +19,42 @@
     "executor_class": null
   },
   "work": {
-    "last_completed": "Reconciliacao de continuidade contra o HEAD canonico 0a9dcf0548809c0db951f69de5b0dbea2d48b667. Desde a adocao inicial, a superficie publica ganhou estado exato de Codespace, controles explicitos, estilos de estado, trilha operacional, dock de status e resumo de uso; nenhuma mudanca de comportamento foi criada por esta reconciliacao SP.",
-    "next_action": "Executar Health/Reconstruction e Recovery genuinamente fresh-context sobre o estado corrente antes de afirmar Recovery PASS. Nao ha roadmap de produto inferido pela camada de continuidade.",
+    "last_completed": "Repair-only de continuidade preparado sobre a revisão canônica 6d5e39d3c1c262120c0203eeeab4c12e55cf2bde: AGENTS.md obrigatório adicionado ao perfil lean. A superfície de produto permanece em 0a9dcf0548809c0db951f69de5b0dbea2d48b667 e nenhum arquivo funcional do launcher foi alterado.",
+    "next_action": "Executar o validator estrutural do UAI Continuity 3.3.1 e repetir Health/Reconstruction + Recovery em executor genuinamente fresh-context sobre /mg/ctml. Registrar PASS somente na revisão exata publicada que passar.",
     "blockers": [
-      "Recovery PASS exige executor genuinamente fresh-context e permanece pendente."
+      "Fresh-context retest pós-reparo de /mg/ctml permanece pendente; não declarar Structural/Health/Recovery PASS antes dessa prova independente."
     ],
-    "safe_resume_checkpoint": "Produto independente /mg/ctml reconciliado ao trabalho material publicado ate 0a9dcf0548809c0db951f69de5b0dbea2d48b667. Fontes de verdade permanecem index.html, app.js, styles.css, .nojekyll e SECURITY.md."
+    "safe_resume_checkpoint": "Produto independente /mg/ctml mantém a superfície estática em 0a9dcf0548809c0db951f69de5b0dbea2d48b667; index.html, app.js, styles.css, .nojekyll e SECURITY.md permanecem as fontes funcionais. O repair atual adiciona somente o adaptador AGENTS.md exigido pelo UAI Continuity."
   },
   "validation": {
-    "last_verified_revision": "0a9dcf0548809c0db951f69de5b0dbea2d48b667",
+    "last_verified_revision": "6d5e39d3c1c262120c0203eeeab4c12e55cf2bde",
     "checks": [
       {
         "name": "Continuity reconciliation against canonical product HEAD",
         "status": "pass",
-        "evidence": "main foi observado em 0a9dcf0548809c0db951f69de5b0dbea2d48b667; os seis commits posteriores a adocao 6907e3697e440c5ba586dbbd78fdc75c72b95917 foram incorporados a narrativa operacional sem alterar codigo de produto nesta reconciliacao.",
-        "verified_revision": "0a9dcf0548809c0db951f69de5b0dbea2d48b667",
-        "environment": "github-connected-agent",
-        "verified_at": "2026-09-18T13:34:00Z",
-        "note": "Esta prova reconcilia memoria operacional com o HEAD observado; nao equivale a Recovery fresh-context."
+        "evidence": "A prova fresh confirmou que os commits posteriores a 0a9dcf0548809c0db951f69de5b0dbea2d48b667 até 6d5e39d3c1c262120c0203eeeab4c12e55cf2bde alteraram somente STATE/HANDOFF; a descrição da superfície reconciliada continua compatível com index.html, app.js, styles.css, .nojekyll e SECURITY.md.",
+        "verified_revision": "6d5e39d3c1c262120c0203eeeab4c12e55cf2bde",
+        "environment": "fresh-context-github-connected-agent",
+        "verified_at": "2026-09-18T14:05:00Z",
+        "note": "Reconciliação factual; não equivale a Structural/Recovery PASS."
+      },
+      {
+        "name": "Fresh-context proof before continuity repair",
+        "status": "stale",
+        "evidence": "A prova fresh retornou Structural FAIL, Health FAIL e Recovery FAIL porque AGENTS.md obrigatório estava ausente. O adaptador foi adicionado no repair atual; a prova anterior permanece histórica e não pode ser promovida a PASS.",
+        "verified_revision": "6d5e39d3c1c262120c0203eeeab4c12e55cf2bde",
+        "environment": "fresh-context-github-connected-agent",
+        "verified_at": "2026-09-18T14:05:00Z",
+        "note": "Evidência pré-reparo; exige novo teste fresh."
+      },
+      {
+        "name": "Structural validation after continuity repair",
+        "status": "pending",
+        "evidence": null,
+        "verified_revision": null,
+        "environment": null,
+        "verified_at": null,
+        "note": "Executar validator canônico do UAI Continuity 3.3.1 na revisão publicada do repair."
       },
       {
         "name": "Recovery fresh-context UAI Continuity 3.3.1",
@@ -45,10 +63,10 @@
         "verified_revision": null,
         "environment": null,
         "verified_at": null,
-        "note": "Recovery PASS exige executor genuinamente fresh-context e nao e inferido da reconciliacao."
+        "note": "Repetir em executor genuinamente fresh-context depois do repair publicado."
       }
     ]
   },
   "releases": [],
-  "updated_at": "2026-09-18T13:34:00Z"
+  "updated_at": "2026-09-18T14:08:00Z"
 }
