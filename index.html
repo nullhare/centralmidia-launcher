@@ -40,7 +40,7 @@
                 <h2>Navegador remoto</h2>
                 <div class="card-signals" aria-label="Estado do navegador">
                   <span id="browser-gh-signal" class="signal unknown" title="GitHub: verificando"><span class="signal-dot"></span>GitHub</span>
-                  <span id="browser-mcp-signal" class="signal unknown" title="MCP: integração na próxima etapa"><span class="signal-dot"></span>MCP</span>
+                  <span id="browser-mcp-signal" class="signal unknown" title="MCP: aguardando estado do Codespace"><span class="signal-dot"></span>MCP</span>
                 </div>
               </div>
               <p>Chrome remoto. O VS usa este mesmo Codespace.</p>
@@ -48,6 +48,7 @@
             <div class="card-controls">
               <button id="open" class="primary-green" type="button"><span id="browser-open-label">Navegador</span></button>
               <button id="open-browser-vs" type="button"><span id="browser-vs-label">Abrir VS</span></button>
+              <button id="activate-browser-mcp" type="button"><span id="browser-mcp-label">Ativar MCP</span></button>
               <button id="stop-browser" class="danger" type="button"><span id="browser-stop-label">Encerrar Codespace</span></button>
             </div>
           </div>
@@ -81,7 +82,7 @@
                 <h2>Computador remoto</h2>
                 <div class="card-signals" aria-label="Estado do computador">
                   <span id="computer-gh-signal" class="signal unknown" title="GitHub: verificando"><span class="signal-dot"></span>GitHub</span>
-                  <span id="computer-mcp-signal" class="signal unknown" title="MCP: integração na próxima etapa"><span class="signal-dot"></span>MCP</span>
+                  <span id="computer-mcp-signal" class="signal unknown" title="MCP: aguardando estado do Codespace"><span class="signal-dot"></span>MCP</span>
                 </div>
               </div>
               <p>RustDesk remoto. O VS usa este mesmo Codespace.</p>
@@ -89,6 +90,7 @@
             <div class="card-controls">
               <button id="open-pc" class="primary-green" type="button"><span id="computer-open-label">Computador</span></button>
               <button id="open-pc-vs" type="button"><span id="computer-vs-label">Abrir VS</span></button>
+              <button id="activate-computer-mcp" type="button"><span id="computer-mcp-label">Ativar MCP</span></button>
               <button id="stop-pc" class="danger" type="button"><span id="computer-stop-label">Encerrar Codespace</span></button>
             </div>
           </div>
@@ -133,14 +135,14 @@
     <div class="dock-entry">
       <button id="mcp-dock" class="dock-item" type="button">
         <span class="dock-label">MCP</span>
-        <strong id="mcp-usage">uso —</strong>
-        <span id="mcp-active">integração pendente</span>
+        <strong id="mcp-usage">sem telemetria</strong>
+        <span id="mcp-active">ativação manual</span>
       </button>
       <div class="dock-popover" role="status">
         <strong>Desktop Commander</strong>
-        <span>Navegador: ainda não conectado ao launcher</span>
-        <span>Computador: ainda não conectado ao launcher</span>
-        <span>Ativação e detecção entram na próxima etapa.</span>
+        <span id="mcp-browser-detail">Navegador: verificando Codespace…</span>
+        <span id="mcp-computer-detail">Computador: verificando Codespace…</span>
+        <span>O launcher não guarda credenciais do Desktop Commander. “Ativar MCP” copia o comando e abre o VS.</span>
       </div>
     </div>
   </div>

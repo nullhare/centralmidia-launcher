@@ -10,6 +10,7 @@
   const BROWSER_DEVCONTAINER = '.devcontainer/browser-v4/devcontainer.json';
   const LEGACY_BROWSER_DEVCONTAINERS = ['.devcontainer/browser-v3/devcontainer.json','.devcontainer/browser-v2/devcontainer.json','.devcontainer/browser/devcontainer.json','.devcontainer/devcontainer.json'];
   const COMPUTER_DEVCONTAINER = '.devcontainer/computer/devcontainer.json';
+  const MCP_COMMAND = 'npx -y @wonderwhy-er/desktop-commander@0.2.51 remote';
 
   const statusEl = document.getElementById('status');
   const pcStatusEl = document.getElementById('pc-status');
@@ -26,12 +27,14 @@
   const keyForPath = path => path === COMPUTER_DEVCONTAINER ? COMPUTER_GH_KEY : BROWSER_GH_KEY;
   const getTokenFor = path => localStorage.getItem(keyForPath(path)) || '';
   const uiForPath = path => path === COMPUTER_DEVCONTAINER ? {
-    status: pcStatusEl, trail: document.getElementById('computer-trail'), ghSignal: document.getElementById('computer-gh-signal'),
+    status: pcStatusEl, trail: document.getElementById('computer-trail'), ghSignal: document.getElementById('computer-gh-signal'), mcpSignal: document.getElementById('computer-mcp-signal'),
     open: document.getElementById('open-pc'), openLabel: document.getElementById('computer-open-label'), vs: document.getElementById('open-pc-vs'), vsLabel: document.getElementById('computer-vs-label'),
+    mcp: document.getElementById('activate-computer-mcp'), mcpLabel: document.getElementById('computer-mcp-label'),
     stop: document.getElementById('stop-pc'), stopLabel: document.getElementById('computer-stop-label'), name: 'Computador', app: 'RustDesk'
   } : {
-    status: statusEl, trail: document.getElementById('browser-trail'), ghSignal: document.getElementById('browser-gh-signal'),
+    status: statusEl, trail: document.getElementById('browser-trail'), ghSignal: document.getElementById('browser-gh-signal'), mcpSignal: document.getElementById('browser-mcp-signal'),
     open: document.getElementById('open'), openLabel: document.getElementById('browser-open-label'), vs: document.getElementById('open-browser-vs'), vsLabel: document.getElementById('browser-vs-label'),
+    mcp: document.getElementById('activate-browser-mcp'), mcpLabel: document.getElementById('browser-mcp-label'),
     stop: document.getElementById('stop-browser'), stopLabel: document.getElementById('browser-stop-label'), name: 'Navegador', app: 'Chrome'
   };
 
@@ -124,9 +127,38 @@
     signal.title = `GitHub: ${label}${space ? ` — ${spaceName(space)}` : ''}`;
   }
 
+  function paintMcpSignal(path, space, hint = '') {
+    const signal = uiForPath(path).mcpSignal;
+    const state = space?.state || '';
+    let cls = 'unknown';
+    let title = 'MCP: estado não observável pelo launcher';
+    if (state === 'Available') {
+      cls = 'working';
+      title = hint || 'MCP: Codespace pronto; ativação manual pelo botão Ativar MCP';
+    } else if (isStartingState(state) || isStoppingState(state)) {
+      cls = 'working';
+      title = `MCP: aguardando Codespace ${isStoppingState(state) ? 'desligar' : 'iniciar'}`;
+    } else if (isStoppedState(state) || !space) {
+      cls = 'off';
+      title = 'MCP: indisponível enquanto o Codespace estiver desligado';
+    }
+    signal.className = `signal ${cls}`;
+    signal.title = title;
+  }
+
+  function mcpDetail(label, space) {
+    const state = space?.state || '';
+    if (state === 'Available') return `${label}: pronto para ativar manualmente`;
+    if (isStartingState(state)) return `${label}: aguardando Codespace iniciar`;
+    if (isStoppingState(state)) return `${label}: Codespace encerrando`;
+    if (isStoppedState(state) || !space) return `${label}: Codespace desligado`;
+    return `${label}: estado do MCP não observável`;
+  }
+
   function rememberSpace(path, space) {
     lastSpace.set(path, space || null);
     paintSignal(path, space);
+    paintMcpSignal(path, space);
     updateDock();
   }
 
@@ -138,14 +170,17 @@
     document.getElementById('github-active').textContent = `${active}/2 ativos`;
     document.getElementById('github-browser-detail').textContent = browser ? `Navegador: ${spaceView(browser).label.toLowerCase()}${machineSummary(browser) ? ` · ${machineSummary(browser)}` : ''}` : 'Navegador: não encontrado';
     document.getElementById('github-computer-detail').textContent = computer ? `Computador: ${spaceView(computer).label.toLowerCase()}${machineSummary(computer) ? ` · ${machineSummary(computer)}` : ''}` : 'Computador: não encontrado';
+    document.getElementById('mcp-browser-detail').textContent = mcpDetail('Navegador',browser);
+    document.getElementById('mcp-computer-detail').textContent = mcpDetail('Computador',computer);
   }
 
   function setBusy(path, busy, action = '') {
     const ui = uiForPath(path);
     if (busy) busyPaths.add(path); else busyPaths.delete(path);
-    [ui.open, ui.vs, ui.stop].forEach(button => { button.disabled = busy; });
+    [ui.open, ui.vs, ui.mcp, ui.stop].forEach(button => { button.disabled = busy; });
     ui.openLabel.textContent = action === 'open' ? `Abrindo ${ui.app}…` : (path === COMPUTER_DEVCONTAINER ? 'Computador' : 'Navegador');
     ui.vsLabel.textContent = action === 'vs' ? 'Abrindo VS…' : 'Abrir VS';
+    ui.mcpLabel.textContent = action === 'mcp' ? 'Preparando MCP…' : 'Ativar MCP';
     ui.stopLabel.textContent = action === 'stop' ? 'Encerrando…' : 'Encerrar Codespace';
   }
 
@@ -173,11 +208,11 @@
     el.hidden = false;
   }
   function finishTrail(path, labels) {
-    paintTrail(path, labels, -1, labels.length - 1);
-    const timer = setTimeout(() => { uiForPath(path).trail.hidden = true; }, 2600);
-    setTrailTimerFor(path, timer);
+    paintTrail(path,labels,-1,labels.length - 1);
+    const timer = setTimeout(() => { uiForPath(path).trail.hidden = true; },2600);
+    setTrailTimerFor(path,timer);
   }
-  function failTrail(path, labels, index) { paintTrail(path, labels, -1, Math.max(-1,index - 1), index); }
+  function failTrail(path, labels, index) { paintTrail(path,labels,-1,Math.max(-1,index - 1),index); }
 
   function popupMessage(tab, title, text) {
     try {
@@ -186,17 +221,37 @@
       doc.documentElement.setAttribute('lang','pt-BR');
       doc.head.replaceChildren();
       const meta = doc.createElement('meta'); meta.name = 'color-scheme'; meta.content = 'dark';
-      const link = doc.createElement('link'); link.rel = 'stylesheet'; link.href = new URL('./styles.css', window.location.href).href;
-      doc.head.append(meta, link);
+      const link = doc.createElement('link'); link.rel = 'stylesheet'; link.href = new URL('./styles.css',window.location.href).href;
+      doc.head.append(meta,link);
       const card = doc.createElement('div'); card.className = 'popup-card';
       const heading = doc.createElement('h2'); heading.textContent = title;
       const paragraph = doc.createElement('p'); paragraph.textContent = text;
-      card.append(heading, paragraph); doc.body.className = 'popup-body'; doc.body.replaceChildren(card);
+      card.append(heading,paragraph); doc.body.className = 'popup-body'; doc.body.replaceChildren(card);
     } catch (_) {}
   }
 
+  async function copyMcpCommand() {
+    try {
+      await navigator.clipboard.writeText(MCP_COMMAND);
+      return true;
+    } catch (_) {
+      try {
+        const area = document.createElement('textarea');
+        area.value = MCP_COMMAND;
+        area.setAttribute('readonly','');
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.append(area);
+        area.select();
+        const ok = document.execCommand('copy');
+        area.remove();
+        return ok;
+      } catch (_) { return false; }
+    }
+  }
+
   async function refreshBrowserConfig() {
-    if (!getTokenFor(BROWSER_DEVCONTAINER)) { if (!busyPaths.has(BROWSER_DEVCONTAINER)) setStatus('● Token do GitHub não configurado','bad'); paintSignal(BROWSER_DEVCONTAINER,null); return; }
+    if (!getTokenFor(BROWSER_DEVCONTAINER)) { if (!busyPaths.has(BROWSER_DEVCONTAINER)) setStatus('● Token do GitHub não configurado','bad'); paintSignal(BROWSER_DEVCONTAINER,null); paintMcpSignal(BROWSER_DEVCONTAINER,null); return; }
     if (!busyPaths.has(BROWSER_DEVCONTAINER)) setStatus('Verificando navegador…');
     try {
       const list = await listCodespaces(BROWSER_DEVCONTAINER);
@@ -211,7 +266,7 @@
   }
 
   async function refreshComputerConfig() {
-    if (!getTokenFor(COMPUTER_DEVCONTAINER)) { if (!busyPaths.has(COMPUTER_DEVCONTAINER)) setPcStatus('● Token do GitHub não configurado','bad'); paintSignal(COMPUTER_DEVCONTAINER,null); return; }
+    if (!getTokenFor(COMPUTER_DEVCONTAINER)) { if (!busyPaths.has(COMPUTER_DEVCONTAINER)) setPcStatus('● Token do GitHub não configurado','bad'); paintSignal(COMPUTER_DEVCONTAINER,null); paintMcpSignal(COMPUTER_DEVCONTAINER,null); return; }
     if (!busyPaths.has(COMPUTER_DEVCONTAINER)) setPcStatus('Verificando computador…');
     try {
       const list = await listCodespaces(COMPUTER_DEVCONTAINER);
@@ -331,6 +386,41 @@
     } finally { setBusy(path,false); refreshConfig(); }
   }
 
+  async function activateMcp(path) {
+    if (!getTokenFor(path)) { const {card,input} = tokenUi(path); card.open = true; setStateForPath(path,'● Token do GitHub não configurado','bad'); window.setTimeout(()=>input.focus(),0); return; }
+    const tab = window.open('about:blank','_blank');
+    if (!tab) return setStateForPath(path,'Libere pop-ups para este site.','bad');
+    popupMessage(tab,'Preparando MCP…','O launcher vai ligar o Codespace, copiar o comando do Desktop Commander e abrir o VS.');
+    try { tab.opener = null; } catch (_) {}
+    const copyPromise = copyMcpCommand();
+    const labels = ['Localizado','Ligando','GitHub pronto','Comando copiado'];
+    setBusy(path,true,'mcp');
+    paintTrail(path,labels,0,-1);
+    try {
+      setStateForPath(path,'Localizando Codespace…','working');
+      let space = await getSpace(path);
+      if (!space && path === BROWSER_DEVCONTAINER) space = await createBrowserSpace();
+      if (!space) throw new Error('Codespace do computador ainda não foi criado.');
+      rememberSpace(path,space); paintTrail(path,labels,1,0);
+      const ready = await waitAvailable(space,path,labels);
+      const copied = await copyPromise;
+      if (!copied) throw new Error(`Não consegui copiar o comando MCP. Rode no terminal: ${MCP_COMMAND}`);
+      paintTrail(path,labels,3,2);
+      paintMcpSignal(path,ready,'MCP: comando copiado; cole no terminal do VS e aguarde Device ready');
+      popupMessage(tab,'MCP pronto para ativar','No VS, abra o terminal, pressione Ctrl+V e Enter. Aguarde aparecer Device ready.');
+      await sleep(900);
+      tab.location.replace(ready.web_url || `https://${ready.name}.github.dev/`);
+      finishTrail(path,labels);
+      const readyView = spaceView(ready);
+      setStateForPath(path,readyView.text,readyView.type);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Não foi possível preparar o MCP.';
+      setStateForPath(path,`● ${message}`,'bad');
+      failTrail(path,labels,Math.min(3,Math.max(0,uiForPath(path).trail.children.length - 1)));
+      popupMessage(tab,'Não foi possível preparar o MCP',message);
+    } finally { setBusy(path,false); window.setTimeout(refreshConfig,4000); }
+  }
+
   async function waitStopped(space,path,labels) {
     let current = space;
     const deadline = Date.now() + 180000;
@@ -373,6 +463,8 @@
   function openComputer() { return openSpace(COMPUTER_DEVCONTAINER,'Iniciando computador…','Ligando o Codespace do RustDesk. Esta aba abrirá automaticamente.','RustDesk',true); }
   function openBrowserVs() { return openSpace(BROWSER_DEVCONTAINER,'Iniciando VS do navegador…','Ligando o mesmo Codespace usado pelo navegador.','VS'); }
   function openComputerVs() { return openSpace(COMPUTER_DEVCONTAINER,'Iniciando VS do computador…','Ligando o mesmo Codespace usado pelo RustDesk.','VS',true); }
+  function activateBrowserMcp() { return activateMcp(BROWSER_DEVCONTAINER); }
+  function activateComputerMcp() { return activateMcp(COMPUTER_DEVCONTAINER); }
   function stopBrowser(openConfig=true) { return stopOne(BROWSER_DEVCONTAINER,openConfig); }
   function stopComputer(openConfig=true) { return stopOne(COMPUTER_DEVCONTAINER,openConfig); }
 
@@ -392,8 +484,10 @@
 
   document.getElementById('open').addEventListener('click',startAndOpen);
   document.getElementById('open-browser-vs').addEventListener('click',openBrowserVs);
+  document.getElementById('activate-browser-mcp').addEventListener('click',activateBrowserMcp);
   document.getElementById('open-pc').addEventListener('click',openComputer);
   document.getElementById('open-pc-vs').addEventListener('click',openComputerVs);
+  document.getElementById('activate-computer-mcp').addEventListener('click',activateComputerMcp);
   document.getElementById('stop-browser').addEventListener('click',()=>stopBrowser(true));
   document.getElementById('stop-pc').addEventListener('click',()=>stopComputer(true));
   document.getElementById('stop-all').addEventListener('click',stopEverything);
