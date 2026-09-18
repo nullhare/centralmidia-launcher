@@ -1,8 +1,8 @@
 {
   "scientia_perennis": {
     "protocol_repository": "nullhare/uai",
-    "protocol_version": "3.3.0",
-    "protocol_revision": "tag:v3.3.0",
+    "protocol_version": "3.3.1",
+    "protocol_revision": "656db308e7ad1ccad15637bcf857cc28d6facb49",
     "profile": "lean"
   },
   "project": {
@@ -19,34 +19,36 @@
     "executor_class": null
   },
   "work": {
-    "last_completed": "Projeto existente preparado para adoção no UAI Continuity 3.3.0 via //migrar, sem alteração do comportamento da página pública. O alias canônico ctml já está registrado na autoridade de routing do UAI.",
-    "next_action": "Manter a superfície pública a partir de index.html, app.js, styles.css, .nojekyll e SECURITY.md. Não há tarefa ativa registrada pela camada SP.",
-    "blockers": [],
-    "safe_resume_checkpoint": "Fonte inspecionada na revisão 6f6d7eb9be5a8c7a225f6478760988fec457539f antes da adoção SP. O projeto permanece independente do produto UAI e continua sendo a superfície pública de abertura associada à Central Mídia."
+    "last_completed": "Reconciliacao de continuidade contra o HEAD canonico 0a9dcf0548809c0db951f69de5b0dbea2d48b667. Desde a adocao inicial, a superficie publica ganhou estado exato de Codespace, controles explicitos, estilos de estado, trilha operacional, dock de status e resumo de uso; nenhuma mudanca de comportamento foi criada por esta reconciliacao SP.",
+    "next_action": "Executar Health/Reconstruction e Recovery genuinamente fresh-context sobre o estado corrente antes de afirmar Recovery PASS. Nao ha roadmap de produto inferido pela camada de continuidade.",
+    "blockers": [
+      "Recovery PASS exige executor genuinamente fresh-context e permanece pendente."
+    ],
+    "safe_resume_checkpoint": "Produto independente /mg/ctml reconciliado ao trabalho material publicado ate 0a9dcf0548809c0db951f69de5b0dbea2d48b667. Fontes de verdade permanecem index.html, app.js, styles.css, .nojekyll e SECURITY.md."
   },
   "validation": {
-    "last_verified_revision": "c3846edb90248482a6154005f0ffb83a41a2b971",
+    "last_verified_revision": "0a9dcf0548809c0db951f69de5b0dbea2d48b667",
     "checks": [
       {
-        "name": "UAI Continuity structural adoption",
+        "name": "Continuity reconciliation against canonical product HEAD",
         "status": "pass",
-        "evidence": "Os dois arquivos obrigatórios do perfil lean estão presentes na revisão c3846edb90248482a6154005f0ffb83a41a2b971 e o STATE foi validado contra capabilities/continuity/schemas/project-state.schema.json do UAI Continuity 3.3.0.",
-        "verified_revision": "c3846edb90248482a6154005f0ffb83a41a2b971",
+        "evidence": "main foi observado em 0a9dcf0548809c0db951f69de5b0dbea2d48b667; os seis commits posteriores a adocao 6907e3697e440c5ba586dbbd78fdc75c72b95917 foram incorporados a narrativa operacional sem alterar codigo de produto nesta reconciliacao.",
+        "verified_revision": "0a9dcf0548809c0db951f69de5b0dbea2d48b667",
         "environment": "github-connected-agent",
-        "verified_at": "2026-09-18T10:27:00Z",
-        "note": "Validação estrutural não equivale a Recovery fresh-context."
+        "verified_at": "2026-09-18T13:34:00Z",
+        "note": "Esta prova reconcilia memoria operacional com o HEAD observado; nao equivale a Recovery fresh-context."
       },
       {
-        "name": "Recovery fresh-context SP 3.x",
+        "name": "Recovery fresh-context UAI Continuity 3.3.1",
         "status": "pending",
         "evidence": null,
         "verified_revision": null,
         "environment": null,
         "verified_at": null,
-        "note": "Recovery PASS exige executor genuinamente fresh-context e não é inferido desta migração."
+        "note": "Recovery PASS exige executor genuinamente fresh-context e nao e inferido da reconciliacao."
       }
     ]
   },
   "releases": [],
-  "updated_at": "2026-09-18T10:27:00Z"
+  "updated_at": "2026-09-18T13:34:00Z"
 }
