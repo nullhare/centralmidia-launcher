@@ -19,54 +19,45 @@
     "executor_class": null
   },
   "work": {
-    "last_completed": "Reconciliacao de continuidade contra o HEAD canonico 502a4ec78b38cd6a7294f80ed473642d316d3c01. Depois do repair b74202ae2690631484399689b5f7b092bf627a98, dois commits evoluiram materialmente a superficie do launcher: index.html ganhou controles/estado de MCP e app.js ganhou o fluxo seguro de ativacao manual do Desktop Commander, incluindo copia do comando pinado, preparacao/localizacao do Codespace e abertura do VS. Nenhuma mudanca funcional foi criada por esta reconciliacao de continuidade.",
-    "next_action": "Executar o validator estrutural do UAI Continuity 3.3.1 e repetir Health/Reconstruction + Recovery em executor genuinamente fresh-context sobre /mg/ctml na revisao publicada desta reconciliacao. Registrar PASS somente na revisao exata que passar.",
+    "last_completed": "Telemetria real de MCP/Codespaces publicada no launcher em fcb5cb50974ff903091086ccb0352f6a6ad6c42d. telemetry.js descobre os Codespaces pelos devcontainer_path, consulta o bridge privado /__centralmidia/mcp/health e /usage, pinta estado MCP real por Browser/Computer e apresenta consumo do Desktop Commander e de Codespaces sem inventar disponibilidade. O GitHub Pages run 35368816913 publicou essa revisão com success; o arquivo telemetry.js servido pelo Pages foi comparado byte a byte com o arquivo da revisão canônica, os SHA-256 coincidiram e ambos passaram node --check. Depois do rebuild de /mg/ctm, o bridge de Browser e Computer respondeu health/usage/proxy/CORS ao vivo conforme esperado.",
+    "next_action": "Validar no navegador do usuário, com a sessão/PAT já mantida localmente pelo launcher, que os dois indicadores MCP e os painéis de uso refletem os bridges privados atuais. Não promover essa etapa a PASS sem observação da UI autenticada; o produto está publicado e a dependência runtime já está live.",
     "blockers": [
-      "Fresh-context retest pos-reconciliacao de /mg/ctml permanece pendente; nao declarar Health/Recovery PASS final antes dessa prova independente."
+      "A prova end-to-end autenticada da UI depende da credencial GitHub/localStorage do navegador do usuário para atravessar as portas privadas dos Codespaces; essa credencial não é disponibilizada ao agente remoto e não deve ser copiada para o repositório ou para logs."
     ],
-    "safe_resume_checkpoint": "Produto independente /mg/ctml reconciliado ao trabalho funcional publicado ate 502a4ec78b38cd6a7294f80ed473642d316d3c01. Fontes funcionais permanecem index.html, app.js, styles.css, .nojekyll e SECURITY.md. A superficie agora inclui controles de ativacao MCP manual para Browser e Computer; o launcher nao armazena credenciais do Desktop Commander e usa o comando pinado npx -y @wonderwhy-er/desktop-commander@0.2.51 remote apenas como instrucao copiada para execucao manual no VS/Codespace."
+    "safe_resume_checkpoint": "Produto /mg/ctml em fcb5cb50974ff903091086ccb0352f6a6ad6c42d, árvore 870bb44135b6e4ed45b80493ce8f793ee2f0e3c5. GitHub Pages publicou a revisão com success e telemetry.js do Pages corresponde exatamente ao blob publicado e passa análise sintática. A dependência /mg/ctm foi rebuildada e validada live nos dois Codespaces; resta somente a observação end-to-end da UI autenticada no navegador que possui a sessão/PAT local."
   },
   "validation": {
-    "last_verified_revision": "502a4ec78b38cd6a7294f80ed473642d316d3c01",
+    "last_verified_revision": "fcb5cb50974ff903091086ccb0352f6a6ad6c42d",
     "checks": [
       {
-        "name": "Continuity reconciliation against canonical launcher HEAD",
+        "name": "Launcher telemetry source and Pages deployment",
         "status": "pass",
-        "evidence": "main foi observado em 502a4ec78b38cd6a7294f80ed473642d316d3c01. O compare desde b74202ae2690631484399689b5f7b092bf627a98 mostra dois commits posteriores e mudancas materiais somente em index.html e app.js: controles/estado MCP e workflow seguro de ativacao manual do Desktop Commander. A memoria operacional foi reconciliada a essa superficie sem alterar codigo de produto nesta operacao.",
-        "verified_revision": "502a4ec78b38cd6a7294f80ed473642d316d3c01",
-        "environment": "github-connected-agent",
-        "verified_at": "2026-09-18T14:35:00Z",
-        "note": "Reconciliacao factual do HEAD funcional; nao equivale a Health/Recovery fresh-context."
+        "evidence": "GitHub Pages run 35368816913 concluiu success para head_sha fcb5cb50974ff903091086ccb0352f6a6ad6c42d. telemetry.js baixado da revisão canônica e do Pages passou node --check nos dois casos; os SHA-256 foram idênticos (3527fccd9397550bd2a718e7138693776d34e97f17c814a53bbf489bd0cdb921), confirmando deploy exato do script validado.",
+        "verified_revision": "fcb5cb50974ff903091086ccb0352f6a6ad6c42d",
+        "environment": "github-pages-and-codespace-validation",
+        "verified_at": "2026-09-18T21:30:35Z",
+        "note": "Prova do artefato estático publicado; não inclui a sessão autenticada do navegador do usuário."
       },
       {
-        "name": "Fresh-context proof before MCP continuity reconciliation",
-        "status": "stale",
-        "evidence": "A prova fresh sobre 502a4ec78b38cd6a7294f80ed473642d316d3c01 obteve Structural PASS e Recovery PASS WITH WARNINGS, mas recusou Health PASS porque STATE/HANDOFF ainda descreviam a superficie anterior ao MCP. Esta reconciliacao corrige exatamente esse drift; a prova anterior permanece historica e nao pode ser promovida a PASS final.",
-        "verified_revision": "502a4ec78b38cd6a7294f80ed473642d316d3c01",
-        "environment": "fresh-context-github-connected-agent",
-        "verified_at": "2026-09-18T14:34:00Z",
-        "note": "Evidencia pre-reconciliacao; exige novo teste fresh na revisao publicada."
+        "name": "Central Midia MCP bridge dependency after rebuild",
+        "status": "pass",
+        "evidence": "Nos Codespaces Browser e Computer de /mg/ctm, após rebuild a partir de d3c4ab18e37b02b3cac7c1d17c505c4642e07882, /health reportou online=true, local=true, remote=online e broadcast=true; /usage reportou available=true, leftPct=98.0 e usedPct=2.0; a rota privada local da porta 3000 e o preflight CORS para https://nullhare.github.io responderam conforme o contrato consumido por telemetry.js.",
+        "verified_revision": "fcb5cb50974ff903091086ccb0352f6a6ad6c42d",
+        "environment": "github-codespaces-browser-and-computer",
+        "verified_at": "2026-09-18T21:30:35Z",
+        "note": "Evidência de dependência cross-repo: produto do launcher permanece em fcb5cb; runtime do bridge foi observado em /mg/ctm d3c4ab18e37b02b3cac7c1d17c505c4642e07882."
       },
       {
-        "name": "Structural validation after MCP continuity reconciliation",
+        "name": "Authenticated launcher UI end-to-end telemetry",
         "status": "pending",
         "evidence": null,
         "verified_revision": null,
         "environment": null,
         "verified_at": null,
-        "note": "Executar validator canonico do UAI Continuity 3.3.1 na revisao publicada desta reconciliacao."
-      },
-      {
-        "name": "Recovery fresh-context UAI Continuity 3.3.1",
-        "status": "pending",
-        "evidence": null,
-        "verified_revision": null,
-        "environment": null,
-        "verified_at": null,
-        "note": "Repetir em executor genuinamente fresh-context depois da reconciliacao publicada."
+        "note": "Requer observar a UI no navegador que possui a sessão/PAT local do launcher; não copiar a credencial para o agente."
       }
     ]
   },
   "releases": [],
-  "updated_at": "2026-09-18T14:35:00Z"
+  "updated_at": "2026-09-18T21:30:35Z"
 }
