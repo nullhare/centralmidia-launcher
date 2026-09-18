@@ -234,6 +234,29 @@ button:hover,.btn:hover {
   font-weight:600;
 }
 
+.status.working,
+.status.off {
+  display:inline-flex;
+  align-items:center;
+  width:max-content;
+  min-height:20px;
+  padding:0 7px;
+  border-radius:2em;
+  font-size:12px;
+  line-height:18px;
+  font-weight:500;
+}
+.status.working {
+  border:1px solid #9e6a03;
+  background:rgba(187,128,9,.15);
+  color:#e3b341;
+}
+.status.off {
+  border:1px solid #6e7681;
+  background:rgba(110,118,129,.12);
+  color:#b1bac4;
+}
+
 .card-config {
   border-top:1px solid var(--border);
   background:var(--panel);
