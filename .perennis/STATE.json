@@ -25,16 +25,16 @@
     "safe_resume_checkpoint": "Fonte inspecionada na revisão 6f6d7eb9be5a8c7a225f6478760988fec457539f antes da adoção SP. O projeto permanece independente do produto UAI e continua sendo a superfície pública de abertura associada à Central Mídia."
   },
   "validation": {
-    "last_verified_revision": null,
+    "last_verified_revision": "c3846edb90248482a6154005f0ffb83a41a2b971",
     "checks": [
       {
         "name": "UAI Continuity structural adoption",
-        "status": "pending",
-        "evidence": "Payload de adoção preparado contra o schema canônico do UAI Continuity 3.3.0; concluir a verificação após publicação canônica dos arquivos lean.",
-        "verified_revision": null,
+        "status": "pass",
+        "evidence": "Os dois arquivos obrigatórios do perfil lean estão presentes na revisão c3846edb90248482a6154005f0ffb83a41a2b971 e o STATE foi validado contra capabilities/continuity/schemas/project-state.schema.json do UAI Continuity 3.3.0.",
+        "verified_revision": "c3846edb90248482a6154005f0ffb83a41a2b971",
         "environment": "github-connected-agent",
-        "verified_at": null,
-        "note": "Não confundir validação estrutural com Recovery fresh-context."
+        "verified_at": "2026-09-18T10:27:00Z",
+        "note": "Validação estrutural não equivale a Recovery fresh-context."
       },
       {
         "name": "Recovery fresh-context SP 3.x",
@@ -48,5 +48,5 @@
     ]
   },
   "releases": [],
-  "updated_at": "2026-09-18T10:25:00Z"
+  "updated_at": "2026-09-18T10:27:00Z"
 }
