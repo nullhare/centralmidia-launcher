@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; connect-src https://api.github.com; img-src 'self' https://github.com https://avatars.githubusercontent.com data:; style-src 'self'; script-src 'self'; object-src 'none'; frame-src 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; connect-src https://api.github.com https://*.app.github.dev; img-src 'self' https://github.com https://avatars.githubusercontent.com data:; style-src 'self'; script-src 'self'; object-src 'none'; frame-src 'none'; form-action 'none'">
   <title>Central remota</title>
   <link rel="stylesheet" href="./styles.css">
   <script src="./app.js" defer></script>
+  <script src="./telemetry.js" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -40,7 +41,7 @@
                 <h2>Navegador remoto</h2>
                 <div class="card-signals" aria-label="Estado do navegador">
                   <span id="browser-gh-signal" class="signal unknown" title="GitHub: verificando"><span class="signal-dot"></span>GitHub</span>
-                  <span id="browser-mcp-signal" class="signal unknown" title="MCP: aguardando estado do Codespace"><span class="signal-dot"></span>MCP</span>
+                  <span id="browser-mcp-signal" class="signal unknown" title="MCP: verificando estado real"><span class="signal-dot"></span>MCP</span>
                 </div>
               </div>
               <p>Chrome remoto. O VS usa este mesmo Codespace.</p>
@@ -82,7 +83,7 @@
                 <h2>Computador remoto</h2>
                 <div class="card-signals" aria-label="Estado do computador">
                   <span id="computer-gh-signal" class="signal unknown" title="GitHub: verificando"><span class="signal-dot"></span>GitHub</span>
-                  <span id="computer-mcp-signal" class="signal unknown" title="MCP: aguardando estado do Codespace"><span class="signal-dot"></span>MCP</span>
+                  <span id="computer-mcp-signal" class="signal unknown" title="MCP: verificando estado real"><span class="signal-dot"></span>MCP</span>
                 </div>
               </div>
               <p>RustDesk remoto. O VS usa este mesmo Codespace.</p>
@@ -122,7 +123,7 @@
     <div class="dock-entry">
       <button id="github-dock" class="dock-item" type="button">
         <span class="dock-label">GitHub</span>
-        <strong id="github-usage">uso —</strong>
+        <strong id="github-usage">uso…</strong>
         <span id="github-active">0/2 ativos</span>
       </button>
       <div class="dock-popover" role="status">
@@ -135,14 +136,15 @@
     <div class="dock-entry">
       <button id="mcp-dock" class="dock-item" type="button">
         <span class="dock-label">MCP</span>
-        <strong id="mcp-usage">sem telemetria</strong>
-        <span id="mcp-active">ativação manual</span>
+        <strong id="mcp-usage">uso…</strong>
+        <span id="mcp-active">verificando…</span>
       </button>
       <div class="dock-popover" role="status">
         <strong>Desktop Commander</strong>
-        <span id="mcp-browser-detail">Navegador: verificando Codespace…</span>
-        <span id="mcp-computer-detail">Computador: verificando Codespace…</span>
-        <span>O launcher não guarda credenciais do Desktop Commander. “Ativar MCP” copia o comando e abre o VS.</span>
+        <span id="mcp-browser-detail">Navegador: verificando…</span>
+        <span id="mcp-computer-detail">Computador: verificando…</span>
+        <span id="mcp-usage-detail">Uso remoto: verificando…</span>
+        <span>Estado confirmado pelo bridge privado do próprio Codespace; credenciais do Desktop Commander não saem dele.</span>
       </div>
     </div>
   </div>
