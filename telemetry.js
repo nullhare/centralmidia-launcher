@@ -19,6 +19,26 @@
   const codespaceCache = new Map();
   let mcpBusy = false;
   let githubBusy = false;
+  const bridgeRetry = new Map();
+  const BRIDGE_BACKOFF_MS = [15000, 30000, 60000, 120000, 300000];
+
+  function bridgeKey(space, endpoint) { return `${space?.name || 'unknown'}:${endpoint}`; }
+  function bridgeRetryState(space, endpoint) {
+    const state = bridgeRetry.get(bridgeKey(space, endpoint));
+    if (!state || Date.now() >= state.nextAt) return null;
+    return state;
+  }
+  function clearBridgeRetry(space, endpoint) { bridgeRetry.delete(bridgeKey(space, endpoint)); }
+  function noteBridgeFailure(space, endpoint, kind) {
+    const key = bridgeKey(space, endpoint);
+    const previous = bridgeRetry.get(key);
+    const attempt = Math.min((previous?.attempt || 0) + 1, BRIDGE_BACKOFF_MS.length);
+    const state = { attempt, kind, nextAt: Date.now() + BRIDGE_BACKOFF_MS[attempt - 1] };
+    bridgeRetry.set(key, state);
+    return state;
+  }
+  function retrySeconds(state) { return Math.max(1, Math.ceil((state.nextAt - Date.now()) / 1000)); }
+  function bridgeError(kind, message) { const error = new Error(message); error.kind = kind; return error; }
 
   const tokenFor = path => localStorage.getItem(TOKEN_KEYS[path]) || '';
   const isStopped = state => ['Shutdown','Stopped','Created','Unavailable','Failed'].includes(state || '');
@@ -79,24 +99,26 @@
     return { token, space: spaces.find(item => item.devcontainer_path === target.path) || null };
   }
 
-  async function bridgeJson(space, token, endpoint) {
+  async function bridgeJson(space, endpoint) {
     const url = `https://${space.name}-3000.app.github.dev/__centralmidia/mcp/${endpoint}`;
-    const base = { credentials: 'include', mode: 'cors', redirect: 'error', headers: { Accept: 'application/json' } };
-    try {
-      const response = await fetchTimeout(url, base, 5500);
-      if (response.ok) return await response.json();
-      if (response.status !== 401 && response.status !== 403) throw new Error(`bridge-${response.status}`);
-    } catch (_) {}
-    if (!token) throw new Error('bridge-auth');
-    const response = await fetchTimeout(url, {
-      ...base,
-      headers: { ...base.headers, 'X-Github-Token': token }
-    }, 5500);
-    if (!response.ok) throw new Error(`bridge-${response.status}`);
-    return response.json();
+    const options = {
+      credentials: 'include',
+      mode: 'cors',
+      redirect: 'error',
+      headers: { Accept: 'application/json' }
+    };
+    let response;
+    try { response = await fetchTimeout(url, options, 5500); }
+    catch (error) {
+      if (error?.name === 'AbortError') throw bridgeError('network', 'bridge-timeout');
+      throw bridgeError('private-access', 'bridge-private-access');
+    }
+    if (response.ok) return response.json();
+    if (response.status === 401 || response.status === 403) throw bridgeError('auth-required', `bridge-${response.status}`);
+    throw bridgeError('http', `bridge-${response.status}`);
   }
 
-  function paintMcpTarget(target, space, health) {
+  function paintMcpTarget(target, space, health, issue = null, retry = null) {
     if (!space || isStopped(space.state)) {
       storeSignal(target.signal, 'off', 'MCP: Codespace desligado');
       storeText(target.detail, `${target.label}: Codespace desligado`);
@@ -113,8 +135,17 @@
       return false;
     }
     if (!health) {
-      storeSignal(target.signal, 'working', 'MCP: bridge ainda não respondeu');
-      storeText(target.detail, `${target.label}: estado MCP não confirmado`);
+      if (issue === 'auth-required' || issue === 'private-access') {
+        const wait = retry ? ` · nova tentativa em ${retrySeconds(retry)}s` : '';
+        storeSignal(target.signal, 'working', 'MCP: autenticação privada necessária');
+        storeText(target.detail, `${target.label}: autenticação necessária — abra ${target.label}, autentique no GitHub e volte${wait}`);
+      } else if (retry) {
+        storeSignal(target.signal, 'working', 'MCP: reconectando ao bridge');
+        storeText(target.detail, `${target.label}: bridge indisponível · nova tentativa em ${retrySeconds(retry)}s`);
+      } else {
+        storeSignal(target.signal, 'working', 'MCP: bridge ainda não respondeu');
+        storeText(target.detail, `${target.label}: estado MCP não confirmado`);
+      }
       return false;
     }
     if (health.online === true) {
@@ -146,13 +177,25 @@
       const usable = [];
       for (const target of TARGETS) {
         try {
-          const { token, space } = await spaceFor(target);
+          const { space } = await spaceFor(target);
           let health = null;
+          let issue = null;
+          let retry = null;
           if (space?.state === 'Available') {
-            try { health = await bridgeJson(space, token, 'health'); } catch (_) {}
-            usable.push({ target, token, space });
+            retry = bridgeRetryState(space, 'health');
+            if (retry) issue = retry.kind;
+            else {
+              try {
+                health = await bridgeJson(space, 'health');
+                clearBridgeRetry(space, 'health');
+              } catch (error) {
+                issue = error?.kind || 'network';
+                retry = noteBridgeFailure(space, 'health', issue);
+              }
+            }
+            if (health) usable.push({ target, space });
           }
-          if (paintMcpTarget(target, space, health)) online++;
+          if (paintMcpTarget(target, space, health, issue, retry)) online++;
         } catch (_) {
           storeSignal(target.signal, 'unknown', 'MCP: não foi possível consultar o Codespace');
           storeText(target.detail, `${target.label}: consulta indisponível`);
@@ -162,10 +205,15 @@
 
       let usage = null;
       for (const item of usable) {
+        const retry = bridgeRetryState(item.space, 'usage');
+        if (retry) continue;
         try {
-          const value = await bridgeJson(item.space, item.token, 'usage');
+          const value = await bridgeJson(item.space, 'usage');
+          clearBridgeRetry(item.space, 'usage');
           if (value?.available === true) { usage = value; break; }
-        } catch (_) {}
+        } catch (error) {
+          noteBridgeFailure(item.space, 'usage', error?.kind || 'network');
+        }
       }
       if (usage) {
         const used = Number(usage.usedPct);
@@ -174,7 +222,7 @@
         storeText('mcp-usage-detail', `Uso remoto: ${used.toFixed(0)}% usado · ${left.toFixed(0)}% restante · referência Free: 10.000 chamadas/mês`);
       } else {
         storeText('mcp-usage', 'uso indisponível');
-        storeText('mcp-usage-detail', 'Uso remoto: aguardando bridge MCP ativo no Codespace');
+        storeText('mcp-usage-detail', usable.length ? 'Uso remoto: reconexão controlada ativa' : 'Uso remoto: aguardando bridge MCP ativo no Codespace');
       }
     } finally { mcpBusy = false; }
   }
@@ -277,8 +325,8 @@
     refreshAll();
     setInterval(() => void refreshMcp(), 6000);
     setInterval(() => void refreshGitHubUsage(), 300000);
-    window.addEventListener('focus', refreshAll);
-    window.addEventListener('storage', () => { codespaceCache.clear(); refreshAll(); });
+    window.addEventListener('focus', () => { bridgeRetry.clear(); refreshAll(); });
+    window.addEventListener('storage', () => { codespaceCache.clear(); bridgeRetry.clear(); refreshAll(); });
     setInterval(applyAll, 2000);
   }
 
