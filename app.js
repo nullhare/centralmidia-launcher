@@ -109,10 +109,14 @@
       const list = await listCodespaces(BROWSER_DEVCONTAINER);
       const browser = findByDevcontainer(list, BROWSER_DEVCONTAINER);
       const legacyBrowser = LEGACY_BROWSER_DEVCONTAINERS.map(path => findByDevcontainer(list, path)).find(Boolean);
-      setStatus(
-        browser ? 'Google Chrome configurado no Codespace' : (legacyBrowser ? 'Google Chrome será preparado ao abrir' : 'Google Chrome será criado ao abrir'),
-        browser ? 'good' : ''
-      );
+      if (browser) {
+        const view = spaceStatus(browser, 'Navegador');
+        setStatus(view.text, view.type);
+      } else if (legacyBrowser) {
+        setStatus(`● LEGADO detectado — ${spaceName(legacyBrowser)}`, 'bad');
+      } else {
+        setStatus('NÃO CRIADO — o navegador será criado ao abrir', 'off');
+      }
     } catch (_) {
       setStatus('● Não foi possível verificar o navegador', 'bad');
     }
@@ -127,10 +131,12 @@
     try {
       const list = await listCodespaces(COMPUTER_DEVCONTAINER);
       const pc = findByDevcontainer(list, COMPUTER_DEVCONTAINER);
-      setPcStatus(
-        pc ? 'Computador configurado no Codespace' : '● Falta criar o Codespace do computador',
-        pc ? 'good' : 'bad'
-      );
+      if (pc) {
+        const view = spaceStatus(pc, 'Computador');
+        setPcStatus(view.text, view.type);
+      } else {
+        setPcStatus('● NÃO CRIADO — falta criar o Codespace do computador', 'bad');
+      }
     } catch (_) {
       setPcStatus('● Não foi possível verificar o computador', 'bad');
     }
@@ -180,6 +186,38 @@
 
   function isStartingState(state) {
     return ['Awaiting', 'Queued', 'Provisioning', 'Starting'].includes(state);
+  }
+
+  function spaceName(space) {
+    return space?.display_name || space?.name || 'Codespace';
+  }
+
+  function machineName(space) {
+    const machine = space?.machine?.display_name || space?.machine?.name || '';
+    return machine ? ` · ${machine}` : '';
+  }
+
+  function spaceStatus(space, fallbackName) {
+    const state = space?.state || '';
+    let label = state || 'DESCONHECIDO';
+    let type = 'off';
+    if (state === 'Available') {
+      label = 'LIGADO';
+      type = 'good';
+    } else if (isStartingState(state)) {
+      label = 'INICIANDO';
+      type = 'working';
+    } else if (isStoppingState(state)) {
+      label = 'ENCERRANDO';
+      type = 'working';
+    } else if (isStoppedState(state)) {
+      label = 'DESLIGADO';
+      type = 'off';
+    }
+    return {
+      text: `${label} — ${spaceName(space) || fallbackName}${machineName(space)}`,
+      type
+    };
   }
 
   async function waitAvailable(space, path, setState) {
@@ -317,6 +355,50 @@
     );
   }
 
+  async function openVsSpace(path, label, setState, openConfigOnMissing = false) {
+    if (!getTokenFor(path)) {
+      const { card, input } = tokenUi(path);
+      card.open = true;
+      setState('● Token do GitHub não configurado', 'bad');
+      window.setTimeout(() => input.focus(), 0);
+      return;
+    }
+
+    const tab = window.open('about:blank', '_blank');
+    if (!tab) return setState('Libere pop-ups para este site.', 'bad');
+    popupMessage(tab, `Iniciando VS do ${label}…`, 'Ligando o mesmo Codespace usado pelo ambiente remoto.');
+    try { tab.opener = null; } catch (_) {}
+
+    try {
+      setState(`Localizando Codespace do ${label}…`);
+      let space = await getSpace(path);
+      if (!space && path === BROWSER_DEVCONTAINER) {
+        space = await createBrowserSpace(setState);
+      }
+      if (!space) {
+        if (openConfigOnMissing) pcConfigCard.open = true;
+        throw new Error(`Codespace do ${label} ainda não foi criado.`);
+      }
+      const ready = await waitAvailable(space, path, setState);
+      setState(`Abrindo VS — ${spaceName(ready)}`);
+      await sleep(1200);
+      tab.location.replace(ready.web_url || `https://${ready.name}.github.dev/`);
+      refreshConfig();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Não foi possível abrir o VS.';
+      setState(`● ${message}`, 'bad');
+      popupMessage(tab, 'Não foi possível abrir o VS', message);
+    }
+  }
+
+  function openBrowserVs() {
+    return openVsSpace(BROWSER_DEVCONTAINER, 'navegador', setStatus);
+  }
+
+  function openComputerVs() {
+    return openVsSpace(COMPUTER_DEVCONTAINER, 'computador', setPcStatus, true);
+  }
+
   async function stopSpace(path, setState, openConfigOnMissing = false) {
     if (!getTokenFor(path)) {
       const { card } = tokenUi(path);
@@ -334,13 +416,13 @@
         return false;
       }
       if (space.state !== 'Available') {
-        setState(isStoppingState(space.state) ? 'Codespace já está desligando.' : 'Codespace já está desligado ou iniciando.');
+        const view = spaceStatus(space, 'Codespace');
+        setState(view.text, view.type);
         restoreConfigStatus();
         return true;
       }
-      setState('Desligando Codespace…');
+      setState(`ENCERRANDO — ${spaceName(space)}`, 'working');
       await api(path, space.stop_url, { method: 'POST' }, [409]);
-      setState('Codespace desligando.');
       restoreConfigStatus();
       return true;
     } catch (err) {
@@ -358,30 +440,26 @@
     }
 
     try {
-      setStatus('Localizando Codespace…');
+      setStatus('Localizando Codespace do navegador…');
       const list = await listCodespaces(BROWSER_DEVCONTAINER);
-      const spaces = [
-        findByDevcontainer(list, BROWSER_DEVCONTAINER),
-        ...LEGACY_BROWSER_DEVCONTAINERS.map(path => findByDevcontainer(list, path))
-      ].filter(Boolean);
-
-      if (!spaces.length) {
-        setStatus('Codespace do navegador ainda não foi criado.');
+      const space = findByDevcontainer(list, BROWSER_DEVCONTAINER);
+      if (!space) {
+        const legacy = LEGACY_BROWSER_DEVCONTAINERS.map(path => findByDevcontainer(list, path)).find(Boolean);
+        setStatus(legacy ? `● O navegador atual não existe; legado encontrado: ${spaceName(legacy)}` : 'Navegador atual ainda não foi criado.', legacy ? 'bad' : 'off');
         restoreConfigStatus();
         return false;
       }
 
-      const running = spaces.filter(space => space.state === 'Available');
-      if (!running.length) {
-        setStatus(spaces.some(space => isStoppingState(space.state)) ? 'Codespace já está desligando.' : 'Codespace já está desligado.');
+      if (space.state !== 'Available') {
+        const view = spaceStatus(space, 'Navegador');
+        setStatus(view.text, view.type);
         restoreConfigStatus();
         return true;
       }
 
-      setStatus('Desligando Codespace…');
-      await Promise.all(running.map(space => api(BROWSER_DEVCONTAINER, space.stop_url, { method: 'POST' }, [409])));
-      setStatus('Codespace desligando.');
-      restoreConfigStatus();
+      setStatus(`ENCERRANDO — ${spaceName(space)}`, 'working');
+      await api(BROWSER_DEVCONTAINER, space.stop_url, { method: 'POST' }, [409]);
+      restoreConfigStatus(2500);
       return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Não foi possível desligar.';
@@ -395,8 +473,8 @@
   }
 
   async function stopEverything() {
-    setStatus('Desligando navegador…');
-    setPcStatus('Desligando computador…');
+    setStatus('ENCERRAR TUDO — navegador…', 'working');
+    setPcStatus('ENCERRAR TUDO — computador…', 'working');
     await Promise.allSettled([
       stopBrowser(false),
       stopComputer(false)
@@ -432,7 +510,9 @@
   }
 
   document.getElementById('open').addEventListener('click', startAndOpen);
+  document.getElementById('open-browser-vs').addEventListener('click', openBrowserVs);
   document.getElementById('open-pc').addEventListener('click', openComputer);
+  document.getElementById('open-pc-vs').addEventListener('click', openComputerVs);
   document.getElementById('stop-browser').addEventListener('click', () => stopBrowser(true));
   document.getElementById('stop-pc').addEventListener('click', () => stopComputer(true));
   document.getElementById('stop-all').addEventListener('click', stopEverything);
@@ -443,4 +523,10 @@
 
   migrateLegacyToken();
   refreshConfig();
+  window.setInterval(() => {
+    if (!document.hidden) refreshConfig();
+  }, 15000);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) refreshConfig();
+  });
 })();
