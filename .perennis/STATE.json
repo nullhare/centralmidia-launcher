@@ -1,0 +1,52 @@
+{
+  "scientia_perennis": {
+    "protocol_repository": "nullhare/uai",
+    "protocol_version": "3.3.0",
+    "protocol_revision": "tag:v3.3.0",
+    "profile": "lean"
+  },
+  "project": {
+    "name": "Central Mídia Launcher",
+    "alias": "ctml",
+    "repository": "nullhare/centralmidia-launcher",
+    "default_branch": "main",
+    "status": "active"
+  },
+  "execution": {
+    "active_task_id": null,
+    "responsible_writer": null,
+    "current_environment": null,
+    "executor_class": null
+  },
+  "work": {
+    "last_completed": "Projeto existente preparado para adoção no UAI Continuity 3.3.0 via //migrar, sem alteração do comportamento da página pública. O alias canônico ctml já está registrado na autoridade de routing do UAI.",
+    "next_action": "Manter a superfície pública a partir de index.html, app.js, styles.css, .nojekyll e SECURITY.md. Não há tarefa ativa registrada pela camada SP.",
+    "blockers": [],
+    "safe_resume_checkpoint": "Fonte inspecionada na revisão 6f6d7eb9be5a8c7a225f6478760988fec457539f antes da adoção SP. O projeto permanece independente do produto UAI e continua sendo a superfície pública de abertura associada à Central Mídia."
+  },
+  "validation": {
+    "last_verified_revision": null,
+    "checks": [
+      {
+        "name": "UAI Continuity structural adoption",
+        "status": "pending",
+        "evidence": "Payload de adoção preparado contra o schema canônico do UAI Continuity 3.3.0; concluir a verificação após publicação canônica dos arquivos lean.",
+        "verified_revision": null,
+        "environment": "github-connected-agent",
+        "verified_at": null,
+        "note": "Não confundir validação estrutural com Recovery fresh-context."
+      },
+      {
+        "name": "Recovery fresh-context SP 3.x",
+        "status": "pending",
+        "evidence": null,
+        "verified_revision": null,
+        "environment": null,
+        "verified_at": null,
+        "note": "Recovery PASS exige executor genuinamente fresh-context e não é inferido desta migração."
+      }
+    ]
+  },
+  "releases": [],
+  "updated_at": "2026-09-18T10:25:00Z"
+}
