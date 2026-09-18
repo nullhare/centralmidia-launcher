@@ -30,7 +30,7 @@
         <h1>Central remota</h1>
         <p class="subtitle">Navegador Codespace e computador Zorin em um só lugar.</p>
       </div>
-      <button id="stop-all" class="danger-fill" type="button">Encerrar tudo</button>
+      <button id="stop-all" class="danger-fill" type="button">Encerrar os 2 Codespaces</button>
     </div>
 
     <div class="grid-2">
@@ -39,7 +39,7 @@
           <div class="card-main">
             <div class="card-copy">
               <h2>Navegador remoto</h2>
-              <p>Inicia o Codespace e abre direto o navegador.</p>
+              <p>Abre o Chrome remoto. O VS usa este mesmo Codespace.</p>
             </div>
             <div class="card-controls">
               <button id="open" class="primary-green" type="button">
@@ -49,7 +49,8 @@
                 </svg>
                 <span>Navegador</span>
               </button>
-              <button id="stop-browser" class="danger" type="button">Encerrar</button>
+              <button id="open-browser-vs" type="button">Abrir VS</button>
+              <button id="stop-browser" class="danger" type="button">Encerrar Codespace</button>
             </div>
           </div>
           <div id="status" class="status"></div>
@@ -78,7 +79,7 @@
           <div class="card-main">
             <div class="card-copy">
               <h2>Computador</h2>
-              <p>RustDesk roda dentro de um Codespace e controla seu Zorin.</p>
+              <p>Abre o RustDesk remoto. O VS usa este mesmo Codespace.</p>
             </div>
             <div class="card-controls">
               <button id="open-pc" class="primary-green" type="button">
@@ -88,7 +89,8 @@
                 </svg>
                 <span>Computador</span>
               </button>
-              <button id="stop-pc" class="danger" type="button">Encerrar</button>
+              <button id="open-pc-vs" type="button">Abrir VS</button>
+              <button id="stop-pc" class="danger" type="button">Encerrar Codespace</button>
             </div>
           </div>
           <div id="pc-status" class="status"></div>
