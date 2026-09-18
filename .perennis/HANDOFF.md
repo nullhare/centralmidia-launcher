@@ -12,28 +12,28 @@
 - SP adotado: `3.3.1` (`656db308e7ad1ccad15637bcf857cc28d6facb49`)
 - Versão do projeto: `não declarada`
 - Tarefa ativa: `nenhuma`
-- Revisão verificada: `6d5e39d3c1c262120c0203eeeab4c12e55cf2bde`
-- Estado atualizado em: `2026-09-18T14:08:00Z`
+- Revisão verificada: `502a4ec78b38cd6a7294f80ed473642d316d3c01`
+- Estado atualizado em: `2026-09-18T14:35:00Z`
 
 ## Último resultado
 
-Repair-only de continuidade preparado sobre a revisão canônica 6d5e39d3c1c262120c0203eeeab4c12e55cf2bde: AGENTS.md obrigatório adicionado ao perfil lean. A superfície de produto permanece em 0a9dcf0548809c0db951f69de5b0dbea2d48b667 e nenhum arquivo funcional do launcher foi alterado.
+Reconciliacao de continuidade contra o HEAD canonico 502a4ec78b38cd6a7294f80ed473642d316d3c01. Depois do repair b74202ae2690631484399689b5f7b092bf627a98, dois commits evoluiram materialmente a superficie do launcher: index.html ganhou controles/estado de MCP e app.js ganhou o fluxo seguro de ativacao manual do Desktop Commander, incluindo copia do comando pinado, preparacao/localizacao do Codespace e abertura do VS. Nenhuma mudanca funcional foi criada por esta reconciliacao de continuidade.
 
 ## Próxima ação
 
-Executar o validator estrutural do UAI Continuity 3.3.1 e repetir Health/Reconstruction + Recovery em executor genuinamente fresh-context sobre /mg/ctml. Registrar PASS somente na revisão exata publicada que passar.
+Executar o validator estrutural do UAI Continuity 3.3.1 e repetir Health/Reconstruction + Recovery em executor genuinamente fresh-context sobre /mg/ctml na revisao publicada desta reconciliacao. Registrar PASS somente na revisao exata que passar.
 
 ## Checkpoint seguro
 
-Produto independente /mg/ctml mantém a superfície estática em 0a9dcf0548809c0db951f69de5b0dbea2d48b667; index.html, app.js, styles.css, .nojekyll e SECURITY.md permanecem as fontes funcionais. O repair atual adiciona somente o adaptador AGENTS.md exigido pelo UAI Continuity.
+Produto independente /mg/ctml reconciliado ao trabalho funcional publicado ate 502a4ec78b38cd6a7294f80ed473642d316d3c01. Fontes funcionais permanecem index.html, app.js, styles.css, .nojekyll e SECURITY.md. A superficie agora inclui controles de ativacao MCP manual para Browser e Computer; o launcher nao armazena credenciais do Desktop Commander e usa o comando pinado npx -y @wonderwhy-er/desktop-commander@0.2.51 remote apenas como instrucao copiada para execucao manual no VS/Codespace.
 
 ## Bloqueios
 
-- Fresh-context retest pós-reparo de /mg/ctml permanece pendente; não declarar Structural/Health/Recovery PASS antes dessa prova independente.
+- Fresh-context retest pos-reconciliacao de /mg/ctml permanece pendente; nao declarar Health/Recovery PASS final antes dessa prova independente.
 
 ## Validações registradas
 
-- `pass` — Continuity reconciliation against canonical product HEAD (`6d5e39d3c1c262120c0203eeeab4c12e55cf2bde`)
-- `stale` — Fresh-context proof before continuity repair (`6d5e39d3c1c262120c0203eeeab4c12e55cf2bde`)
-- `pending` — Structural validation after continuity repair (`revisão não registrada`)
+- `pass` — Continuity reconciliation against canonical launcher HEAD (`502a4ec78b38cd6a7294f80ed473642d316d3c01`)
+- `stale` — Fresh-context proof before MCP continuity reconciliation (`502a4ec78b38cd6a7294f80ed473642d316d3c01`)
+- `pending` — Structural validation after MCP continuity reconciliation (`revisão não registrada`)
 - `pending` — Recovery fresh-context UAI Continuity 3.3.1 (`revisão não registrada`)
