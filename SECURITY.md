@@ -4,13 +4,15 @@ The launcher is intentionally a static GitHub Pages application. It has no serve
 
 ## Current protections
 
-- A restrictive Content Security Policy only permits local scripts/styles, GitHub avatar images, GitHub API requests to `api.github.com`, and health/usage requests to private `*.app.github.dev` Codespace ports.
+- A restrictive Content Security Policy only permits local scripts/styles, GitHub avatar images, GitHub API requests to `api.github.com`, and health/usage requests to the dedicated `*.app.github.dev` telemetry ports.
 - The launcher no longer uses inline JavaScript or `document.write`; dynamic status/error text is inserted with `textContent`.
 - Browser and Computer use independent token storage keys. Removing one token does not remove the other.
 - The legacy shared token is migrated once into the two independent keys so existing installations keep working.
 - GitHub API error bodies are not rendered into the page.
 - API requests use `no-store` caching and a `no-referrer` policy.
-- Private MCP health/usage calls authenticate only with the browser's GitHub session for the private Codespace port; the configured launcher token is never forwarded to `*.app.github.dev`.
+- MCP health/usage calls use a dedicated telemetry key and the separate public port `8766`; the configured GitHub token is never forwarded to `*.app.github.dev`.
+- The telemetry endpoint exposes only `GET /health` and `GET /usage`, rejects other paths, accepts the launcher origin only, and has no terminal, file, browser, RustDesk, or remote-execution capability.
+- Browser and Computer telemetry keys are independent and stored only in this site's `localStorage`; they are not GitHub credentials and grant no GitHub privilege.
 - New tabs have their opener detached.
 
 ## Residual token risk

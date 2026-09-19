@@ -11,9 +11,13 @@
     [BROWSER_PATH]: 'centralmidia_browser_token_v2',
     [COMPUTER_PATH]: 'centralmidia_computer_token_v2'
   };
+  const TELEMETRY_KEY_KEYS = {
+    [BROWSER_PATH]: 'centralmidia_browser_telemetry_key_v1',
+    [COMPUTER_PATH]: 'centralmidia_computer_telemetry_key_v1'
+  };
   const TARGETS = [
-    { path: BROWSER_PATH, label: 'Navegador', signal: 'browser-mcp-signal', detail: 'mcp-browser-detail' },
-    { path: COMPUTER_PATH, label: 'Computador', signal: 'computer-mcp-signal', detail: 'mcp-computer-detail' }
+    { path: BROWSER_PATH, label: 'Navegador', signal: 'browser-mcp-signal', detail: 'mcp-browser-detail', keyInput: 'browser-telemetry-key', keySave: 'browser-telemetry-save', keyForget: 'browser-telemetry-forget' },
+    { path: COMPUTER_PATH, label: 'Computador', signal: 'computer-mcp-signal', detail: 'mcp-computer-detail', keyInput: 'computer-telemetry-key', keySave: 'computer-telemetry-save', keyForget: 'computer-telemetry-forget' }
   ];
   const desired = new Map();
   const codespaceCache = new Map();
@@ -41,6 +45,7 @@
   function bridgeError(kind, message) { const error = new Error(message); error.kind = kind; return error; }
 
   const tokenFor = path => localStorage.getItem(TOKEN_KEYS[path]) || '';
+  const telemetryKeyFor = path => localStorage.getItem(TELEMETRY_KEY_KEYS[path]) || '';
   const isStopped = state => ['Shutdown','Stopped','Created','Unavailable','Failed'].includes(state || '');
   const isTransitional = state => ['Awaiting','Queued','Provisioning','Starting','ShuttingDown','Stopping'].includes(state || '');
 
@@ -99,23 +104,26 @@
     return { token, space: spaces.find(item => item.devcontainer_path === target.path) || null };
   }
 
-  async function bridgeJson(space, endpoint) {
-    const url = `https://${space.name}-3000.app.github.dev/__centralmidia/mcp/${endpoint}`;
+  async function bridgeJson(target, space, endpoint) {
+    const key = telemetryKeyFor(target.path);
+    if (!key) throw bridgeError('key-missing', 'telemetry-key-missing');
+    const url = `https://${space.name}-8766.app.github.dev/${endpoint}`;
     const options = {
-      credentials: 'include',
+      credentials: 'omit',
       mode: 'cors',
       redirect: 'error',
-      headers: { Accept: 'application/json' }
+      headers: { Accept: 'application/json', 'X-Centralmidia-Telemetry-Key': key }
     };
     let response;
     try { response = await fetchTimeout(url, options, 5500); }
     catch (error) {
-      if (error?.name === 'AbortError') throw bridgeError('network', 'bridge-timeout');
-      throw bridgeError('private-access', 'bridge-private-access');
+      if (error?.name === 'AbortError') throw bridgeError('network', 'telemetry-timeout');
+      throw bridgeError('network', 'telemetry-unreachable');
     }
     if (response.ok) return response.json();
-    if (response.status === 401 || response.status === 403) throw bridgeError('auth-required', `bridge-${response.status}`);
-    throw bridgeError('http', `bridge-${response.status}`);
+    if (response.status === 401) throw bridgeError('key-invalid', 'telemetry-key-invalid');
+    if (response.status === 403) throw bridgeError('origin-rejected', 'telemetry-origin-rejected');
+    throw bridgeError('http', `telemetry-${response.status}`);
   }
 
   function paintMcpTarget(target, space, health, issue = null, retry = null) {
@@ -135,15 +143,20 @@
       return false;
     }
     if (!health) {
-      if (issue === 'auth-required' || issue === 'private-access') {
-        const wait = retry ? ` · nova tentativa em ${retrySeconds(retry)}s` : '';
-        storeSignal(target.signal, 'working', 'MCP: autenticação privada necessária');
-        storeText(target.detail, `${target.label}: autenticação necessária — abra ${target.label}, autentique no GitHub e volte${wait}`);
+      if (issue === 'key-missing') {
+        storeSignal(target.signal, 'working', 'MCP: chave de telemetria necessária');
+        storeText(target.detail, `${target.label}: configure a chave de telemetria MCP`);
+      } else if (issue === 'key-invalid') {
+        storeSignal(target.signal, 'working', 'MCP: chave de telemetria inválida');
+        storeText(target.detail, `${target.label}: chave de telemetria recusada`);
+      } else if (issue === 'origin-rejected') {
+        storeSignal(target.signal, 'working', 'MCP: origem recusada pelo endpoint');
+        storeText(target.detail, `${target.label}: endpoint de telemetria recusou a origem`);
       } else if (retry) {
-        storeSignal(target.signal, 'working', 'MCP: reconectando ao bridge');
-        storeText(target.detail, `${target.label}: bridge indisponível · nova tentativa em ${retrySeconds(retry)}s`);
+        storeSignal(target.signal, 'working', 'MCP: reconectando à telemetria');
+        storeText(target.detail, `${target.label}: telemetria indisponível · nova tentativa em ${retrySeconds(retry)}s`);
       } else {
-        storeSignal(target.signal, 'working', 'MCP: bridge ainda não respondeu');
+        storeSignal(target.signal, 'working', 'MCP: telemetria ainda não respondeu');
         storeText(target.detail, `${target.label}: estado MCP não confirmado`);
       }
       return false;
@@ -182,15 +195,18 @@
           let issue = null;
           let retry = null;
           if (space?.state === 'Available') {
-            retry = bridgeRetryState(space, 'health');
-            if (retry) issue = retry.kind;
+            if (!telemetryKeyFor(target.path)) issue = 'key-missing';
             else {
-              try {
-                health = await bridgeJson(space, 'health');
-                clearBridgeRetry(space, 'health');
-              } catch (error) {
-                issue = error?.kind || 'network';
-                retry = noteBridgeFailure(space, 'health', issue);
+              retry = bridgeRetryState(space, 'health');
+              if (retry) issue = retry.kind;
+              else {
+                try {
+                  health = await bridgeJson(target, space, 'health');
+                  clearBridgeRetry(space, 'health');
+                } catch (error) {
+                  issue = error?.kind || 'network';
+                  if (issue !== 'key-invalid' && issue !== 'origin-rejected') retry = noteBridgeFailure(space, 'health', issue);
+                }
               }
             }
             if (health) usable.push({ target, space });
@@ -208,7 +224,7 @@
         const retry = bridgeRetryState(item.space, 'usage');
         if (retry) continue;
         try {
-          const value = await bridgeJson(item.space, 'usage');
+          const value = await bridgeJson(item.target, item.space, 'usage');
           clearBridgeRetry(item.space, 'usage');
           if (value?.available === true) { usage = value; break; }
         } catch (error) {
@@ -307,6 +323,29 @@
     } finally { githubBusy = false; }
   }
 
+  function wireTelemetryKeys() {
+    for (const target of TARGETS) {
+      const input = document.getElementById(target.keyInput);
+      const save = document.getElementById(target.keySave);
+      const forget = document.getElementById(target.keyForget);
+      if (!input || !save || !forget) continue;
+      save.addEventListener('click', () => {
+        const value = input.value.trim();
+        if (!value) return;
+        localStorage.setItem(TELEMETRY_KEY_KEYS[target.path], value);
+        input.value = '';
+        bridgeRetry.clear();
+        void refreshMcp();
+      });
+      forget.addEventListener('click', () => {
+        localStorage.removeItem(TELEMETRY_KEY_KEYS[target.path]);
+        input.value = '';
+        bridgeRetry.clear();
+        void refreshMcp();
+      });
+    }
+  }
+
   function refreshAll() {
     void refreshMcp();
     void refreshGitHubUsage();
@@ -321,6 +360,7 @@
   });
 
   function start() {
+    wireTelemetryKeys();
     observer.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['class','title'] });
     refreshAll();
     setInterval(() => void refreshMcp(), 6000);

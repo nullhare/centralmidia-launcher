@@ -71,6 +71,16 @@
                 <button id="forget" type="button">Remover token</button>
               </div>
             </div>
+            <div class="config-block">
+              <p>Chave de telemetria MCP do Navegador. É separada do token GitHub e autoriza somente health/usage.</p>
+              <div class="field-row">
+                <input id="browser-telemetry-key" type="password" autocomplete="new-password" spellcheck="false" placeholder="chave de telemetria" aria-label="Chave de telemetria do navegador">
+                <button id="browser-telemetry-save" type="button">Salvar chave</button>
+              </div>
+              <div class="config-actions">
+                <button id="browser-telemetry-forget" type="button">Remover chave</button>
+              </div>
+            </div>
           </div>
         </details>
       </section>
@@ -113,6 +123,16 @@
                 <button id="pc-forget" type="button">Remover token</button>
               </div>
             </div>
+            <div class="config-block">
+              <p>Chave de telemetria MCP do Computador. É separada do token GitHub e autoriza somente health/usage.</p>
+              <div class="field-row">
+                <input id="computer-telemetry-key" type="password" autocomplete="new-password" spellcheck="false" placeholder="chave de telemetria" aria-label="Chave de telemetria do computador">
+                <button id="computer-telemetry-save" type="button">Salvar chave</button>
+              </div>
+              <div class="config-actions">
+                <button id="computer-telemetry-forget" type="button">Remover chave</button>
+              </div>
+            </div>
           </div>
         </details>
       </section>
@@ -144,7 +164,7 @@
         <span id="mcp-browser-detail">Navegador: verificando…</span>
         <span id="mcp-computer-detail">Computador: verificando…</span>
         <span id="mcp-usage-detail">Uso remoto: verificando…</span>
-        <span>Estado confirmado pelo bridge privado do próprio Codespace; credenciais do Desktop Commander não saem dele.</span>
+        <span>Estado confirmado por endpoint de telemetria separado, limitado a health/usage; credenciais do Desktop Commander não saem do Codespace.</span>
       </div>
     </div>
   </div>
