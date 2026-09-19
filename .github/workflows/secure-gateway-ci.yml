@@ -6,14 +6,12 @@ on:
     paths:
       - 'secure-gateway/**'
       - 'middleware.js'
-      - '404.html'
       - 'index.html'
       - '.github/workflows/secure-gateway-ci.yml'
   pull_request:
     paths:
       - 'secure-gateway/**'
       - 'middleware.js'
-      - '404.html'
       - 'index.html'
       - '.github/workflows/secure-gateway-ci.yml'
 
@@ -51,8 +49,8 @@ jobs:
             echo 'Public Pages must not publish an index.html.' >&2
             exit 1
           fi
-          if grep -Eiq 'central|m[ií]dia|github|gateway|codespace|mcp|telemetr|painel' 404.html; then
-            echo 'Public 404 must remain generic and reveal no product or architecture clues.' >&2
+          if [ -e 404.html ]; then
+            echo 'Public Pages 404 shell must remain retired.' >&2
             exit 1
           fi
           if grep -R -nE '(GITHUB_CLIENT_SECRET|SESSION_SECRET)"?[[:space:]]*[:=][[:space:]]*"[^R][^"]+' secure-gateway --exclude=worker.js --exclude=README.md --exclude=test.mjs --exclude=vercel.test.mjs; then
