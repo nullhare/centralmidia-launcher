@@ -13,19 +13,19 @@
     "status": "active"
   },
   "execution": {
-    "active_task_id": null,
-    "responsible_writer": null,
-    "current_environment": "vercel-production-authenticated-plus-github-pages-unpublished",
+    "active_task_id": "ctml-pages-unpublish-finalize-20260919",
+    "responsible_writer": "chatgpt-auth-gateway-ctml-20260919-r5",
+    "current_environment": "vercel-production-authenticated-plus-github-pages-unpublish-verification",
     "executor_class": null
   },
   "work": {
-    "last_completed": "O launcher operacional está em https://centralmidia-launcher.vercel.app, protegido por GitHub OAuth e validado em fluxo real autorizado. O antigo GitHub Pages foi explicitamente despublicado pelo usuário em Settings > Pages > Unpublish site; a URL https://nullhare.github.io/centralmidia-launcher/ permanece apenas como 404 genérico do GitHub, sem servir o launcher. O repositório não contém workflow próprio de Pages; somente secure-gateway-ci.yml permanece em .github/workflows.",
-    "next_action": "Nenhuma mudança material pendente neste owner. No mesmo //gravar permanece somente a validação live da telemetria no owner CTM quando os Codespaces puderem iniciar novamente; não reabrir nem refazer o gateway CTML.",
+    "last_completed": "O launcher operacional permanece em https://centralmidia-launcher.vercel.app, protegido por GitHub OAuth e validado em fluxo real autorizado. O usuário acionou Settings > Pages > Unpublish site. A tela 404 observada logo depois não era o 404 genérico do GitHub: era o 404.html customizado ainda presente no repositório, fato confirmado pela leitura direta do arquivo. Esse shell obsoleto foi removido de main em ebe7ee1030dbc5b650e7169b0a4f0bd0aef896f5, e a pós-condição no repositório foi comprovada por fetch de 404.html retornando Not Found.",
+    "next_action": "Confirmar no navegador, após a propagação da despublicação, que https://nullhare.github.io/centralmidia-launcher/ não serve mais o 404 customizado. Depois disso, nenhuma mudança material permanece em CTML. No mesmo //gravar continuará somente a validação live da telemetria no owner CTM quando os Codespaces puderem iniciar novamente.",
     "blockers": [],
-    "safe_resume_checkpoint": "CTML está concluído: Vercel é o único host operacional do launcher, GitHub OAuth está ativo, assets autenticados foram validados e GitHub Pages foi despublicado. A URL github.io antiga pode continuar existindo como endereço do GitHub e responder 404; isso não significa que o Pages esteja publicando o aplicativo. O mesmo //gravar continua aberto apenas pela pendência CTM de validar a telemetria 8766 em runtime vivo quando a cota de Codespaces permitir."
+    "safe_resume_checkpoint": "CTML está operacionalmente migrado para Vercel e o launcher autenticado está validado. O GitHub Pages foi despublicado pelo usuário, mas a verificação visual imediatamente posterior ainda mostrou o antigo 404.html customizado; esse arquivo foi então removido do repositório em ebe7ee1030dbc5b650e7169b0a4f0bd0aef896f5 e já não existe em main. Falta somente a confirmação live de que a URL github.io deixou de servir esse shell após a propagação. O mesmo //gravar continua aberto também pela pendência CTM de validar a telemetria 8766 em runtime vivo quando a cota de Codespaces permitir."
   },
   "validation": {
-    "last_verified_revision": "3105511ca6db6751ca1330f668c059ca45a7ca42",
+    "last_verified_revision": "ebe7ee1030dbc5b650e7169b0a4f0bd0aef896f5",
     "checks": [
       {
         "name": "Codespace shutdown controls and progress trail",
@@ -73,16 +73,16 @@
         "note": "Validação HTTP de produção sem expor secrets."
       },
       {
-        "name": "GitHub Pages unpublished",
-        "status": "pass",
-        "evidence": "O usuário acionou Unpublish site em Settings > Pages e confirmou em seguida que https://nullhare.github.io/centralmidia-launcher/ exibe apenas o 404 genérico. A árvore .github/workflows contém somente secure-gateway-ci.yml, sem workflow próprio de Pages.",
-        "verified_revision": "9d47bbb5af7395ef683de5ab2e37eacb80f857d6",
+        "name": "GitHub Pages unpublish propagation",
+        "status": "pending",
+        "evidence": "O usuário acionou Unpublish site. A resposta visual posterior ainda era o 404.html customizado do próprio repositório; esse arquivo foi removido em ebe7ee1030dbc5b650e7169b0a4f0bd0aef896f5 e fetch de 404.html em main agora retorna Not Found.",
+        "verified_revision": "ebe7ee1030dbc5b650e7169b0a4f0bd0aef896f5",
         "environment": "github-settings-plus-user-browser",
-        "verified_at": "2026-09-19T16:54:00Z",
-        "note": "A permanência do endereço github.io com 404 é normal; o conteúdo do launcher não é mais publicado ali."
+        "verified_at": "2026-09-19T16:58:00Z",
+        "note": "Ainda falta prova live de que a URL github.io deixou de servir o shell customizado após a propagação."
       }
     ]
   },
   "releases": [],
-  "updated_at": "2026-09-19T16:54:00Z"
+  "updated_at": "2026-09-19T16:58:00Z"
 }
