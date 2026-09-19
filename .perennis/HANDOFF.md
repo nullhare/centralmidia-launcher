@@ -11,32 +11,30 @@
 - Status: `active`
 - SP adotado: `3.3.1` (`656db308e7ad1ccad15637bcf857cc28d6facb49`)
 - Versão do projeto: `não declarada`
-- Tarefa ativa: `nenhuma`
-- Revisão verificada: `05eb3b6f53c454e03b40ae89749ba3cad94247cd`
-- Estado atualizado em: `2026-09-19T03:24:01Z`
+- Tarefa ativa: `ctml-authenticated-launcher-gateway-20260919`
+- Revisão verificada: `bd447279c9456240f7062ba089fc5c98f3ffef61`
+- Estado atualizado em: `2026-09-19T05:48:37Z`
 
 ## Último resultado
 
-Limpeza de interface concluída: os dois botões Ativar MCP e toda a função que copiava o comando Desktop Commander e abria o VS foram removidos por redundância. Abrir VS continua disponível diretamente e a telemetria MCP permanece independente e inalterada. Produto publicado em 05eb3b6f53c454e03b40ae89749ba3cad94247cd; Pages run 35418334887 concluiu success. O artefato publicado passou node --check, não contém referências a Ativar MCP/activateMcp/MCP_COMMAND e preserva telemetry.js e os botões Abrir VS.
+Fluxo de encerramento do launcher restaurado em 0679384c88d2d005d03e491856029d0faf9a67f3 (Pages 35423705022 success). Em seguida, o resultado aprovado pelo //crivoT foi materializado até o limite executável: o GitHub Pages público deixou de entregar a UI operacional e agora mostra somente uma tela inócua de acesso privado; foi criado secure-gateway/ com GitHub OAuth + PKCE S256, autorização pelo GitHub user ID estável 318746268, sessão HMAC em cookie Secure/HttpOnly/SameSite=Lax, token OAuth usado somente server-side para /user e descartado, assets operacionais fixados na revisão 0679384c88d2d005d03e491856029d0faf9a67f3, mantendo PATs de Codespaces e chaves de telemetria separados no navegador. Produto atual bd447279c9456240f7062ba089fc5c98f3ffef61; Secure Gateway CI 35424893846 success; Pages 35424892998 success; artefato Pages confirmado sem referências operacionais no index.html.
 
 ## Próxima ação
 
-Nenhuma correção material imediata pendente no launcher.
+Retomar o mesmo //gravar sem nova aprovação quando houver acesso a um host serverless/HTTPS e à configuração de um GitHub OAuth App: registrar callback https://<host>/oauth/callback, configurar GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, SESSION_SECRET, APP_ORIGIN e ALLOWED_GITHUB_USER_ID, publicar secure-gateway/, validar conta autorizada, conta não autorizada (403), logout e entrega autenticada do launcher. Manter GitHub Pages público não operacional; não substituir os PATs/chaves de telemetria por OAuth nesta parcela.
 
 ## Checkpoint seguro
 
-CTML mantém os controles Navegador/Computador, Abrir VS e Encerrar Codespace, com GitHub/MCP observados por telemetria. O controle Ativar MCP foi removido porque apenas duplicava Abrir VS com cópia do comando remote. Produto desta limpeza: 05eb3b6f53c454e03b40ae89749ba3cad94247cd; Pages 35418334887 success. A telemetria 8766 e as chaves/PATs permanecem separadas e não foram alteradas.
+O //gravar de autenticação continua aberto e autorizado, porém estacionado em checkpoint seguro. main contém bd447279c9456240f7062ba089fc5c98f3ffef61. O endereço github.io não entrega mais o painel operacional. secure-gateway/src/worker.js implementa OAuth GitHub com PKCE, allowlist pelo ID 318746268 e sessão HttpOnly; secure-gateway/test.mjs prova redirect sem sessão, callback autorizado, asset autenticado e 403 para ID divergente. secure-gateway/wrangler.jsonc contém somente placeholders/vars não secretas; GITHUB_CLIENT_SECRET e SESSION_SECRET nunca foram commitidos. Os assets operacionais estão pinados em 0679384c88d2d005d03e491856029d0faf9a67f3. Ao retomar, não refazer esta implementação nem pedir nova aprovação: executar somente setup/deploy externo, E2E real, atualizar ASSET_REVISION se houver novo produto aprovado e fechar continuidade.
 
 ## Bloqueios
 
-- Nenhum bloqueio material conhecido.
+- Fechamento live do gateway depende de recursos externos não disponíveis ao executor atual: criação/configuração de GitHub OAuth App e um host serverless/HTTPS (por exemplo Cloudflare Workers) com armazenamento de secrets. Nenhum conector de implantação desse provedor está disponível nesta sessão e nenhuma credencial/host foi fornecido.
 
 ## Validações registradas
 
-- `pass` — Launcher telemetry source and Pages deployment (`fcb5cb50974ff903091086ccb0352f6a6ad6c42d`)
-- `pass` — Central Midia MCP bridge dependency after rebuild (`fcb5cb50974ff903091086ccb0352f6a6ad6c42d`)
-- `pass` — Authenticated launcher UI end-to-end telemetry (`8663cbd492500b67edce72dbbdc110dfc51d0f3b`)
-- `pass` — Private-port authentication hardening static validation (`c888947b5b8b73558d13386f60b29376e1cfac52`)
-- `pass` — Private-port authentication hardening Pages deployment (`35914d8beb52720e46129e7519f848b159ae6a11`)
-- `pass` — Scoped telemetry fallback Pages deployment (`8663cbd492500b67edce72dbbdc110dfc51d0f3b`)
-- `pass` — Redundant MCP activation control removal and Pages deployment (`05eb3b6f53c454e03b40ae89749ba3cad94247cd`)
+- `pass` — Codespace shutdown controls and progress trail (`0679384c88d2d005d03e491856029d0faf9a67f3`)
+- `pass` — Public Pages operational launcher withdrawal (`bd447279c9456240f7062ba089fc5c98f3ffef61`)
+- `pass` — Authenticated gateway static and mocked OAuth flow (`bd447279c9456240f7062ba089fc5c98f3ffef61`)
+- `pass` — Authentication secrets boundary (`bd447279c9456240f7062ba089fc5c98f3ffef61`)
+- `blocked` — Real authenticated host end-to-end (`bd447279c9456240f7062ba089fc5c98f3ffef61`)

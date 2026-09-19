@@ -13,85 +13,69 @@
     "status": "active"
   },
   "execution": {
-    "active_task_id": null,
+    "active_task_id": "ctml-authenticated-launcher-gateway-20260919",
     "responsible_writer": null,
-    "current_environment": null,
+    "current_environment": "github-pages-plus-secure-gateway-source",
     "executor_class": null
   },
   "work": {
-    "last_completed": "Limpeza de interface concluída: os dois botões Ativar MCP e toda a função que copiava o comando Desktop Commander e abria o VS foram removidos por redundância. Abrir VS continua disponível diretamente e a telemetria MCP permanece independente e inalterada. Produto publicado em 05eb3b6f53c454e03b40ae89749ba3cad94247cd; Pages run 35418334887 concluiu success. O artefato publicado passou node --check, não contém referências a Ativar MCP/activateMcp/MCP_COMMAND e preserva telemetry.js e os botões Abrir VS.",
-    "next_action": "Nenhuma correção material imediata pendente no launcher.",
-    "blockers": [],
-    "safe_resume_checkpoint": "CTML mantém os controles Navegador/Computador, Abrir VS e Encerrar Codespace, com GitHub/MCP observados por telemetria. O controle Ativar MCP foi removido porque apenas duplicava Abrir VS com cópia do comando remote. Produto desta limpeza: 05eb3b6f53c454e03b40ae89749ba3cad94247cd; Pages 35418334887 success. A telemetria 8766 e as chaves/PATs permanecem separadas e não foram alteradas."
+    "last_completed": "Fluxo de encerramento do launcher restaurado em 0679384c88d2d005d03e491856029d0faf9a67f3 (Pages 35423705022 success). Em seguida, o resultado aprovado pelo //crivoT foi materializado até o limite executável: o GitHub Pages público deixou de entregar a UI operacional e agora mostra somente uma tela inócua de acesso privado; foi criado secure-gateway/ com GitHub OAuth + PKCE S256, autorização pelo GitHub user ID estável 318746268, sessão HMAC em cookie Secure/HttpOnly/SameSite=Lax, token OAuth usado somente server-side para /user e descartado, assets operacionais fixados na revisão 0679384c88d2d005d03e491856029d0faf9a67f3, mantendo PATs de Codespaces e chaves de telemetria separados no navegador. Produto atual bd447279c9456240f7062ba089fc5c98f3ffef61; Secure Gateway CI 35424893846 success; Pages 35424892998 success; artefato Pages confirmado sem referências operacionais no index.html.",
+    "next_action": "Retomar o mesmo //gravar sem nova aprovação quando houver acesso a um host serverless/HTTPS e à configuração de um GitHub OAuth App: registrar callback https://<host>/oauth/callback, configurar GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, SESSION_SECRET, APP_ORIGIN e ALLOWED_GITHUB_USER_ID, publicar secure-gateway/, validar conta autorizada, conta não autorizada (403), logout e entrega autenticada do launcher. Manter GitHub Pages público não operacional; não substituir os PATs/chaves de telemetria por OAuth nesta parcela.",
+    "blockers": [
+      "Fechamento live do gateway depende de recursos externos não disponíveis ao executor atual: criação/configuração de GitHub OAuth App e um host serverless/HTTPS (por exemplo Cloudflare Workers) com armazenamento de secrets. Nenhum conector de implantação desse provedor está disponível nesta sessão e nenhuma credencial/host foi fornecido."
+    ],
+    "safe_resume_checkpoint": "O //gravar de autenticação continua aberto e autorizado, porém estacionado em checkpoint seguro. main contém bd447279c9456240f7062ba089fc5c98f3ffef61. O endereço github.io não entrega mais o painel operacional. secure-gateway/src/worker.js implementa OAuth GitHub com PKCE, allowlist pelo ID 318746268 e sessão HttpOnly; secure-gateway/test.mjs prova redirect sem sessão, callback autorizado, asset autenticado e 403 para ID divergente. secure-gateway/wrangler.jsonc contém somente placeholders/vars não secretas; GITHUB_CLIENT_SECRET e SESSION_SECRET nunca foram commitidos. Os assets operacionais estão pinados em 0679384c88d2d005d03e491856029d0faf9a67f3. Ao retomar, não refazer esta implementação nem pedir nova aprovação: executar somente setup/deploy externo, E2E real, atualizar ASSET_REVISION se houver novo produto aprovado e fechar continuidade."
   },
   "validation": {
-    "last_verified_revision": "05eb3b6f53c454e03b40ae89749ba3cad94247cd",
+    "last_verified_revision": "bd447279c9456240f7062ba089fc5c98f3ffef61",
     "checks": [
       {
-        "name": "Launcher telemetry source and Pages deployment",
+        "name": "Codespace shutdown controls and progress trail",
         "status": "pass",
-        "evidence": "GitHub Pages run 35368816913 concluiu success para head_sha fcb5cb50974ff903091086ccb0352f6a6ad6c42d. telemetry.js baixado da revisão canônica e do Pages passou node --check nos dois casos; os SHA-256 foram idênticos (3527fccd9397550bd2a718e7138693776d34e97f17c814a53bbf489bd0cdb921), confirmando deploy exato do script validado.",
-        "verified_revision": "fcb5cb50974ff903091086ccb0352f6a6ad6c42d",
-        "environment": "github-pages-and-codespace-validation",
-        "verified_at": "2026-09-18T21:30:35Z",
-        "note": "Prova do artefato estático publicado; não inclui a sessão autenticada do navegador do usuário."
-      },
-      {
-        "name": "Central Midia MCP bridge dependency after rebuild",
-        "status": "pass",
-        "evidence": "Nos Codespaces Browser e Computer de /mg/ctm, após rebuild a partir de d3c4ab18e37b02b3cac7c1d17c505c4642e07882, /health reportou online=true, local=true, remote=online e broadcast=true; /usage reportou available=true, leftPct=98.0 e usedPct=2.0; a rota privada local da porta 3000 e o preflight CORS para https://nullhare.github.io responderam conforme o contrato consumido por telemetry.js.",
-        "verified_revision": "fcb5cb50974ff903091086ccb0352f6a6ad6c42d",
-        "environment": "github-codespaces-browser-and-computer",
-        "verified_at": "2026-09-18T21:30:35Z",
-        "note": "Evidência de dependência cross-repo: produto do launcher permanece em fcb5cb; runtime do bridge foi observado em /mg/ctm d3c4ab18e37b02b3cac7c1d17c505c4642e07882."
-      },
-      {
-        "name": "Authenticated launcher UI end-to-end telemetry",
-        "status": "pass",
-        "evidence": "Após promoção do fallback 8766, captura do navegador do usuário mostrou Browser e Computer com sinais GitHub verdes, sinais MCP verdes, MCP 2/2 ativos e uso remoto 4%. DevTools Network mostrou o billing GitHub em 403, mas não health MCP em erro. A travessia de telemetria separada ficou funcional sem PAT encaminhado ao endpoint MCP.",
-        "verified_revision": "8663cbd492500b67edce72dbbdc110dfc51d0f3b",
-        "environment": "user-browser",
-        "verified_at": "2026-09-19T02:51:40Z",
-        "note": "E2E do launcher concluído. Billing GitHub é preocupação separada de permissão do token."
-      },
-      {
-        "name": "Private-port authentication hardening static validation",
-        "status": "pass",
-        "evidence": "Revisão de produto criada com remoção de X-Github-Token do bridge privado, credentials=include como único mecanismo de fetch ao port, backoff exponencial separado por health/usage e mensagens explícitas de autenticação/reconexão. No checkout local exato, node --check telemetry.js, node --check app.js, git diff --check e asserts estáticos de ausência de X-Github-Token passaram.",
-        "verified_revision": "c888947b5b8b73558d13386f60b29376e1cfac52",
-        "environment": "fresh-checkout-codespace-static-validation",
-        "verified_at": "2026-09-18T23:36:58Z",
-        "note": "Validação estática da implementação; não substitui a prova end-to-end da sessão autenticada no navegador do usuário."
-      },
-      {
-        "name": "Private-port authentication hardening Pages deployment",
-        "status": "pass",
-        "evidence": "GitHub Pages run 35406445389, head_sha 35914d8beb52720e46129e7519f848b159ae6a11, concluiu success após a publicação canônica que contém o produto c888947b5b8b73558d13386f60b29376e1cfac52 e a continuidade correspondente.",
-        "verified_revision": "35914d8beb52720e46129e7519f848b159ae6a11",
+        "evidence": "stopOne() e waitStopped() foram restaurados sem reintroduzir Ativar MCP. Pages run 35423705022 concluiu success para 0679384c88d2d005d03e491856029d0faf9a67f3.",
+        "verified_revision": "0679384c88d2d005d03e491856029d0faf9a67f3",
         "environment": "github-pages",
-        "verified_at": "2026-09-18T23:38:13Z",
-        "note": "Prova de publicação estática. A única validação material ainda pendente é a sessão autenticada end-to-end no navegador do usuário."
+        "verified_at": "2026-09-19T05:21:10Z",
+        "note": "Corrige a regressão causada pela limpeza anterior do controle MCP."
       },
       {
-        "name": "Scoped telemetry fallback Pages deployment",
+        "name": "Public Pages operational launcher withdrawal",
         "status": "pass",
-        "evidence": "GitHub Pages run 35414389778 publicou head_sha 8663cbd492500b67edce72dbbdc110dfc51d0f3b com conclusion success.",
-        "verified_revision": "8663cbd492500b67edce72dbbdc110dfc51d0f3b",
-        "environment": "github-pages",
-        "verified_at": "2026-09-19T02:01:03Z",
-        "note": "Publicação do launcher que consome a porta 8766."
+        "evidence": "Pages run 35424892998 concluiu success para bd447279c9456240f7062ba089fc5c98f3ffef61. O artefato github-pages foi baixado e seu index.html contém a tela 'Acesso privado' e não contém app.js, telemetry.js, Encerrar Codespace ou Abrir VS.",
+        "verified_revision": "bd447279c9456240f7062ba089fc5c98f3ffef61",
+        "environment": "github-pages-artifact",
+        "verified_at": "2026-09-19T05:47:55Z",
+        "note": "Arquivos-fonte ainda pertencem ao repositório público, mas a origem Pages não entrega uma rota HTML operacional do launcher. Credenciais permanecem fora do repositório."
       },
       {
-        "name": "Redundant MCP activation control removal and Pages deployment",
+        "name": "Authenticated gateway static and mocked OAuth flow",
         "status": "pass",
-        "evidence": "app.js e index.html removeram os dois controles Ativar MCP, copyMcpCommand/activateMcp e listeners associados. node --check passou; o Pages publicado não contém referências residuais e preserva telemetry.js e os botões Abrir VS. Pages run 35418334887 concluiu success.",
-        "verified_revision": "05eb3b6f53c454e03b40ae89749ba3cad94247cd",
-        "environment": "github-pages-plus-static-validation",
-        "verified_at": "2026-09-19T03:24:01Z",
-        "note": "Nenhuma mudança na telemetria MCP ou nas credenciais."
+        "evidence": "Secure Gateway CI run 35424893846 concluiu success para bd447279c9456240f7062ba089fc5c98f3ffef61. O gate executa node --check e secure-gateway/test.mjs, cobrindo PKCE S256, cookie OAuth HttpOnly/SameSite=Lax, sessão assinada, redirect sem sessão, entrega de asset com sessão e HTTP 403 para GitHub user ID não autorizado.",
+        "verified_revision": "bd447279c9456240f7062ba089fc5c98f3ffef61",
+        "environment": "github-actions",
+        "verified_at": "2026-09-19T05:47:41Z",
+        "note": "Teste usa fetch mockado; não substitui o E2E com OAuth App e host reais."
+      },
+      {
+        "name": "Authentication secrets boundary",
+        "status": "pass",
+        "evidence": "O repositório contém apenas nomes de secrets e placeholders de configuração. GITHUB_CLIENT_SECRET e SESSION_SECRET são requeridos em runtime pelo gateway e o CI verifica ausência de valores commitidos fora do teste isolado.",
+        "verified_revision": "bd447279c9456240f7062ba089fc5c98f3ffef61",
+        "environment": "github-actions-plus-source-review",
+        "verified_at": "2026-09-19T05:47:41Z",
+        "note": "PATs do launcher e chaves de telemetria não foram movidos nem alterados por esta evolução."
+      },
+      {
+        "name": "Real authenticated host end-to-end",
+        "status": "blocked",
+        "evidence": "Código e testes estão prontos, porém não há nesta sessão um host serverless/HTTPS conectado nem capacidade de criar/configurar o GitHub OAuth App e seus secrets.",
+        "verified_revision": "bd447279c9456240f7062ba089fc5c98f3ffef61",
+        "environment": "external-deployment-pending",
+        "verified_at": "2026-09-19T05:48:37Z",
+        "note": "Retomar o mesmo //gravar quando o recurso externo existir; não reabrir decisão intelectual já aprovada."
       }
     ]
   },
   "releases": [],
-  "updated_at": "2026-09-19T03:24:01Z"
+  "updated_at": "2026-09-19T05:48:37Z"
 }
