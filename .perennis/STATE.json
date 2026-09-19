@@ -15,14 +15,14 @@
   "execution": {
     "active_task_id": null,
     "responsible_writer": null,
-    "current_environment": "vercel-production-authenticated-plus-github-pages-generic-404",
+    "current_environment": "vercel-production-authenticated-plus-github-pages-unpublished",
     "executor_class": null
   },
   "work": {
-    "last_completed": "O launcher operacional foi retirado do GitHub Pages público, que permanece em 404 genérico, e passou a ser entregue pelo host autenticado https://centralmidia-launcher.vercel.app. O deployment de produção Vercel está READY sobre a revisão 3105511ca6db6751ca1330f668c059ca45a7ca42. O GitHub OAuth App foi configurado com callback https://centralmidia-launcher.vercel.app/oauth/callback; as variáveis runtime foram aplicadas em Production. O fluxo real autorizado foi concluído com sucesso: logs Vercel registraram /oauth/callback 302 seguido de / 200 e app.js, telemetry.js e styles.css 200, e o usuário confirmou visualmente o launcher aberto após autorizar no GitHub. O Client ID incorreto por transcrição foi corrigido antes desta validação final.",
-    "next_action": "Nenhuma mudança material pendente neste owner. O endereço operacional é https://centralmidia-launcher.vercel.app. No mesmo //gravar ainda permanece apenas a validação live da telemetria no owner CTM quando os Codespaces puderem iniciar novamente; não reabrir nem refazer o gateway CTML.",
+    "last_completed": "O launcher operacional está em https://centralmidia-launcher.vercel.app, protegido por GitHub OAuth e validado em fluxo real autorizado. O antigo GitHub Pages foi explicitamente despublicado pelo usuário em Settings > Pages > Unpublish site; a URL https://nullhare.github.io/centralmidia-launcher/ permanece apenas como 404 genérico do GitHub, sem servir o launcher. O repositório não contém workflow próprio de Pages; somente secure-gateway-ci.yml permanece em .github/workflows.",
+    "next_action": "Nenhuma mudança material pendente neste owner. No mesmo //gravar permanece somente a validação live da telemetria no owner CTM quando os Codespaces puderem iniciar novamente; não reabrir nem refazer o gateway CTML.",
     "blockers": [],
-    "safe_resume_checkpoint": "Gateway CTML concluído e vivo em produção. GitHub Pages continua inexpressivo; Vercel exige GitHub OAuth, autoriza pelo user ID estável 318746268 e entrega os assets pinados da revisão 0679384c88d2d005d03e491856029d0faf9a67f3 após sessão válida. Secrets permanecem somente no ambiente Vercel. O mesmo //gravar não está fechado globalmente porque CTM ainda aguarda validação de telemetria nos Codespaces indisponíveis por cota mensal."
+    "safe_resume_checkpoint": "CTML está concluído: Vercel é o único host operacional do launcher, GitHub OAuth está ativo, assets autenticados foram validados e GitHub Pages foi despublicado. A URL github.io antiga pode continuar existindo como endereço do GitHub e responder 404; isso não significa que o Pages esteja publicando o aplicativo. O mesmo //gravar continua aberto apenas pela pendência CTM de validar a telemetria 8766 em runtime vivo quando a cota de Codespaces permitir."
   },
   "validation": {
     "last_verified_revision": "3105511ca6db6751ca1330f668c059ca45a7ca42",
@@ -30,20 +30,11 @@
       {
         "name": "Codespace shutdown controls and progress trail",
         "status": "pass",
-        "evidence": "stopOne() e waitStopped() foram restaurados sem reintroduzir controles MCP redundantes; Pages correspondente concluiu success.",
+        "evidence": "stopOne() e waitStopped() foram restaurados sem reintroduzir controles MCP redundantes.",
         "verified_revision": "0679384c88d2d005d03e491856029d0faf9a67f3",
-        "environment": "github-pages",
+        "environment": "github-repository",
         "verified_at": "2026-09-19T05:21:10Z",
         "note": "Base funcional pinada pelo gateway autenticado."
-      },
-      {
-        "name": "Public Pages generic 404 minimization",
-        "status": "pass",
-        "evidence": "O Pages público ficou sem index.html operacional e com 404 genérico; CI/Pages passaram na revisão que consolidou a minimização.",
-        "verified_revision": "9b139110f25db74e57db15e6c6a6098f45575674",
-        "environment": "github-pages-plus-ci",
-        "verified_at": "2026-09-19T14:49:14Z",
-        "note": "A origem pública não é rota alternativa para o launcher."
       },
       {
         "name": "Authenticated gateway static and mocked security flow",
@@ -52,37 +43,46 @@
         "verified_revision": "9b139110f25db74e57db15e6c6a6098f45575674",
         "environment": "github-actions",
         "verified_at": "2026-09-19T14:48:59Z",
-        "note": "O caso de conta não autorizada é coberto por teste automatizado; não foi usado um segundo login GitHub real em produção."
+        "note": "O caso de conta não autorizada é coberto por teste automatizado."
       },
       {
         "name": "Vercel production deployment",
         "status": "pass",
-        "evidence": "Projeto centralmidia-launcher em Vercel possui deployment production READY e alias estável centralmidia-launcher.vercel.app sobre 3105511ca6db6751ca1330f668c059ca45a7ca42.",
+        "evidence": "Projeto centralmidia-launcher em Vercel possui deployment production READY e alias estável centralmidia-launcher.vercel.app.",
         "verified_revision": "3105511ca6db6751ca1330f668c059ca45a7ca42",
         "environment": "vercel-production",
         "verified_at": "2026-09-19T16:23:14Z",
-        "note": "Variáveis de autenticação estão configuradas somente no ambiente Production."
+        "note": "Variáveis de autenticação estão configuradas em Production."
       },
       {
         "name": "Real GitHub OAuth allowed-account end-to-end",
         "status": "pass",
-        "evidence": "Após autorização real no GitHub, runtime logs Vercel registraram GET /oauth/callback 302, GET / 200 e GET /app.js, /telemetry.js e /styles.css 200; o usuário confirmou visualmente o painel aberto.",
+        "evidence": "Após autorização real no GitHub, runtime Vercel registrou GET /oauth/callback 302, GET / 200 e assets 200; o usuário confirmou visualmente o painel aberto.",
         "verified_revision": "3105511ca6db6751ca1330f668c059ca45a7ca42",
         "environment": "vercel-production-plus-user-browser",
         "verified_at": "2026-09-19T16:23:49Z",
-        "note": "Prova real do caminho autorizado e da entrega protegida do launcher."
+        "note": "Prova real do caminho autorizado."
       },
       {
         "name": "Unauthenticated and logout redirect path",
         "status": "pass",
-        "evidence": "A raiz sem sessão redireciona para o login GitHub com client_id e callback corretos; /logout limpa a sessão e retorna ao fluxo de login conforme o gateway de produção.",
+        "evidence": "A raiz sem sessão redireciona para o login GitHub com client_id e callback corretos; /logout limpa a sessão e retorna ao fluxo de login.",
         "verified_revision": "3105511ca6db6751ca1330f668c059ca45a7ca42",
         "environment": "vercel-production",
         "verified_at": "2026-09-19T16:28:07Z",
         "note": "Validação HTTP de produção sem expor secrets."
+      },
+      {
+        "name": "GitHub Pages unpublished",
+        "status": "pass",
+        "evidence": "O usuário acionou Unpublish site em Settings > Pages e confirmou em seguida que https://nullhare.github.io/centralmidia-launcher/ exibe apenas o 404 genérico. A árvore .github/workflows contém somente secure-gateway-ci.yml, sem workflow próprio de Pages.",
+        "verified_revision": "9d47bbb5af7395ef683de5ab2e37eacb80f857d6",
+        "environment": "github-settings-plus-user-browser",
+        "verified_at": "2026-09-19T16:54:00Z",
+        "note": "A permanência do endereço github.io com 404 é normal; o conteúdo do launcher não é mais publicado ali."
       }
     ]
   },
   "releases": [],
-  "updated_at": "2026-09-19T16:29:00Z"
+  "updated_at": "2026-09-19T16:54:00Z"
 }
