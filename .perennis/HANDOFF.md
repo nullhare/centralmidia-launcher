@@ -13,19 +13,19 @@
 - Versão do projeto: `não declarada`
 - Tarefa ativa: `nenhuma`
 - Revisão verificada: `3105511ca6db6751ca1330f668c059ca45a7ca42`
-- Estado atualizado em: `2026-09-19T16:29:00Z`
+- Estado atualizado em: `2026-09-19T16:54:00Z`
 
 ## Último resultado
 
-O launcher operacional foi retirado do GitHub Pages público, que permanece em 404 genérico, e passou a ser entregue pelo host autenticado `https://centralmidia-launcher.vercel.app`. O deployment de produção Vercel está READY sobre a revisão `3105511ca6db6751ca1330f668c059ca45a7ca42`. O GitHub OAuth App foi configurado com callback `https://centralmidia-launcher.vercel.app/oauth/callback`; as variáveis runtime foram aplicadas em Production. O fluxo real autorizado foi concluído com sucesso: logs Vercel registraram `/oauth/callback` 302 seguido de `/` 200 e `app.js`, `telemetry.js` e `styles.css` 200, e o usuário confirmou visualmente o launcher aberto após autorizar no GitHub. O Client ID incorreto por transcrição foi corrigido antes desta validação final.
+O launcher operacional está em `https://centralmidia-launcher.vercel.app`, protegido por GitHub OAuth e validado em fluxo real autorizado. O antigo GitHub Pages foi explicitamente despublicado pelo usuário em `Settings > Pages > Unpublish site`; a URL `https://nullhare.github.io/centralmidia-launcher/` permanece apenas como 404 genérico do GitHub, sem servir o launcher. O repositório não contém workflow próprio de Pages; somente `secure-gateway-ci.yml` permanece em `.github/workflows`.
 
 ## Próxima ação
 
-Nenhuma mudança material pendente neste owner. O endereço operacional é `https://centralmidia-launcher.vercel.app`. No mesmo `//gravar` ainda permanece apenas a validação live da telemetria no owner CTM quando os Codespaces puderem iniciar novamente; não reabrir nem refazer o gateway CTML.
+Nenhuma mudança material pendente neste owner. No mesmo `//gravar` permanece somente a validação live da telemetria no owner CTM quando os Codespaces puderem iniciar novamente; não reabrir nem refazer o gateway CTML.
 
 ## Checkpoint seguro
 
-Gateway CTML concluído e vivo em produção. GitHub Pages continua inexpressivo; Vercel exige GitHub OAuth, autoriza pelo user ID estável `318746268` e entrega os assets pinados da revisão `0679384c88d2d005d03e491856029d0faf9a67f3` após sessão válida. Secrets permanecem somente no ambiente Vercel. O mesmo `//gravar` não está fechado globalmente porque CTM ainda aguarda validação de telemetria nos Codespaces indisponíveis por cota mensal.
+CTML está concluído: Vercel é o único host operacional do launcher, GitHub OAuth está ativo, assets autenticados foram validados e GitHub Pages foi despublicado. A URL `github.io` antiga pode continuar existindo como endereço do GitHub e responder 404; isso não significa que o Pages esteja publicando o aplicativo. O mesmo `//gravar` continua aberto apenas pela pendência CTM de validar a telemetria 8766 em runtime vivo quando a cota de Codespaces permitir.
 
 ## Bloqueios
 
@@ -34,8 +34,8 @@ Gateway CTML concluído e vivo em produção. GitHub Pages continua inexpressivo
 ## Validações registradas
 
 - `pass` — Codespace shutdown controls and progress trail (`0679384c88d2d005d03e491856029d0faf9a67f3`)
-- `pass` — Public Pages generic 404 minimization (`9b139110f25db74e57db15e6c6a6098f45575674`)
 - `pass` — Authenticated gateway static and mocked security flow (`9b139110f25db74e57db15e6c6a6098f45575674`)
 - `pass` — Vercel production deployment (`3105511ca6db6751ca1330f668c059ca45a7ca42`)
 - `pass` — Real GitHub OAuth allowed-account end-to-end (`3105511ca6db6751ca1330f668c059ca45a7ca42`)
 - `pass` — Unauthenticated and logout redirect path (`3105511ca6db6751ca1330f668c059ca45a7ca42`)
+- `pass` — GitHub Pages unpublished (`9d47bbb5af7395ef683de5ab2e37eacb80f857d6`)
