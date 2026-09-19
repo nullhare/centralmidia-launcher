@@ -226,6 +226,16 @@
     } catch (_) {}
   }
 
+  function navigateLaunchTarget(tab, url) {
+    try {
+      if (tab && !tab.closed) {
+        tab.location.replace(url);
+        return;
+      }
+    } catch (_) {}
+    window.location.assign(url);
+  }
+
   async function refreshBrowserConfig() {
     if (!getTokenFor(BROWSER_DEVCONTAINER)) { if (!busyPaths.has(BROWSER_DEVCONTAINER)) setStatus('● Token do GitHub não configurado','bad'); paintSignal(BROWSER_DEVCONTAINER,null); paintMcpSignal(BROWSER_DEVCONTAINER,null); return; }
     if (!busyPaths.has(BROWSER_DEVCONTAINER)) setStatus('Verificando navegador…');
@@ -337,8 +347,7 @@
     const ui = uiForPath(path);
     if (!getTokenFor(path)) { const {card,input} = tokenUi(path); card.open = true; setStateForPath(path,'● Token do GitHub não configurado','bad'); window.setTimeout(()=>input.focus(),0); return; }
     const tab = window.open('about:blank','_blank');
-    if (!tab) return setStateForPath(path,'Libere pop-ups para este site.','bad');
-    popupMessage(tab,title,description); try { tab.opener = null; } catch (_) {}
+    if (tab) { popupMessage(tab,title,description); try { tab.opener = null; } catch (_) {} }
     const labels = ['Localizado','Ligando','GitHub pronto',`Abrindo ${targetLabel}`];
     setBusy(path,true,targetLabel === 'VS' ? 'vs' : 'open');
     paintTrail(path,labels,0,-1);
@@ -353,12 +362,15 @@
       setStateForPath(path,`PRONTO · ${spaceName(ready)}${machineSummary(ready) ? ` · ${machineSummary(ready)}` : ''}`,'good');
       paintTrail(path,labels,3,2);
       await sleep(targetLabel === 'VS' ? 1200 : 7000);
-      tab.location.replace(targetLabel === 'VS' ? (ready.web_url || `https://${ready.name}.github.dev/`) : `https://${ready.name}-3000.app.github.dev`);
+      const targetUrl = targetLabel === 'VS' ? (ready.web_url || `https://${ready.name}.github.dev/`) : `https://${ready.name}-3000.app.github.dev`;
+      navigateLaunchTarget(tab,targetUrl);
       finishTrail(path,labels);
       setStateForPath(path,readyView.text,readyView.type);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Não foi possível concluir a operação.';
-      setStateForPath(path,`● ${message}`,'bad'); failTrail(path,labels,Math.min(3,Math.max(0,ui.trail.children.length - 1))); popupMessage(tab,'Não foi possível abrir',message);
+      setStateForPath(path,`● ${message}`,'bad');
+      failTrail(path,labels,Math.min(3,Math.max(0,ui.trail.children.length - 1)));
+      if (tab && !tab.closed) popupMessage(tab,'Não foi possível abrir',message);
     } finally { setBusy(path,false); refreshConfig(); }
   }
 
