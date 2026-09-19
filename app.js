@@ -226,7 +226,6 @@
     } catch (_) {}
   }
 
-
   async function refreshBrowserConfig() {
     if (!getTokenFor(BROWSER_DEVCONTAINER)) { if (!busyPaths.has(BROWSER_DEVCONTAINER)) setStatus('● Token do GitHub não configurado','bad'); paintSignal(BROWSER_DEVCONTAINER,null); paintMcpSignal(BROWSER_DEVCONTAINER,null); return; }
     if (!busyPaths.has(BROWSER_DEVCONTAINER)) setStatus('Verificando navegador…');
@@ -363,6 +362,70 @@
     } finally { setBusy(path,false); refreshConfig(); }
   }
 
+  async function waitStopped(space,path,labels) {
+    let current = space;
+    const deadline = Date.now() + 180000;
+    while (Date.now() < deadline) {
+      if (isStoppedState(current?.state)) {
+        rememberSpace(path,current);
+        finishTrail(path,labels);
+        const view = spaceView(current);
+        setStateForPath(path,view.text,view.type);
+        return current;
+      }
+      paintTrail(path,labels,2,1);
+      setStateForPath(path,`ENCERRANDO · ${spaceName(current)}`,'working');
+      await sleep(2500);
+      const list = await listCodespaces(path);
+      current = list.find(item => item.name === space.name) || current;
+      rememberSpace(path,current);
+    }
+    throw new Error('O Codespace demorou demais para desligar.');
+  }
+
+  async function stopOne(path,openConfigOnMissing=false) {
+    if (!getTokenFor(path)) {
+      const {card,input} = tokenUi(path);
+      if (openConfigOnMissing) card.open = true;
+      setStateForPath(path,'● Token do GitHub não configurado','bad');
+      window.setTimeout(()=>input.focus(),0);
+      return false;
+    }
+    const labels = ['Localizado','Solicitado','Encerrando','Desligado'];
+    setBusy(path,true,'stop');
+    paintTrail(path,labels,0,-1);
+    try {
+      setStateForPath(path,'Localizando Codespace…','working');
+      const space = await getSpace(path);
+      if (!space) {
+        if (openConfigOnMissing) tokenUi(path).card.open = true;
+        throw new Error('Codespace ainda não foi criado.');
+      }
+      rememberSpace(path,space);
+      paintTrail(path,labels,1,0);
+      if (isStoppedState(space.state)) {
+        finishTrail(path,labels);
+        const view = spaceView(space);
+        setStateForPath(path,view.text,view.type);
+        return true;
+      }
+      if (!isStoppingState(space.state)) {
+        setStateForPath(path,`ENCERRANDO · solicitação enviada para ${spaceName(space)}`,'working');
+        await api(path,space.stop_url,{method:'POST'},[409]);
+      }
+      paintTrail(path,labels,2,1);
+      await waitStopped(space,path,labels);
+      return true;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Não foi possível desligar.';
+      setStateForPath(path,`● ${message}`,'bad');
+      failTrail(path,labels,2);
+      return false;
+    } finally {
+      setBusy(path,false);
+      refreshConfig();
+    }
+  }
 
   function startAndOpen() { return openSpace(BROWSER_DEVCONTAINER,'Iniciando navegador…','Ligando o Codespace do navegador. Esta aba abrirá automaticamente.','Chrome'); }
   function openComputer() { return openSpace(COMPUTER_DEVCONTAINER,'Iniciando computador…','Ligando o Codespace do RustDesk. Esta aba abrirá automaticamente.','RustDesk',true); }
