@@ -13,88 +13,76 @@
     "status": "active"
   },
   "execution": {
-    "active_task_id": "ctml-authenticated-launcher-gateway-20260919",
+    "active_task_id": null,
     "responsible_writer": null,
-    "current_environment": "github-pages-plus-vercel-ready-secure-gateway-source",
+    "current_environment": "vercel-production-authenticated-plus-github-pages-generic-404",
     "executor_class": null
   },
   "work": {
-    "last_completed": "Fluxo de encerramento do launcher permanece restaurado em 0679384c88d2d005d03e491856029d0faf9a67f3. A origem GitHub Pages permanece reduzida a 404 genérico sem pistas do produto. O gateway autenticado já tinha GitHub OAuth + PKCE S256, autorização pelo GitHub user ID estável 318746268, sessão HMAC em cookie Secure/HttpOnly/SameSite=Lax e assets operacionais fixados na revisão 0679384c88d2d005d03e491856029d0faf9a67f3. Nesta continuação do mesmo //gravar foi adicionada a entrada de runtime para Vercel em middleware.js, delegando todas as requisições ao worker autenticado, mais secure-gateway/vercel.test.mjs e gates de CI para impedir reintrodução de index.html público ou pistas no 404. Produto atual 9b139110f25db74e57db15e6c6a6098f45575674; Secure Gateway CI 35449874425 success; Pages 35449873657 success. O acesso final, quando publicado, será pela URL de produção do host Vercel na raiz /, que redireciona sem sessão para /login, autentica no GitHub e retorna por /oauth/callback.",
-    "next_action": "Retomar este mesmo //gravar sem nova aprovação assim que a integração Vercel estiver conectada a uma conta/time: criar/publicar o projeto a partir da raiz do repositório, obter a URL de produção, registrar um GitHub OAuth App com callback https://<host>/oauth/callback, configurar GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, SESSION_SECRET, APP_ORIGIN, ALLOWED_GITHUB_USER_ID e ASSET_REVISION no host, e então validar E2E conta autorizada, conta não autorizada (403), logout e entrega autenticada do launcher. O endereço de uso será a raiz da URL de produção Vercel; o github.io deve continuar apenas como 404 genérico.",
-    "blockers": [
-      "A integração Vercel está disponível no diretório, porém não está conectada a uma conta/time nesta sessão: list_teams retornou zero times e a ação de deploy não está disponível enquanto a conexão não for concluída pelo usuário.",
-      "A criação/configuração do GitHub OAuth App é uma ação de conta que o conector GitHub atual não expõe. Depois de existir a URL de produção, o OAuth App precisa ser registrado com callback https://<host>/oauth/callback e seu client secret fornecido ao host como secret, nunca commitado."
-    ],
-    "safe_resume_checkpoint": "O //gravar de autenticação continua aberto e autorizado. main contém 9b139110f25db74e57db15e6c6a6098f45575674. GitHub Pages continua sem index.html e serve somente 404 genérico. middleware.js já torna a raiz de um futuro deployment Vercel o ponto de entrada autenticado e secure-gateway/vercel.test.mjs prova raiz sem sessão -> /login e redirect OAuth com callback configurado. secure-gateway/src/worker.js continua implementando OAuth GitHub com PKCE, allowlist pelo ID 318746268 e sessão HttpOnly; secure-gateway/test.mjs cobre callback autorizado, asset autenticado e 403 para ID divergente. GITHUB_CLIENT_SECRET e SESSION_SECRET permanecem fora do repositório. Não refazer esta implementação nem pedir nova aprovação: quando Vercel for conectado, executar somente deploy/configuração externa, criar/configurar OAuth App, validar E2E real e fechar continuidade."
+    "last_completed": "O launcher operacional foi retirado do GitHub Pages público, que permanece em 404 genérico, e passou a ser entregue pelo host autenticado https://centralmidia-launcher.vercel.app. O deployment de produção Vercel está READY sobre a revisão 3105511ca6db6751ca1330f668c059ca45a7ca42. O GitHub OAuth App foi configurado com callback https://centralmidia-launcher.vercel.app/oauth/callback; as variáveis runtime foram aplicadas em Production. O fluxo real autorizado foi concluído com sucesso: logs Vercel registraram /oauth/callback 302 seguido de / 200 e app.js, telemetry.js e styles.css 200, e o usuário confirmou visualmente o launcher aberto após autorizar no GitHub. O Client ID incorreto por transcrição foi corrigido antes desta validação final.",
+    "next_action": "Nenhuma mudança material pendente neste owner. O endereço operacional é https://centralmidia-launcher.vercel.app. No mesmo //gravar ainda permanece apenas a validação live da telemetria no owner CTM quando os Codespaces puderem iniciar novamente; não reabrir nem refazer o gateway CTML.",
+    "blockers": [],
+    "safe_resume_checkpoint": "Gateway CTML concluído e vivo em produção. GitHub Pages continua inexpressivo; Vercel exige GitHub OAuth, autoriza pelo user ID estável 318746268 e entrega os assets pinados da revisão 0679384c88d2d005d03e491856029d0faf9a67f3 após sessão válida. Secrets permanecem somente no ambiente Vercel. O mesmo //gravar não está fechado globalmente porque CTM ainda aguarda validação de telemetria nos Codespaces indisponíveis por cota mensal."
   },
   "validation": {
-    "last_verified_revision": "9b139110f25db74e57db15e6c6a6098f45575674",
+    "last_verified_revision": "3105511ca6db6751ca1330f668c059ca45a7ca42",
     "checks": [
       {
         "name": "Codespace shutdown controls and progress trail",
         "status": "pass",
-        "evidence": "stopOne() e waitStopped() foram restaurados sem reintroduzir Ativar MCP. Pages run 35423705022 concluiu success para 0679384c88d2d005d03e491856029d0faf9a67f3.",
+        "evidence": "stopOne() e waitStopped() foram restaurados sem reintroduzir controles MCP redundantes; Pages correspondente concluiu success.",
         "verified_revision": "0679384c88d2d005d03e491856029d0faf9a67f3",
         "environment": "github-pages",
         "verified_at": "2026-09-19T05:21:10Z",
-        "note": "Corrige a regressão causada pela limpeza anterior do controle MCP."
-      },
-      {
-        "name": "Public Pages operational launcher withdrawal",
-        "status": "pass",
-        "evidence": "Pages run 35424892998 concluiu success para bd447279c9456240f7062ba089fc5c98f3ffef61. O artefato github-pages foi baixado e seu index.html continha apenas a tela inócua de acesso privado, sem app.js, telemetry.js, Encerrar Codespace ou Abrir VS.",
-        "verified_revision": "bd447279c9456240f7062ba089fc5c98f3ffef61",
-        "environment": "github-pages-artifact",
-        "verified_at": "2026-09-19T05:47:55Z",
-        "note": "Etapa intermediária posteriormente substituída pela minimização para 404 genérico."
-      },
-      {
-        "name": "Authenticated gateway static and mocked OAuth flow",
-        "status": "pass",
-        "evidence": "Secure Gateway CI run 35424893846 concluiu success para bd447279c9456240f7062ba089fc5c98f3ffef61. O gate executa node --check e secure-gateway/test.mjs, cobrindo PKCE S256, cookie OAuth HttpOnly/SameSite=Lax, sessão assinada, redirect sem sessão, entrega de asset com sessão e HTTP 403 para GitHub user ID não autorizado.",
-        "verified_revision": "bd447279c9456240f7062ba089fc5c98f3ffef61",
-        "environment": "github-actions",
-        "verified_at": "2026-09-19T05:47:41Z",
-        "note": "Teste usa fetch mockado; não substitui o E2E com OAuth App e host reais."
-      },
-      {
-        "name": "Authentication secrets boundary",
-        "status": "pass",
-        "evidence": "O repositório contém apenas nomes de secrets e placeholders de configuração. GITHUB_CLIENT_SECRET e SESSION_SECRET são requeridos em runtime pelo gateway e o CI verifica ausência de valores commitidos fora dos testes isolados.",
-        "verified_revision": "9b139110f25db74e57db15e6c6a6098f45575674",
-        "environment": "github-actions-plus-source-review",
-        "verified_at": "2026-09-19T14:48:59Z",
-        "note": "PATs do launcher e chaves de telemetria não foram movidos nem alterados por esta evolução."
+        "note": "Base funcional pinada pelo gateway autenticado."
       },
       {
         "name": "Public Pages generic 404 minimization",
         "status": "pass",
-        "evidence": "Pages run 35449873657 concluiu success para 9b139110f25db74e57db15e6c6a6098f45575674; o CI também impõe ausência de index.html e rejeita pistas de produto/arquitetura em 404.html.",
+        "evidence": "O Pages público ficou sem index.html operacional e com 404 genérico; CI/Pages passaram na revisão que consolidou a minimização.",
         "verified_revision": "9b139110f25db74e57db15e6c6a6098f45575674",
         "environment": "github-pages-plus-ci",
         "verified_at": "2026-09-19T14:49:14Z",
-        "note": "A origem pública segue inexpressiva; a barreira de segurança real será o host autenticado."
+        "note": "A origem pública não é rota alternativa para o launcher."
       },
       {
-        "name": "Vercel authenticated gateway entrypoint",
+        "name": "Authenticated gateway static and mocked security flow",
         "status": "pass",
-        "evidence": "Secure Gateway CI run 35449874425 concluiu success para 9b139110f25db74e57db15e6c6a6098f45575674. middleware.js delega a requisição ao worker autenticado e secure-gateway/vercel.test.mjs prova raiz sem sessão -> /login, redirect para GitHub e callback https://<APP_ORIGIN>/oauth/callback com PKCE S256.",
+        "evidence": "Secure Gateway CI cobre PKCE S256, state, cookie OAuth HttpOnly/SameSite=Lax, sessão HMAC, entrega autenticada de assets e HTTP 403 para GitHub user ID divergente.",
         "verified_revision": "9b139110f25db74e57db15e6c6a6098f45575674",
         "environment": "github-actions",
         "verified_at": "2026-09-19T14:48:59Z",
-        "note": "Compatibilidade estática/testada pronta; publicação Vercel ainda depende de conexão de conta/time."
+        "note": "O caso de conta não autorizada é coberto por teste automatizado; não foi usado um segundo login GitHub real em produção."
       },
       {
-        "name": "Real authenticated host end-to-end",
-        "status": "blocked",
-        "evidence": "O código e o adaptador Vercel estão prontos, mas a integração Vercel da sessão não possui conta/time conectado e a ação de deploy não está disponível. A criação do GitHub OAuth App também não é exposta pelo conector GitHub atual.",
-        "verified_revision": "9b139110f25db74e57db15e6c6a6098f45575674",
-        "environment": "external-deployment-pending",
-        "verified_at": "2026-09-19T14:49:49Z",
-        "note": "Retomar o mesmo //gravar após conectar Vercel e registrar o OAuth App; não reabrir a decisão intelectual já aprovada."
+        "name": "Vercel production deployment",
+        "status": "pass",
+        "evidence": "Projeto centralmidia-launcher em Vercel possui deployment production READY e alias estável centralmidia-launcher.vercel.app sobre 3105511ca6db6751ca1330f668c059ca45a7ca42.",
+        "verified_revision": "3105511ca6db6751ca1330f668c059ca45a7ca42",
+        "environment": "vercel-production",
+        "verified_at": "2026-09-19T16:23:14Z",
+        "note": "Variáveis de autenticação estão configuradas somente no ambiente Production."
+      },
+      {
+        "name": "Real GitHub OAuth allowed-account end-to-end",
+        "status": "pass",
+        "evidence": "Após autorização real no GitHub, runtime logs Vercel registraram GET /oauth/callback 302, GET / 200 e GET /app.js, /telemetry.js e /styles.css 200; o usuário confirmou visualmente o painel aberto.",
+        "verified_revision": "3105511ca6db6751ca1330f668c059ca45a7ca42",
+        "environment": "vercel-production-plus-user-browser",
+        "verified_at": "2026-09-19T16:23:49Z",
+        "note": "Prova real do caminho autorizado e da entrega protegida do launcher."
+      },
+      {
+        "name": "Unauthenticated and logout redirect path",
+        "status": "pass",
+        "evidence": "A raiz sem sessão redireciona para o login GitHub com client_id e callback corretos; /logout limpa a sessão e retorna ao fluxo de login conforme o gateway de produção.",
+        "verified_revision": "3105511ca6db6751ca1330f668c059ca45a7ca42",
+        "environment": "vercel-production",
+        "verified_at": "2026-09-19T16:28:07Z",
+        "note": "Validação HTTP de produção sem expor secrets."
       }
     ]
   },
   "releases": [],
-  "updated_at": "2026-09-19T14:49:49Z"
+  "updated_at": "2026-09-19T16:29:00Z"
 }
