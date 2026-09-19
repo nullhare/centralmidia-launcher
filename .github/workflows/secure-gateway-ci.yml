@@ -5,11 +5,15 @@ on:
     branches: [main]
     paths:
       - 'secure-gateway/**'
+      - 'middleware.js'
+      - '404.html'
       - 'index.html'
       - '.github/workflows/secure-gateway-ci.yml'
   pull_request:
     paths:
       - 'secure-gateway/**'
+      - 'middleware.js'
+      - '404.html'
       - 'index.html'
       - '.github/workflows/secure-gateway-ci.yml'
 
@@ -28,7 +32,9 @@ jobs:
         run: |
           set -euo pipefail
           node --check secure-gateway/src/worker.js
+          node --check middleware.js
           node secure-gateway/test.mjs
+          node secure-gateway/vercel.test.mjs
           grep -Fq 'ALLOWED_GITHUB_USER_ID' secure-gateway/src/worker.js
           grep -Fq 'GITHUB_CLIENT_SECRET' secure-gateway/src/worker.js
           grep -Fq 'SESSION_SECRET' secure-gateway/src/worker.js
@@ -37,11 +43,19 @@ jobs:
           grep -Fq 'HttpOnly' secure-gateway/src/worker.js
           grep -Fq 'SameSite=Lax' secure-gateway/src/worker.js
           grep -Fq 'https://api.github.com/user' secure-gateway/src/worker.js
-          if grep -Eq 'app\.js|telemetry\.js|Encerrar Codespace|Abrir VS' index.html; then
-            echo 'Public Pages must not expose the operational launcher.' >&2
+          grep -Fq "import worker from './secure-gateway/src/worker.js'" middleware.js
+          grep -Fq 'process.env.GITHUB_CLIENT_ID' middleware.js
+          grep -Fq 'process.env.GITHUB_CLIENT_SECRET' middleware.js
+          grep -Fq 'process.env.SESSION_SECRET' middleware.js
+          if [ -e index.html ]; then
+            echo 'Public Pages must not publish an index.html.' >&2
             exit 1
           fi
-          if grep -R -nE '(GITHUB_CLIENT_SECRET|SESSION_SECRET)"?[[:space:]]*[:=][[:space:]]*"[^R][^"]+' secure-gateway --exclude=worker.js --exclude=README.md --exclude=test.mjs; then
+          if grep -Eiq 'central|m[ií]dia|github|gateway|codespace|mcp|telemetr|painel' 404.html; then
+            echo 'Public 404 must remain generic and reveal no product or architecture clues.' >&2
+            exit 1
+          fi
+          if grep -R -nE '(GITHUB_CLIENT_SECRET|SESSION_SECRET)"?[[:space:]]*[:=][[:space:]]*"[^R][^"]+' secure-gateway --exclude=worker.js --exclude=README.md --exclude=test.mjs --exclude=vercel.test.mjs; then
             echo 'Possible committed secret found.' >&2
             exit 1
           fi
