@@ -71,7 +71,7 @@ function makeCookie(name, value, maxAge) {
 function securityHeaders(extra = {}) {
   return {
     'Cache-Control': 'private, no-store, max-age=0',
-    'Content-Security-Policy': "default-src 'self'; connect-src 'self' https://api.github.com https://*.app.github.dev; img-src 'self' data: https://avatars.githubusercontent.com; style-src 'self'; script-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self' https://github.com",
+    'Content-Security-Policy': "default-src 'self'; connect-src 'self' https://api.github.com https://*.app.github.dev; img-src 'self' data: https://github.com https://avatars.githubusercontent.com; style-src 'self'; script-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self' https://github.com",
     'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
     'Referrer-Policy': 'no-referrer',
     'X-Content-Type-Options': 'nosniff',

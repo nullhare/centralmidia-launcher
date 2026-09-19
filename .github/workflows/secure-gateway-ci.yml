@@ -28,6 +28,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check secure-gateway/src/worker.js
+          node secure-gateway/test.mjs
           grep -Fq 'ALLOWED_GITHUB_USER_ID' secure-gateway/src/worker.js
           grep -Fq 'GITHUB_CLIENT_SECRET' secure-gateway/src/worker.js
           grep -Fq 'SESSION_SECRET' secure-gateway/src/worker.js
@@ -40,7 +41,7 @@ jobs:
             echo 'Public Pages must not expose the operational launcher.' >&2
             exit 1
           fi
-          if grep -R -nE '(GITHUB_CLIENT_SECRET|SESSION_SECRET)"?[[:space:]]*[:=][[:space:]]*"[^R][^"]+' secure-gateway --exclude=worker.js --exclude=README.md; then
+          if grep -R -nE '(GITHUB_CLIENT_SECRET|SESSION_SECRET)"?[[:space:]]*[:=][[:space:]]*"[^R][^"]+' secure-gateway --exclude=worker.js --exclude=README.md --exclude=test.mjs; then
             echo 'Possible committed secret found.' >&2
             exit 1
           fi
