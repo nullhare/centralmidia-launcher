@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "centralmidia-launcher-private",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-09-19",
+  "workers_dev": true,
+  "vars": {
+    "ALLOWED_GITHUB_USER_ID": "318746268",
+    "ASSET_REVISION": "0679384c88d2d005d03e491856029d0faf9a67f3",
+    "APP_ORIGIN": "https://REPLACE_WITH_WORKER_HOST",
+    "GITHUB_CLIENT_ID": "REPLACE_WITH_GITHUB_OAUTH_CLIENT_ID"
+  }
+}

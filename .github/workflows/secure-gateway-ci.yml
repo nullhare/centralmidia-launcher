@@ -1,0 +1,46 @@
+name: Secure Gateway CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'secure-gateway/**'
+      - 'index.html'
+      - '.github/workflows/secure-gateway-ci.yml'
+  pull_request:
+    paths:
+      - 'secure-gateway/**'
+      - 'index.html'
+      - '.github/workflows/secure-gateway-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Validate authenticated gateway invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check secure-gateway/src/worker.js
+          grep -Fq 'ALLOWED_GITHUB_USER_ID' secure-gateway/src/worker.js
+          grep -Fq 'GITHUB_CLIENT_SECRET' secure-gateway/src/worker.js
+          grep -Fq 'SESSION_SECRET' secure-gateway/src/worker.js
+          grep -Fq 'code_challenge_method' secure-gateway/src/worker.js
+          grep -Fq "url.searchParams.set('code_challenge_method', 'S256')" secure-gateway/src/worker.js
+          grep -Fq 'HttpOnly' secure-gateway/src/worker.js
+          grep -Fq 'SameSite=Lax' secure-gateway/src/worker.js
+          grep -Fq 'https://api.github.com/user' secure-gateway/src/worker.js
+          if grep -Eq 'app\.js|telemetry\.js|Encerrar Codespace|Abrir VS' index.html; then
+            echo 'Public Pages must not expose the operational launcher.' >&2
+            exit 1
+          fi
+          if grep -R -nE '(GITHUB_CLIENT_SECRET|SESSION_SECRET)"?[[:space:]]*[:=][[:space:]]*"[^R][^"]+' secure-gateway --exclude=worker.js --exclude=README.md; then
+            echo 'Possible committed secret found.' >&2
+            exit 1
+          fi
