@@ -11,31 +11,33 @@
 - Status: `active`
 - SP adotado: `3.3.1` (`656db308e7ad1ccad15637bcf857cc28d6facb49`)
 - Versão do projeto: `não declarada`
-- Tarefa ativa: `ctml-pages-unpublish-finalize-20260919`
-- Revisão verificada: `ebe7ee1030dbc5b650e7169b0a4f0bd0aef896f5`
-- Estado atualizado em: `2026-09-19T16:58:00Z`
+- Tarefa ativa: `nenhuma`
+- Revisão verificada: `a1ec2ea51c931bda3b133affa65f2e18a6f4b103`
+- Estado atualizado em: `2026-09-19T19:16:00Z`
 
 ## Último resultado
 
-O launcher operacional permanece em `https://centralmidia-launcher.vercel.app`, protegido por GitHub OAuth e validado em fluxo real autorizado. O usuário acionou `Settings > Pages > Unpublish site`. A tela 404 observada logo depois não era o 404 genérico do GitHub: era o `404.html` customizado ainda presente no repositório, fato confirmado pela leitura direta do arquivo. Esse shell obsoleto foi removido de `main` em `ebe7ee1030dbc5b650e7169b0a4f0bd0aef896f5`, e a pós-condição no repositório foi comprovada por fetch de `404.html` retornando `Not Found`.
+CTML foi fechado materialmente no host autenticado da Vercel. O launcher operacional está em https://centralmidia-launcher.vercel.app com GitHub OAuth/2FA; o GitHub Pages foi despublicado e depois desligado como source, a URL antiga foi confirmada no navegador com o 404 nativo do GitHub, o shell 404 customizado foi removido, o fallback de abertura deixou de abortar quando window.open() não entrega handle, o CI foi alinhado ao Pages aposentado e as branches temporárias acidentais tmp-ignore e noop2 foram removidas.
 
 ## Próxima ação
 
-Confirmar no navegador, após a propagação da despublicação, que `https://nullhare.github.io/centralmidia-launcher/` não serve mais o 404 customizado. Depois disso, nenhuma mudança material permanece em CTML. No mesmo `//gravar` continuará somente a validação live da telemetria no owner CTM quando os Codespaces puderem iniciar novamente.
+Nenhuma tarefa ativa; aguardar nova instrução explícita.
 
 ## Checkpoint seguro
 
-CTML está operacionalmente migrado para Vercel e o launcher autenticado está validado. O GitHub Pages foi despublicado pelo usuário, mas a verificação visual imediatamente posterior ainda mostrou o antigo `404.html` customizado; esse arquivo foi então removido do repositório em `ebe7ee1030dbc5b650e7169b0a4f0bd0aef896f5` e já não existe em `main`. Falta somente a confirmação live de que a URL `github.io` deixou de servir esse shell após a propagação. O mesmo `//gravar` continua aberto também pela pendência CTM de validar a telemetria 8766 em runtime vivo quando a cota de Codespaces permitir.
+CTML está ocioso e organizado. A superfície operacional é somente https://centralmidia-launcher.vercel.app; o repositório nullhare/centralmidia-launcher permanece como fonte canônica e origem de deploy da Vercel; GitHub Pages não é mais superfície operacional. Não há tarefa material pendente neste owner. A pendência de telemetria live pertence exclusivamente ao CTM e deve ser retomada no mesmo //gravar quando os Codespaces voltarem.
 
 ## Bloqueios
 
-- Nenhum bloqueio material neste owner.
+- Nenhum.
 
 ## Validações registradas
 
 - `pass` — Codespace shutdown controls and progress trail (`0679384c88d2d005d03e491856029d0faf9a67f3`)
 - `pass` — Authenticated gateway static and mocked security flow (`9b139110f25db74e57db15e6c6a6098f45575674`)
-- `pass` — Vercel production deployment (`3105511ca6db6751ca1330f668c059ca45a7ca42`)
-- `pass` — Real GitHub OAuth allowed-account end-to-end (`3105511ca6db6751ca1330f668c059ca45a7ca42`)
+- `pass` — Vercel production and real GitHub OAuth path (`3105511ca6db6751ca1330f668c059ca45a7ca42`)
 - `pass` — Unauthenticated and logout redirect path (`3105511ca6db6751ca1330f668c059ca45a7ca42`)
-- `pending` — GitHub Pages unpublish propagation (`ebe7ee1030dbc5b650e7169b0a4f0bd0aef896f5`)
+- `pass` — GitHub Pages retirement (`ebe7ee1030dbc5b650e7169b0a4f0bd0aef896f5`)
+- `pass` — Popup fallback deployment (`0685bd2a670932d705dfb77d53c6c2683ee7e408`)
+- `pass` — Gateway CI aligned with retired Pages shell (`a1ec2ea51c931bda3b133affa65f2e18a6f4b103`)
+- `pass` — Temporary branch cleanup (`a1ec2ea51c931bda3b133affa65f2e18a6f4b103`)

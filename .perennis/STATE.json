@@ -13,19 +13,19 @@
     "status": "active"
   },
   "execution": {
-    "active_task_id": "ctml-pages-unpublish-finalize-20260919",
-    "responsible_writer": "chatgpt-auth-gateway-ctml-20260919-r5",
-    "current_environment": "vercel-production-authenticated-plus-github-pages-unpublish-verification",
+    "active_task_id": null,
+    "responsible_writer": null,
+    "current_environment": "vercel-production-authenticated",
     "executor_class": null
   },
   "work": {
-    "last_completed": "O launcher operacional permanece em https://centralmidia-launcher.vercel.app, protegido por GitHub OAuth e validado em fluxo real autorizado. O usuário acionou Settings > Pages > Unpublish site. A tela 404 observada logo depois não era o 404 genérico do GitHub: era o 404.html customizado ainda presente no repositório, fato confirmado pela leitura direta do arquivo. Esse shell obsoleto foi removido de main em ebe7ee1030dbc5b650e7169b0a4f0bd0aef896f5, e a pós-condição no repositório foi comprovada por fetch de 404.html retornando Not Found.",
-    "next_action": "Confirmar no navegador, após a propagação da despublicação, que https://nullhare.github.io/centralmidia-launcher/ não serve mais o 404 customizado. Depois disso, nenhuma mudança material permanece em CTML. No mesmo //gravar continuará somente a validação live da telemetria no owner CTM quando os Codespaces puderem iniciar novamente.",
+    "last_completed": "CTML foi fechado materialmente no host autenticado da Vercel. O launcher operacional está em https://centralmidia-launcher.vercel.app com GitHub OAuth/2FA; o GitHub Pages foi despublicado e depois desligado como source, a URL antiga foi confirmada no navegador com o 404 nativo do GitHub, o shell 404 customizado foi removido, o fallback de abertura deixou de abortar quando window.open() não entrega handle, o CI foi alinhado ao Pages aposentado e as branches temporárias acidentais tmp-ignore e noop2 foram removidas.",
+    "next_action": null,
     "blockers": [],
-    "safe_resume_checkpoint": "CTML está operacionalmente migrado para Vercel e o launcher autenticado está validado. O GitHub Pages foi despublicado pelo usuário, mas a verificação visual imediatamente posterior ainda mostrou o antigo 404.html customizado; esse arquivo foi então removido do repositório em ebe7ee1030dbc5b650e7169b0a4f0bd0aef896f5 e já não existe em main. Falta somente a confirmação live de que a URL github.io deixou de servir esse shell após a propagação. O mesmo //gravar continua aberto também pela pendência CTM de validar a telemetria 8766 em runtime vivo quando a cota de Codespaces permitir."
+    "safe_resume_checkpoint": "CTML está ocioso e organizado. A superfície operacional é somente https://centralmidia-launcher.vercel.app; o repositório nullhare/centralmidia-launcher permanece como fonte canônica e origem de deploy da Vercel; GitHub Pages não é mais superfície operacional. Não há tarefa material pendente neste owner. A pendência de telemetria live pertence exclusivamente ao CTM e deve ser retomada no mesmo //gravar quando os Codespaces voltarem."
   },
   "validation": {
-    "last_verified_revision": "ebe7ee1030dbc5b650e7169b0a4f0bd0aef896f5",
+    "last_verified_revision": "a1ec2ea51c931bda3b133affa65f2e18a6f4b103",
     "checks": [
       {
         "name": "Codespace shutdown controls and progress trail",
@@ -34,7 +34,7 @@
         "verified_revision": "0679384c88d2d005d03e491856029d0faf9a67f3",
         "environment": "github-repository",
         "verified_at": "2026-09-19T05:21:10Z",
-        "note": "Base funcional pinada pelo gateway autenticado."
+        "note": "Base funcional preservada pelo gateway autenticado."
       },
       {
         "name": "Authenticated gateway static and mocked security flow",
@@ -46,43 +46,61 @@
         "note": "O caso de conta não autorizada é coberto por teste automatizado."
       },
       {
-        "name": "Vercel production deployment",
+        "name": "Vercel production and real GitHub OAuth path",
         "status": "pass",
-        "evidence": "Projeto centralmidia-launcher em Vercel possui deployment production READY e alias estável centralmidia-launcher.vercel.app.",
-        "verified_revision": "3105511ca6db6751ca1330f668c059ca45a7ca42",
-        "environment": "vercel-production",
-        "verified_at": "2026-09-19T16:23:14Z",
-        "note": "Variáveis de autenticação estão configuradas em Production."
-      },
-      {
-        "name": "Real GitHub OAuth allowed-account end-to-end",
-        "status": "pass",
-        "evidence": "Após autorização real no GitHub, runtime Vercel registrou GET /oauth/callback 302, GET / 200 e assets 200; o usuário confirmou visualmente o painel aberto.",
+        "evidence": "Produção Vercel ficou READY; após autorização real no GitHub, o callback retornou ao host Vercel e o painel/assets foram entregues com HTTP 200.",
         "verified_revision": "3105511ca6db6751ca1330f668c059ca45a7ca42",
         "environment": "vercel-production-plus-user-browser",
         "verified_at": "2026-09-19T16:23:49Z",
-        "note": "Prova real do caminho autorizado."
+        "note": "Fluxo autorizado real confirmado."
       },
       {
         "name": "Unauthenticated and logout redirect path",
         "status": "pass",
-        "evidence": "A raiz sem sessão redireciona para o login GitHub com client_id e callback corretos; /logout limpa a sessão e retorna ao fluxo de login.",
+        "evidence": "A raiz sem sessão redireciona para o login GitHub com callback Vercel correto; /logout limpa a sessão e retorna ao fluxo de login.",
         "verified_revision": "3105511ca6db6751ca1330f668c059ca45a7ca42",
         "environment": "vercel-production",
         "verified_at": "2026-09-19T16:28:07Z",
         "note": "Validação HTTP de produção sem expor secrets."
       },
       {
-        "name": "GitHub Pages unpublish propagation",
-        "status": "pending",
-        "evidence": "O usuário acionou Unpublish site. A resposta visual posterior ainda era o 404.html customizado do próprio repositório; esse arquivo foi removido em ebe7ee1030dbc5b650e7169b0a4f0bd0aef896f5 e fetch de 404.html em main agora retorna Not Found.",
+        "name": "GitHub Pages retirement",
+        "status": "pass",
+        "evidence": "O shell 404 próprio foi removido; o usuário confirmou visualmente o 404 nativo do GitHub e depois configurou Pages com branch/source None, encerrando a publicação do site antigo.",
         "verified_revision": "ebe7ee1030dbc5b650e7169b0a4f0bd0aef896f5",
         "environment": "github-settings-plus-user-browser",
-        "verified_at": "2026-09-19T16:58:00Z",
-        "note": "Ainda falta prova live de que a URL github.io deixou de servir o shell customizado após a propagação."
+        "verified_at": "2026-09-19T19:16:00Z",
+        "note": "A URL github.io não participa mais do fluxo operacional."
+      },
+      {
+        "name": "Popup fallback deployment",
+        "status": "pass",
+        "evidence": "openSpace passou a continuar e navegar na mesma aba quando window.open() não entrega handle; a revisão foi publicada em produção Vercel READY e o usuário repetiu o fluxo após recarregar.",
+        "verified_revision": "0685bd2a670932d705dfb77d53c6c2683ee7e408",
+        "environment": "vercel-production-plus-user-browser",
+        "verified_at": "2026-09-19T17:19:30Z",
+        "note": "A cota de Codespaces ainda pode bloquear o passo seguinte, mas não o launcher por falso diagnóstico de pop-up."
+      },
+      {
+        "name": "Gateway CI aligned with retired Pages shell",
+        "status": "pass",
+        "evidence": "Secure Gateway CI run 35458103962 concluiu success após remover dependência do 404.html e exigir que o shell Pages permaneça aposentado.",
+        "verified_revision": "a1ec2ea51c931bda3b133affa65f2e18a6f4b103",
+        "environment": "github-actions",
+        "verified_at": "2026-09-19T17:26:41Z",
+        "note": "CI atual não exige mais o 404 customizado."
+      },
+      {
+        "name": "Temporary branch cleanup",
+        "status": "pass",
+        "evidence": "As branches acidentais tmp-ignore e noop2 foram removidas e buscas posteriores de branches retornaram vazio para ambos os nomes.",
+        "verified_revision": "a1ec2ea51c931bda3b133affa65f2e18a6f4b103",
+        "environment": "github-branches",
+        "verified_at": "2026-09-19T19:16:00Z",
+        "note": "Branches históricas de propriedade incerta foram preservadas."
       }
     ]
   },
   "releases": [],
-  "updated_at": "2026-09-19T16:58:00Z"
+  "updated_at": "2026-09-19T19:16:00Z"
 }
