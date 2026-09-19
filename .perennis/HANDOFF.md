@@ -12,29 +12,30 @@
 - SP adotado: `3.3.1` (`656db308e7ad1ccad15637bcf857cc28d6facb49`)
 - Versão do projeto: `não declarada`
 - Tarefa ativa: `nenhuma`
-- Revisão verificada: `c888947b5b8b73558d13386f60b29376e1cfac52`
-- Estado atualizado em: `2026-09-18T23:38:57Z`
+- Revisão verificada: `8663cbd492500b67edce72dbbdc110dfc51d0f3b`
+- Estado atualizado em: `2026-09-19T02:51:40Z`
 
 ## Último resultado
 
-Crivo aprovado materializado na revisão de produto c888947b5b8b73558d13386f60b29376e1cfac52 e publicado em main por 35914d8beb52720e46129e7519f848b159ae6a11. telemetry.js não encaminha mais o token local do launcher para *.app.github.dev; /health e /usage usam somente a sessão GitHub do navegador na porta privada. Falhas de autenticação/acesso entram em estado explícito e backoff exponencial por endpoint de 15s a 5min, com nova tentativa imediata ao voltar ao foco/storage. SECURITY.md foi reconciliado. node --check em telemetry.js e app.js, git diff --check e invariantes de ausência de X-Github-Token passaram. GitHub Pages run 35406445389 publicou 35914d8beb52720e46129e7519f848b159ae6a11 com conclusão success.
+Fallback de telemetria MCP separado materializado no launcher e publicado em 8663cbd492500b67edce72dbbdc110dfc51d0f3b. telemetry.js usa https://<codespace>-8766.app.github.dev com credentials=omit e X-Centralmidia-Telemetry-Key própria por ambiente; o PAT GitHub continua restrito à API GitHub. GitHub Pages run 35414389778 concluiu success. A validação end-to-end no navegador do usuário passou: Browser e Computer aparecem GitHub ativos, MCP 2/2 ativo e uso remoto 4%; Network não mostra mais falha de health MCP. O único 403 restante é o endpoint de billing/usage do GitHub, separado da saúde dos Codespaces/MCP e dependente da permissão Plan: read no token atual.
 
 ## Próxima ação
 
-Validar no navegador do usuário: com Browser e Computer ativos, abrir cada porta privada pelo botão Navegador/Computador quando a UI indicar autenticação necessária, retornar ao launcher e confirmar 2/2 MCPs e /usage sem envio de PAT ao bridge. Se a chamada CORS continuar bloqueada mesmo após autenticação explícita da porta, considerar refutado o caminho private-first direto e promover somente então o plano B já crivado: endpoint separado, chave própria e escopo mínimo health/usage.
+Nenhuma correção material pendente no launcher para MCP. Se for desejado preencher o indicador GitHub de uso mensal, substituir/configurar o fine-grained PAT usado pelo launcher com permissão de usuário Plan: read além das permissões já necessárias para Codespaces; o 403 atual do billing não afeta GitHub 2/2 nem MCP 2/2.
 
 ## Checkpoint seguro
 
-CTML mantém private-first. Produto c888947b5b8b73558d13386f60b29376e1cfac52 publicado via main 35914d8beb52720e46129e7519f848b159ae6a11 e Pages run 35406445389 success: PAT/token do launcher permanece restrito à API GitHub e não é enviado a *.app.github.dev; autenticação do bridge privado usa somente a sessão do navegador; falhas entram em backoff/reconexão controlada e instrução de autenticação. O runtime MCP de /mg/ctm já estava validado. Fallback público continua apenas plano B não implementado, limitado a health/usage e sem privilégio lateral.
+CTML consome o endpoint separado 8766 do CTM; chave de telemetria e PAT GitHub permanecem credenciais distintas. E2E confirmado no navegador: GitHub 2/2, MCP 2/2 e uso MCP 4%. Pages publicou 8663cbd492500b67edce72dbbdc110dfc51d0f3b com success. O fetch private-first direto pela porta 3000 foi refutado por 302/401 do gateway cross-site e não deve ser reaberto sem nova evidência. O indicador GitHub uso -- corresponde a 403 do endpoint de billing por permissão insuficiente do token para Plan: read; não é falha do runtime MCP.
 
 ## Bloqueios
 
-- A validação end-to-end da nova travessia privada depende da sessão autenticada do navegador do usuário; essa sessão/cookie/localStorage não deve ser exportada para agente, código, logs ou repositório.
+- Nenhum bloqueio material conhecido.
 
 ## Validações registradas
 
 - `pass` — Launcher telemetry source and Pages deployment (`fcb5cb50974ff903091086ccb0352f6a6ad6c42d`)
 - `pass` — Central Midia MCP bridge dependency after rebuild (`fcb5cb50974ff903091086ccb0352f6a6ad6c42d`)
-- `pending` — Authenticated launcher UI end-to-end telemetry (`revisão não registrada`)
+- `pass` — Authenticated launcher UI end-to-end telemetry (`8663cbd492500b67edce72dbbdc110dfc51d0f3b`)
 - `pass` — Private-port authentication hardening static validation (`c888947b5b8b73558d13386f60b29376e1cfac52`)
 - `pass` — Private-port authentication hardening Pages deployment (`35914d8beb52720e46129e7519f848b159ae6a11`)
+- `pass` — Scoped telemetry fallback Pages deployment (`8663cbd492500b67edce72dbbdc110dfc51d0f3b`)

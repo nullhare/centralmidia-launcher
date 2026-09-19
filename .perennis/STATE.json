@@ -19,15 +19,13 @@
     "executor_class": null
   },
   "work": {
-    "last_completed": "Crivo aprovado materializado na revisão de produto c888947b5b8b73558d13386f60b29376e1cfac52 e publicado em main por 35914d8beb52720e46129e7519f848b159ae6a11. telemetry.js não encaminha mais o token local do launcher para *.app.github.dev; /health e /usage usam somente a sessão GitHub do navegador na porta privada. Falhas de autenticação/acesso entram em estado explícito e backoff exponencial por endpoint de 15s a 5min, com nova tentativa imediata ao voltar ao foco/storage. SECURITY.md foi reconciliado. node --check em telemetry.js e app.js, git diff --check e invariantes de ausência de X-Github-Token passaram. GitHub Pages run 35406445389 publicou 35914d8beb52720e46129e7519f848b159ae6a11 com conclusão success.",
-    "next_action": "Validar no navegador do usuário: com Browser e Computer ativos, abrir cada porta privada pelo botão Navegador/Computador quando a UI indicar autenticação necessária, retornar ao launcher e confirmar 2/2 MCPs e /usage sem envio de PAT ao bridge. Se a chamada CORS continuar bloqueada mesmo após autenticação explícita da porta, considerar refutado o caminho private-first direto e promover somente então o plano B já crivado: endpoint separado, chave própria e escopo mínimo health/usage.",
-    "blockers": [
-      "A validação end-to-end da nova travessia privada depende da sessão autenticada do navegador do usuário; essa sessão/cookie/localStorage não deve ser exportada para agente, código, logs ou repositório."
-    ],
-    "safe_resume_checkpoint": "CTML mantém private-first. Produto c888947b5b8b73558d13386f60b29376e1cfac52 publicado via main 35914d8beb52720e46129e7519f848b159ae6a11 e Pages run 35406445389 success: PAT/token do launcher permanece restrito à API GitHub e não é enviado a *.app.github.dev; autenticação do bridge privado usa somente a sessão do navegador; falhas entram em backoff/reconexão controlada e instrução de autenticação. O runtime MCP de /mg/ctm já estava validado. Fallback público continua apenas plano B não implementado, limitado a health/usage e sem privilégio lateral."
+    "last_completed": "Fallback de telemetria MCP separado materializado no launcher e publicado em 8663cbd492500b67edce72dbbdc110dfc51d0f3b. telemetry.js usa https://<codespace>-8766.app.github.dev com credentials=omit e X-Centralmidia-Telemetry-Key própria por ambiente; o PAT GitHub continua restrito à API GitHub. GitHub Pages run 35414389778 concluiu success. A validação end-to-end no navegador do usuário passou: Browser e Computer aparecem GitHub ativos, MCP 2/2 ativo e uso remoto 4%; Network não mostra mais falha de health MCP. O único 403 restante é o endpoint de billing/usage do GitHub, separado da saúde dos Codespaces/MCP e dependente da permissão Plan: read no token atual.",
+    "next_action": "Nenhuma correção material pendente no launcher para MCP. Se for desejado preencher o indicador GitHub de uso mensal, substituir/configurar o fine-grained PAT usado pelo launcher com permissão de usuário Plan: read além das permissões já necessárias para Codespaces; o 403 atual do billing não afeta GitHub 2/2 nem MCP 2/2.",
+    "blockers": [],
+    "safe_resume_checkpoint": "CTML consome o endpoint separado 8766 do CTM; chave de telemetria e PAT GitHub permanecem credenciais distintas. E2E confirmado no navegador: GitHub 2/2, MCP 2/2 e uso MCP 4%. Pages publicou 8663cbd492500b67edce72dbbdc110dfc51d0f3b com success. O fetch private-first direto pela porta 3000 foi refutado por 302/401 do gateway cross-site e não deve ser reaberto sem nova evidência. O indicador GitHub uso -- corresponde a 403 do endpoint de billing por permissão insuficiente do token para Plan: read; não é falha do runtime MCP."
   },
   "validation": {
-    "last_verified_revision": "c888947b5b8b73558d13386f60b29376e1cfac52",
+    "last_verified_revision": "8663cbd492500b67edce72dbbdc110dfc51d0f3b",
     "checks": [
       {
         "name": "Launcher telemetry source and Pages deployment",
@@ -49,12 +47,12 @@
       },
       {
         "name": "Authenticated launcher UI end-to-end telemetry",
-        "status": "pending",
-        "evidence": "No checkpoint de recuperação, a UI do usuário mostrou os dois Codespaces GitHub ativos, mas MCP ainda indisponível/0 de 2 enquanto os dois Desktop Commander remote estavam online nos terminais. DevTools apontou interceptação pela autenticação GitHub da porta privada, com 302 para login e/ou 401 no preflight antes do bridge, além de repetição das chamadas em erro.",
-        "verified_revision": null,
+        "status": "pass",
+        "evidence": "Após promoção do fallback 8766, captura do navegador do usuário mostrou Browser e Computer com sinais GitHub verdes, sinais MCP verdes, MCP 2/2 ativos e uso remoto 4%. DevTools Network mostrou o billing GitHub em 403, mas não health MCP em erro. A travessia de telemetria separada ficou funcional sem PAT encaminhado ao endpoint MCP.",
+        "verified_revision": "8663cbd492500b67edce72dbbdc110dfc51d0f3b",
         "environment": "user-browser",
-        "verified_at": null,
-        "note": "Após publicação, autenticar explicitamente as portas privadas pelo navegador e confirmar 2/2 MCPs e usage. Só promover a PASS com observação end-to-end sem exportar credenciais."
+        "verified_at": "2026-09-19T02:51:40Z",
+        "note": "E2E do launcher concluído. Billing GitHub é preocupação separada de permissão do token."
       },
       {
         "name": "Private-port authentication hardening static validation",
@@ -73,9 +71,18 @@
         "environment": "github-pages",
         "verified_at": "2026-09-18T23:38:13Z",
         "note": "Prova de publicação estática. A única validação material ainda pendente é a sessão autenticada end-to-end no navegador do usuário."
+      },
+      {
+        "name": "Scoped telemetry fallback Pages deployment",
+        "status": "pass",
+        "evidence": "GitHub Pages run 35414389778 publicou head_sha 8663cbd492500b67edce72dbbdc110dfc51d0f3b com conclusion success.",
+        "verified_revision": "8663cbd492500b67edce72dbbdc110dfc51d0f3b",
+        "environment": "github-pages",
+        "verified_at": "2026-09-19T02:01:03Z",
+        "note": "Publicação do launcher que consome a porta 8766."
       }
     ]
   },
   "releases": [],
-  "updated_at": "2026-09-18T23:38:57Z"
+  "updated_at": "2026-09-19T02:51:40Z"
 }
